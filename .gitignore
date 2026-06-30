@@ -1,0 +1,125 @@
+# ============================================================
+# 爸妈宝 — .gitignore
+# Flutter + Python 标准模版
+# ============================================================
+
+# ---- Python ----
+*.py[cod]
+*$py.class
+__pycache__/
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.tox/
+*.egg-info/
+dist/
+build/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg
+*.manifest
+*.spec
+
+# ---- Virtual Environment ----
+venv/
+.venv/
+env/
+envs/
+.pyenv/
+
+# ---- Database (dev) ----
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+test_*.db
+
+# ---- Flutter / Dart ----
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+*.iml
+*.ipr
+*.iws
+/android/app/debug
+/android/app/profile
+/android/app/release
+/macos/Pods/
+/linux/flutter/ephemeral
+/windows/flutter/ephemeral
+/windows/runner/flutter
+/android/.gradle
+/android/local.properties
+/ios/.symlinks/
+/ios/Pods/
+/ios/Runner/GeneratedPluginRegistrant.*
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Flutter.podspec
+.symbols
+app.*.symbols
+app.*.map.json
+
+# ---- Environment ----
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+# ---- Logs ----
+logs/
+*.log
+
+# ---- IDE ----
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+.directory
+
+# ---- Docker ----
+.docker/
+
+# ---- Uploads (dev) ----
+uploads/*
+!uploads/.gitkeep
+
+# ---- Miniapp ----
+node_modules/
+miniapp/node_modules/
+miniapp/unpackage/
+miniapp/dist/
+
+# ---- APK / Build Artifacts ----
+*.apk
+*.aab
+*.apk.1
+安卓版/
+华为版/发布包/
+苹果版/发布包/
+
+# ---- Temp ----
+tmp/
+temp/

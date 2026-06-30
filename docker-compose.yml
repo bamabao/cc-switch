@@ -1,0 +1,89 @@
+# ============================================================
+# 爸妈宝 — Docker Compose 开发/生产环境
+# ============================================================
+# 使用方式：
+#   开发模式（热重载）：  docker compose up -d
+#   查看日志：           docker compose logs -f backend
+#   执行测试：           docker compose exec backend pytest -v
+#   停止：               docker compose down
+#   重建：               docker compose build --no-cache
+# ============================================================
+
+version: "3.9"
+
+services:
+  # ---- 后端 FastAPI 服务 ----
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bamabao-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      # 开发模式：挂载源码实现热重载
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=sqlite:///./bamabao.db
+      - DEBUG=true
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ---- MySQL 数据库（生产环境） ----
+  # 开发环境默认用 SQLite，需要 MySQL 时取消下面注释
+  #
+  # db:
+  #   image: mysql:8.0
+  #   container_name: bamabao-mysql
+  #   restart: unless-stopped
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-bamabao_root}
+  #     MYSQL_DATABASE: bamabao
+  #     MYSQL_USER: bamabao
+  #     MYSQL_PASSWORD: ${MYSQL_PASSWORD:-bamabao_pass}
+  #     TZ: Asia/Shanghai
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #     - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+  #   command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+  #   healthcheck:
+  #     test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # ---- MinIO 对象存储（药品拍照/商品图片） ----
+  # minio:
+  #   image: minio/minio:latest
+  #   container_name: bamabao-minio
+  #   restart: unless-stopped
+  #   environment:
+  #     MINIO_ROOT_USER: ${MINIO_ROOT_USER:-bamabao}
+  #     MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-bamabao_minio_2024}
+  #   ports:
+  #     - "9000:9000"   # API
+  #     - "9001:9001"   # Console
+  #   volumes:
+  #     - minio_data:/data
+  #   command: server /data --console-address ":9001"
+
+  # ---- 应用监控 ----
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   container_name: bamabao-prometheus
+  #   volumes:
+  #     - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   ports:
+  #     - "9090:9090"
+
+# volumes:
+#   mysql_data:
+#   minio_data:
