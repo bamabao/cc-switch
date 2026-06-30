@@ -85,9 +85,15 @@ class ApiService {
     );
   }
 
-  /// 发送验证码
+  /// 发送验证码（后端POST，phone在query）
   Future<String> sendSmsCode(String phone) async {
-    final result = await get('${ApiConfig.authSendSms}?phone=$phone');
+    final uri = Uri.parse('$baseUrl${ApiConfig.authSendSms}?phone=$phone');
+    final headers = await _headers();
+    final response = await _client.post(
+      uri,
+      headers: headers,
+    );
+    final result = _handleResponse(response);
     return result['code'] as String? ?? '123456';
   }
 
