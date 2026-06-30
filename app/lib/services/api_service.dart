@@ -17,6 +17,9 @@ class ApiService {
 
   String get baseUrl => ApiConfig.baseUrl;
 
+  /// 获取当前 Token
+  String? get token => _token;
+
   /// 设置认证 Token
   void setToken(String token) => _token = token;
 

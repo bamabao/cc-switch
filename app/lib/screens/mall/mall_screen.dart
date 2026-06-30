@@ -3,7 +3,7 @@ import '../../config/theme.dart';
 import '../../config/api_config.dart';
 import '../../services/api_service.dart';
 
-/// 积分商城 — 对接后端真实商品API
+/// 积分商城 — 对接后端真实商品API + 兑换流程
 class MallScreen extends StatefulWidget {
   const MallScreen({super.key});
 
@@ -17,6 +17,7 @@ class _MallScreenState extends State<MallScreen> {
   int _points = 0;
   bool _loading = true;
 
+
   @override
   void initState() {
     super.initState();
@@ -24,9 +25,19 @@ class _MallScreenState extends State<MallScreen> {
   }
 
   Future<void> _loadData() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+
+    });
     try {
       final prodResult = await _api.get(ApiConfig.pointProducts);
+      // 尝试获取积分（需要elder_id, 没有的话静默）
+      try {
+        final pts = await _api.get('${ApiConfig.points}/profile?elder_id=1');
+        _points = pts['total_points'] as int? ?? 0;
+      } catch (_) {}
+
+      if (!mounted) return;
       setState(() {
         _products = prodResult['items'] as List<dynamic>? ?? [];
         _loading = false;
@@ -34,6 +45,46 @@ class _MallScreenState extends State<MallScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _redeem(int productId, String productName, int price) async {
+    if (_points < price) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('积分不足，需要 $price 积分')),
+      );
+      return;
+    }
+
+    // 确认对话框
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('确认兑换'),
+        content: Text('确定用 $price 积分兑换「$productName」吗？'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('取消')),
+          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('确认兑换')),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await _api.post('${ApiConfig.redeem}?elder_id=1&product_id=$productId');
+      if (!mounted) return;
+      // 刷新积分
+      await _loadData();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('🎉 兑换成功！获得「$productName」')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('兑换失败: $e')),
+      );
     }
   }
 
@@ -84,12 +135,17 @@ class _MallScreenState extends State<MallScreen> {
                       style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(height: AppTheme.spacingSm),
                   // 商品列表
-                  ..._products.map((p) => _buildProductCard(
-                        context,
-                        name: p['name'] as String? ?? '',
-                        points: p['price_points'] as int? ?? 0,
-                        stock: p['stock'] as int? ?? 0,
-                      )),
+                  ..._products.map((p) {
+                    final pid = p['id'] as int? ?? 0;
+                    final name = p['name'] as String? ?? '';
+                    final price = p['price_points'] as int? ?? 0;
+                    final stock = p['stock'] as int? ?? 0;
+                    return _buildProductCard(context,
+                        id: pid,
+                        name: name,
+                        points: price,
+                        stock: stock);
+                  }),
                   if (_products.isEmpty)
                     const Padding(
                       padding: EdgeInsets.all(AppTheme.spacingLg),
@@ -107,7 +163,7 @@ class _MallScreenState extends State<MallScreen> {
   }
 
   Widget _buildProductCard(BuildContext context,
-      {required String name, required int points, required int stock}) {
+      {required int id, required String name, required int points, required int stock}) {
     return Card(
       child: ListTile(
         contentPadding: const EdgeInsets.all(AppTheme.spacingMd),
@@ -136,7 +192,9 @@ class _MallScreenState extends State<MallScreen> {
           ],
         ),
         trailing: ElevatedButton(
-          onPressed: stock > 0 ? () {} : null,
+          onPressed: stock > 0
+              ? () => _redeem(id, name, points)
+              : null,
           child: Text(stock > 0 ? '兑换' : '已兑完',
               style: const TextStyle(fontSize: AppTheme.bodyLarge)),
         ),

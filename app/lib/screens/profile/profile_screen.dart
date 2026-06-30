@@ -1,65 +1,137 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
+import '../../config/api_config.dart';
+import '../../services/api_service.dart';
+import '../../models/user.dart';
 import '../auth/kid_binding_screen.dart';
 import '../profile/settings_screen.dart';
 
-/// 个人中心
-class ProfileScreen extends StatelessWidget {
+/// 个人中心 — 对接后端真实API
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final ApiService _api = ApiService();
+  UserProfile? _user;
+  bool _loading = true;
+  int _totalPoints = 0;
+  int _streak = 0;
+  List<Map<String, dynamic>> _family = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      // 获取用户信息
+      final me = await _api.get('${ApiConfig.authMe}?token=${_api.token ?? ""}');
+      // 也会返回积分和家庭信息
+      // 但还需要老年人ID才能查积分
+      setState(() {
+        _user = UserProfile(
+          id: me['id'] as int? ?? 0,
+          phone: me['phone'] as String? ?? '',
+          role: me['role'] as String? ?? 'elder',
+          name: me['nickname'] as String? ?? '用户',
+          avatarUrl: me['avatar_url'] as String?,
+        );
+        _totalPoints = me['total_points'] as int? ?? 0;
+        _streak = me['current_streak'] as int? ?? 0;
+        final members = me['family_members'] as List<dynamic>? ?? [];
+        _family = members.map((m) => {
+          'name': (m as Map)['nickname'] ?? '',
+          'role': m['role'] ?? '',
+        }).toList();
+        _loading = false;
+      });
+    } catch (e) {
+      // 降级：登录信息尚未设置
+      setState(() => _loading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('我的')),
-      body: ListView(
-        padding: const EdgeInsets.all(AppTheme.spacingMd),
-        children: [
-          // 用户信息卡
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(AppTheme.spacingLg),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 36,
-                    backgroundColor:
-                        AppTheme.primaryLight.withValues(alpha: 0.3),
-                    child: const Icon(Icons.person,
-                        size: 40, color: AppTheme.primaryColor),
-                  ),
-                  const SizedBox(width: AppTheme.spacingMd),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('用户',
-                          style: Theme.of(context).textTheme.headlineMedium),
-                      Text('积分: 1,280',
-                          style: Theme.of(context).textTheme.bodyLarge),
-                    ],
-                  ),
-                ],
+      body: RefreshIndicator(
+        onRefresh: _loadData,
+        child: ListView(
+          padding: const EdgeInsets.all(AppTheme.spacingMd),
+          children: [
+            // 用户信息卡
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppTheme.spacingLg),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 36,
+                      backgroundColor:
+                          AppTheme.primaryLight.withValues(alpha: 0.3),
+                      child: Icon(Icons.person,
+                          size: 40, color: AppTheme.primaryColor),
+                    ),
+                    const SizedBox(width: AppTheme.spacingMd),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _loading ? '加载中…' : (_user?.name ?? '用户'),
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        if (!_loading) ...[
+                          Text(
+                            '星星: $_totalPoints  | 已连续 $_streak 天',
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: AppTheme.primaryColor,
+                            ),
+                          ),
+                          if (_family.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                '家人: ${_family.map((f) => f['name']).join('、')}',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppTheme.textSecondary,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: AppTheme.spacingMd),
-          // 功能列表
-          _buildMenuItem(context,
-              icon: Icons.family_restroom, title: '家庭绑定',
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const KidBindingScreen()))),
-          _buildMenuItem(context,
-              icon: Icons.notifications, title: '消息通知'),
-          _buildMenuItem(context,
-              icon: Icons.assignment, title: '健康档案'),
-          _buildMenuItem(context,
-              icon: Icons.settings, title: '设置',
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const SettingsScreen()))),
-          _buildMenuItem(context,
-              icon: Icons.phone_in_talk, title: '紧急联系人'),
-          _buildMenuItem(context,
-              icon: Icons.info_outline, title: '关于'),
-        ],
+            const SizedBox(height: AppTheme.spacingMd),
+            // 功能列表
+            _buildMenuItem(context,
+                icon: Icons.family_restroom, title: '家庭绑定',
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const KidBindingScreen()))),
+            _buildMenuItem(context,
+                icon: Icons.notifications, title: '消息通知'),
+            _buildMenuItem(context,
+                icon: Icons.assignment, title: '健康档案'),
+            _buildMenuItem(context,
+                icon: Icons.settings, title: '设置',
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const SettingsScreen()))),
+            _buildMenuItem(context,
+                icon: Icons.phone_in_talk, title: '紧急联系人'),
+            _buildMenuItem(context,
+                icon: Icons.info_outline, title: '关于'),
+          ],
+        ),
       ),
     );
   }

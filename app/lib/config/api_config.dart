@@ -19,4 +19,7 @@ class ApiConfig {
   static const String pointOrders = '$apiPrefix/points/orders';
   static const String reminders = '$apiPrefix/reminders';
   static const String medicationConfirm = '$apiPrefix/medications/confirm';
+
+  // 积分兑换
+  static const String redeem = '$apiPrefix/points/redeem';
 }
