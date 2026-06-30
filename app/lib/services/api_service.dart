@@ -44,6 +44,18 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  /// 通用 PUT 请求
+  Future<Map<String, dynamic>> put(String endpoint,
+      {Map<String, dynamic>? body}) async {
+    final uri = Uri.parse('$baseUrl$endpoint');
+    final response = await _client.put(
+      uri,
+      headers: await _headers(),
+      body: body != null ? jsonEncode(body) : null,
+    );
+    return _handleResponse(response);
+  }
+
   /// 通用 POST 请求
   Future<Map<String, dynamic>> post(String endpoint,
       {Map<String, dynamic>? body}) async {

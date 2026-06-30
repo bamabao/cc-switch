@@ -26,4 +26,7 @@ class ApiConfig {
   // 审核（静态方法）
   static String medicationSubmit(int id) => '$apiPrefix/medications/$id/submit';
   static String medicationAudit(int id) => '$apiPrefix/medications/$id/audit';
+
+  // 用户
+  static const String authProfile = '$apiPrefix/auth/profile';
 }

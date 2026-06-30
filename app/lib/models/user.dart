@@ -7,6 +7,8 @@ class UserProfile {
   final int totalPoints;
   final int currentStreak;
   final int longestStreak;
+  final String? voicePreference;
+  final int? fontScale;
   final List<Map<String, dynamic>> familyMembers;
 
   UserProfile({
@@ -18,6 +20,8 @@ class UserProfile {
     this.totalPoints = 0,
     this.currentStreak = 0,
     this.longestStreak = 0,
+    this.voicePreference,
+    this.fontScale,
     this.familyMembers = const [],
   });
 
@@ -37,6 +41,8 @@ class UserProfile {
       totalPoints: json['total_points'] as int? ?? 0,
       currentStreak: json['current_streak'] as int? ?? 0,
       longestStreak: json['longest_streak'] as int? ?? 0,
+      voicePreference: json['voice_preference'] as String?,
+      fontScale: json['font_scale'] as int?,
       familyMembers: members,
     );
   }
