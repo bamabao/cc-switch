@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
+import '../../services/api_service.dart';
 
 /// 首次开机子女绑定流程 — 家人绑定引导
 /// P0新增强制：首次开机配对
@@ -14,6 +15,9 @@ class KidBindingScreen extends StatefulWidget {
 class _KidBindingScreenState extends State<KidBindingScreen> {
   int _currentStep = 0;
   final TextEditingController _phoneController = TextEditingController();
+  final ApiService _api = ApiService();
+  bool _sendingInvite = false;
+  String? _inviteError;
 
   static const List<String> _stepLabels = [
     '开始',
@@ -313,12 +317,42 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
               onChanged: (_) => setState(() {}),
             ),
           ),
+          if (_inviteError != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Text(
+                _inviteError!,
+                style: TextStyle(
+                  fontSize: AppTheme.bodyMedium,
+                  color: AppTheme.dangerColor,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             height: AppTheme.buttonHeight,
             child: ElevatedButton(
-              onPressed: _phoneController.text.length == 11 ? _nextStep : null,
+              onPressed: _phoneController.text.length == 11
+                  ? () async {
+                      setState(() {
+                        _sendingInvite = true;
+                        _inviteError = null;
+                      });
+                      try {
+                        await _api.sendSmsCode(_phoneController.text);
+                        if (!mounted) return;
+                        _nextStep();
+                      } catch (e) {
+                        if (!mounted) return;
+                        setState(() =>
+                            _inviteError = '发送失败，请检查手机号');
+                      } finally {
+                        if (mounted) setState(() => _sendingInvite = false);
+                      }
+                    }
+                  : null,
               style: ElevatedButton.styleFrom(
                 disabledBackgroundColor:
                     AppTheme.cardColor.withValues(alpha: 0.6),
@@ -327,9 +361,9 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
                       BorderRadius.circular(AppTheme.radiusButton),
                 ),
               ),
-              child: const Text(
-                '发送邀请',
-                style: TextStyle(
+              child: Text(
+                _sendingInvite ? '发送中…' : '发送邀请',
+                style: const TextStyle(
                   fontSize: AppTheme.titleMedium,
                   fontWeight: FontWeight.w600,
                 ),
