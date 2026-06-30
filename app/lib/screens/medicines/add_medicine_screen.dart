@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
+import '../../config/api_config.dart';
+import '../../services/api_service.dart';
 
 /// 药品录入页 — 三通道录入
 /// 支持：药盒拍照 / 语音录入 / 手动手写录入
@@ -19,10 +21,18 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
   final FocusNode _nameFocus = FocusNode();
   final FocusNode _dosageFocus = FocusNode();
 
+  final ApiService _api = ApiService();
   String _selectedCategory = '内服';
   bool _showForm = true;
+  bool _submitting = false;
 
   static const List<String> _categories = ['内服', '外用', '针剂', '滋补'];
+  static const Map<String, String> _categoryApiMap = {
+    '内服': 'oral',
+    '外用': 'external',
+    '针剂': 'injection',
+    '滋补': 'supplement',
+  };
   List<IconData> get _categoryIcons => const [
     Icons.medication_liquid,
     Icons.medication,
@@ -41,16 +51,37 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
     super.dispose();
   }
 
-  void _submit() {
-    // TODO: 调用后端保存药品API
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('药品已添加！'),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-    Navigator.pop(context, true);
+  void _submit() async {
+    if (_submitting) return;
+    setState(() => _submitting = true);
+    try {
+      await _api.post('${ApiConfig.medications}?elder_id=1', body: {
+        'name': _nameController.text,
+        'category': _categoryApiMap[_selectedCategory] ?? 'oral',
+        'oral_form': 'tablet',
+        'notes': _noteController.text,
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('药品已添加！'),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('添加失败：$e'),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 
   @override
@@ -89,6 +120,11 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
             const SizedBox(height: AppTheme.spacingLg),
             // 提交按钮
             if (_showForm) _buildSubmitButton(),
+            if (_submitting)
+              const Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: Center(child: CircularProgressIndicator()),
+              ),
           ],
         ),
       ),
