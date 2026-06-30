@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
+import '../config/api_config.dart';
 import '../services/api_service.dart';
+import 'checkin_popup.dart';
 
 /// 用药提醒全屏弹窗 — P0最高优先级
 /// 展示药名/用量/注意事项 + "已服药"二次确认
@@ -95,7 +97,7 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
     if (widget.medicationId != null && widget.scheduleId != null) {
       try {
         final result = await _api.post(
-          'api/v1/medications/confirm?elder_id=${widget.elderId}',
+          '${ApiConfig.medicationConfirm}?elder_id=${widget.elderId}',
           body: {
             'medication_id': widget.medicationId,
             'schedule_id': widget.scheduleId,
@@ -103,9 +105,10 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
           },
         );
         if (!mounted) return;
+        final pointsEarned = result['points_earned'] as int? ?? 0;
         setState(() {
-          _pointsEarned = result['points_earned'] as int? ?? 0;
-          _feedbackMessage = '✅ 已记录！获得 ${_pointsEarned ?? 0} 积分';
+          _pointsEarned = pointsEarned;
+          _feedbackMessage = '✅ 已记录！获得 $pointsEarned 积分';
         });
       } catch (e) {
         if (!mounted) return;
@@ -116,7 +119,13 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
     }
 
     Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) Navigator.of(context).pop(true);
+      if (mounted) {
+        Navigator.of(context).pop(true);
+        // 弹出积分打卡弹窗
+        if (_pointsEarned != null && _pointsEarned! > 0) {
+          CheckinPopup.show(context, pointsEarned: _pointsEarned!);
+        }
+      }
     });
   }
 

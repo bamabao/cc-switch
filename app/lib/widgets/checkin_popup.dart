@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
+import '../config/api_config.dart';
+import '../services/api_service.dart';
 
 /// 积分打卡弹窗 — 服药后打卡成功
 /// P0-5：积分打卡（弹窗方案，非独立页面）
@@ -7,19 +9,30 @@ import '../config/theme.dart';
 class CheckinPopup extends StatefulWidget {
   final int consecutiveDays;
   final int pointsEarned;
+  final int totalPoints;
+  final int longestStreak;
 
   const CheckinPopup({
     super.key,
     this.consecutiveDays = 1,
     this.pointsEarned = 3,
+    this.totalPoints = 0,
+    this.longestStreak = 1,
   });
 
-  /// 便捷调用
-  static Future<void> show(
-    BuildContext context, {
-    int consecutiveDays = 1,
-    int pointsEarned = 3,
-  }) {
+  /// 便捷调用 — 自动从后端拉积分数据
+  static Future<void> show(BuildContext context, {int pointsEarned = 10}) async {
+    final api = ApiService();
+    int consecutiveDays = 1;
+    int totalPoints = 0;
+    int longestStreak = 1;
+    try {
+      final profile = await api.get('${ApiConfig.points}/profile?elder_id=1');
+      consecutiveDays = profile['current_streak'] as int? ?? 1;
+      totalPoints = profile['total_points'] as int? ?? 0;
+      longestStreak = profile['longest_streak'] as int? ?? 1;
+    } catch (_) {}
+    if (!context.mounted) return;
     return showDialog(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.6),
@@ -27,6 +40,8 @@ class CheckinPopup extends StatefulWidget {
       builder: (_) => CheckinPopup(
         consecutiveDays: consecutiveDays,
         pointsEarned: pointsEarned,
+        totalPoints: totalPoints,
+        longestStreak: longestStreak,
       ),
     );
   }
