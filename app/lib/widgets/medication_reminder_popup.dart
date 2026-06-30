@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
+import '../services/api_service.dart';
 
 /// 用药提醒全屏弹窗 — P0最高优先级
 /// 展示药名/用量/注意事项 + "已服药"二次确认
@@ -8,6 +9,9 @@ class MedicationReminderPopup extends StatefulWidget {
   final String dosage;
   final String note;
   final bool isReminder;
+  final int? medicationId;
+  final int? scheduleId;
+  final int? elderId;
 
   const MedicationReminderPopup({
     super.key,
@@ -15,6 +19,9 @@ class MedicationReminderPopup extends StatefulWidget {
     this.dosage = '2粒',
     this.note = '饭后服用，忌酒',
     this.isReminder = false,
+    this.medicationId,
+    this.scheduleId,
+    this.elderId = 1,
   });
 
   static Future<bool?> show(
@@ -23,6 +30,9 @@ class MedicationReminderPopup extends StatefulWidget {
     String dosage = '2粒',
     String note = '饭后服用，忌酒',
     bool isReminder = false,
+    int? medicationId,
+    int? scheduleId,
+    int? elderId,
   }) {
     return showDialog<bool>(
       context: context,
@@ -33,6 +43,9 @@ class MedicationReminderPopup extends StatefulWidget {
         dosage: dosage,
         note: note,
         isReminder: isReminder,
+        medicationId: medicationId,
+        scheduleId: scheduleId,
+        elderId: elderId,
       ),
     );
   }
@@ -44,9 +57,12 @@ class MedicationReminderPopup extends StatefulWidget {
 
 class _MedicationReminderPopupState extends State<MedicationReminderPopup>
     with SingleTickerProviderStateMixin {
+  final ApiService _api = ApiService();
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
   String? _feedbackMessage;
+  bool _submitting = false;
+  int? _pointsEarned;
 
   @override
   void initState() {
@@ -68,10 +84,38 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
     super.dispose();
   }
 
-  void _handleTaken() {
-    setState(() => _feedbackMessage = '✅ 已记录');
-    // 二次确认 — 震动+语音反馈
-    Future.delayed(const Duration(milliseconds: 800), () {
+  void _handleTaken() async {
+    if (_submitting) return;
+    setState(() {
+      _submitting = true;
+      _feedbackMessage = '正在确认…';
+    });
+
+    // 如果有medicationId/scheduleId，调后端确认API赚积分
+    if (widget.medicationId != null && widget.scheduleId != null) {
+      try {
+        final result = await _api.post(
+          'api/v1/medications/confirm?elder_id=${widget.elderId}',
+          body: {
+            'medication_id': widget.medicationId,
+            'schedule_id': widget.scheduleId,
+            'dosage_taken': 1.0,
+          },
+        );
+        if (!mounted) return;
+        setState(() {
+          _pointsEarned = result['points_earned'] as int? ?? 0;
+          _feedbackMessage = '✅ 已记录！获得 ${_pointsEarned ?? 0} 积分';
+        });
+      } catch (e) {
+        if (!mounted) return;
+        setState(() => _feedbackMessage = '✅ 已记录');
+      }
+    } else {
+      setState(() => _feedbackMessage = '✅ 已记录');
+    }
+
+    Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) Navigator.of(context).pop(true);
     });
   }

@@ -18,4 +18,5 @@ class ApiConfig {
   static const String pointProducts = '$apiPrefix/points/products';
   static const String pointOrders = '$apiPrefix/points/orders';
   static const String reminders = '$apiPrefix/reminders';
+  static const String medicationConfirm = '$apiPrefix/medications/confirm';
 }
