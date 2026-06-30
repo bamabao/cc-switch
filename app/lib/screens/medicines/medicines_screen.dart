@@ -33,7 +33,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
     try {
       final result = await _api.get(ApiConfig.medications, queryParams: {
         'elder_id': '1',
-        'token': '',
+        'token': _api.token ?? '',
       });
       setState(() {
         _medications = result['items'] as List<dynamic>? ?? [];
@@ -161,65 +161,138 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
     }
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppTheme.spacingMd),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryLight.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        onTap: () => _showMedicationDetail(context, med, emoji, times, statusLabel, statusColor),
+        child: Padding(
+          padding: const EdgeInsets.all(AppTheme.spacingMd),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryLight.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                    ),
+                    child: Center(child: Text(emoji, style: const TextStyle(fontSize: 24))),
                   ),
-                  child: Center(child: Text(emoji, style: const TextStyle(fontSize: 24))),
-                ),
-                const SizedBox(width: AppTheme.spacingMd),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(name, style: Theme.of(context).textTheme.titleLarge),
-                      if (dosageDisplay.isNotEmpty)
-                        Text(dosageDisplay, style: Theme.of(context).textTheme.bodyLarge),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    statusLabel,
-                    style: TextStyle(
-                      fontSize: AppTheme.bodyMedium,
-                      color: statusColor,
-                      fontWeight: FontWeight.w600,
+                  const SizedBox(width: AppTheme.spacingMd),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(name, style: Theme.of(context).textTheme.titleLarge),
+                        if (dosageDisplay.isNotEmpty)
+                          Text(dosageDisplay, style: Theme.of(context).textTheme.bodyLarge),
+                      ],
                     ),
                   ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      statusLabel,
+                      style: TextStyle(
+                        fontSize: AppTheme.bodyMedium,
+                        color: statusColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (times.isNotEmpty) ...[
+                const SizedBox(height: AppTheme.spacingSm),
+                Text('⏰ $times',
+                    style: Theme.of(context).textTheme.bodyLarge
+                        ?.copyWith(color: AppTheme.warningColor)),
+              ],
+              if (med['notes'] != null && (med['notes'] as String).isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text('📝 ${med['notes']}',
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(color: AppTheme.textSecondary)),
                 ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showMedicationDetail(BuildContext ctx, dynamic med, String emoji, String times, String statusLabel, Color statusColor) {
+    showDialog(
+      context: ctx,
+      builder: (dialogCtx) {
+        final name = med['name'] as String? ?? '';
+        final manufacturer = med['manufacturer'] as String? ?? '';
+
+        final dosagePerTake = med['dosage_per_take'];
+        final frequency = med['frequency_per_day'];
+        final totalQty = med['total_quantity']?.toString() ?? '';
+        final unit = med['unit'] as String? ?? '';
+        final expiry = med['expiry_date']?.toString() ?? '';
+        final notes = med['notes'] as String? ?? '';
+        final sideEffects = med['side_effects'] as String? ?? '';
+        final dietaryRestricts = med['dietary_restrictions'] as String? ?? '';
+        final mealRelation = med['meal_relation'] as String? ?? '';
+
+        return AlertDialog(
+          title: Row(
+            children: [
+              Text('$emoji ', style: const TextStyle(fontSize: 24)),
+              Expanded(child: Text(name, style: const TextStyle(fontWeight: FontWeight.bold))),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _detailRow('状态', statusLabel, color: statusColor),
+                if (times.isNotEmpty) _detailRow('服用时间', times),
+                if (manufacturer.isNotEmpty) _detailRow('厂家', manufacturer),
+                if (dosagePerTake != null) _detailRow('每次用量', '$dosagePerTake$unit'),
+                if (frequency != null) _detailRow('每日次数', '${frequency}次'),
+                if (totalQty.isNotEmpty) _detailRow('总量', '$totalQty$unit'),
+                if (expiry.isNotEmpty) _detailRow('有效期', expiry),
+                if (mealRelation.isNotEmpty) _detailRow('餐前/餐后', mealRelation),
+                if (dietaryRestricts.isNotEmpty) _detailRow('饮食禁忌', dietaryRestricts),
+                if (sideEffects.isNotEmpty) _detailRow('副作用', sideEffects),
+                if (notes.isNotEmpty) _detailRow('备注', notes),
               ],
             ),
-            if (times.isNotEmpty) ...[
-              const SizedBox(height: AppTheme.spacingSm),
-              Text('⏰ $times',
-                  style: Theme.of(context).textTheme.bodyLarge
-                      ?.copyWith(color: AppTheme.warningColor)),
-            ],
-            if (med['notes'] != null && (med['notes'] as String).isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text('📝 ${med['notes']}',
-                    style: Theme.of(context).textTheme.bodyMedium
-                        ?.copyWith(color: AppTheme.textSecondary)),
-              ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogCtx), child: const Text('关闭')),
           ],
-        ),
+        );
+      },
+    );
+  }
+
+  Widget _detailRow(String label, String value, {Color? color}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text('$label：', style: const TextStyle(fontSize: AppTheme.bodyMedium, color: AppTheme.textSecondary)),
+          ),
+          Expanded(
+            child: Text(value, style: TextStyle(fontSize: AppTheme.bodyMedium, color: color ?? AppTheme.textPrimary)),
+          ),
+        ],
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
 
 /// 紧急求助页 — 三连紧急救援链路
@@ -164,15 +165,29 @@ class _EmergencyScreenState extends State<EmergencyScreen>
       return _countdown > 0 && mounted;
     }).then((_) {
       if (mounted) {
-        // TODO: url_launcher tel: 发起拨号
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('正在呼叫紧急联系人…'), duration: Duration(seconds: 3)),
-        );
-        Future.delayed(const Duration(seconds: 2), () {
-          if (mounted) setState(() => _isCalling = false);
-        });
+        _makePhoneCall('tel:120');
       }
     });
+  }
+
+  Future<void> _makePhoneCall(String url) async {
+    final uri = Uri.parse(url);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('暂无法拨打电话，请手动拨打120')),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('暂无法拨打电话，请手动拨打120')),
+      );
+    }
+    if (mounted) setState(() => _isCalling = false);
   }
 
   Widget _buildCallingOverlay() {
