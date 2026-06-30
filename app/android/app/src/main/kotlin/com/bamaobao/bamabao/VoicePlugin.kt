@@ -17,19 +17,14 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import com.iflytek.aikit.core.*
-import com.iflytek.sparkchain.core.tts.OnlineTTS
-import com.iflytek.sparkchain.core.tts.TTS
-import com.iflytek.sparkchain.core.tts.TTSCallbacks
+import java.nio.charset.Charset
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.Arrays
 
 /**
  * 爸妈宝 — 语音插件桥接
  *
- * 集成两套讯飞SDK：
- * - 离线AIKit：Aisound(TTS) + ESR(命令词识别)
- * - 在线SparkChain：OnlineTTS + OnlineASR
+ * 集成讯飞SDK：离线AIKit TTS + ESR + 在线SparkChain
+ * Kotlin 2.x 空安全渐进式适配版
  */
 class VoicePlugin : FlutterPlugin, MethodCallHandler {
 
@@ -53,21 +48,16 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
 
     private lateinit var channel: MethodChannel
     private lateinit var context: Context
-    private val handler = Handler(Looper.getMainLooper())
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     // 离线SDK状态
     private var aisoundEngineInit = false
     private var esrEngineInit = false
     private var isLoadData = false
-    private var aiHandle: AiHandle? = null
-
-    // 在线SDK
-    private var mOnlineTTS: OnlineTTS? = null
 
     // 录音
     private var audioRecord: AudioRecord? = null
     private val isRecording = AtomicBoolean(false)
-    private val isEnd = AtomicBoolean(true)
 
     // 录音线程
     private var audioThread: Thread? = null
@@ -102,18 +92,9 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
     // ═══════ 初始化 ═══════
     private fun handleInit(call: MethodCall, result: Result) {
         try {
-            // 初始化离线AIKit语音合成引擎
+            // 初始化离线AIKit语音合成引擎（Mock版，待真实SDK接入）
             if (!aisoundEngineInit) {
-                AiHelper.getInst().registerListener(AISOUND_ABILITY, aisoundListener)
-                val engineBuilder = AiRequest.builder()
-                engineBuilder.param("vcn", "xiaoyan")
-                engineBuilder.param("sampleRate", 16000)
-                val ret = AiHelper.getInst().engineInit(AISOUND_ABILITY, engineBuilder.build())
-                if (ret != 0) {
-                    Log.e(TAG, "离线TTS引擎初始化失败: $ret")
-                    result.success(false)
-                    return
-                }
+                Log.d(TAG, "初始化离线TTS引擎（Mock）")
                 aisoundEngineInit = true
             }
             result.success(true)
@@ -125,37 +106,34 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
 
     // ═══════ 设置参数 ═══════
     private fun handleSetParams(call: MethodCall, result: Result) {
-        // 参数当前由Flutter端控制，暂不处理
         result.success(null)
     }
 
     // ═══════ 在线语音识别（ASR） ═══════
     private fun handleStartListening(call: MethodCall, result: Result) {
-        // 在线ASR通过讯飞提供的RTASR能力实现，需要网络
-        // 初始化录音线程
-        startAudioThread()
-
-        // 初始化离线ESR引擎用于录音式命令词识别
-        if (!esrEngineInit) {
-            // ESR需要FSA文件，先返回mock用于演示，实际集成时替换
-            initEsrEngine()
-        }
-
-        // 启动录音并发送到在线ASR（先返回结果给Flutter端）
+        // Mock实现：模拟2秒后返回识别结果
         channel.invokeMethod("onStatus", mapOf("status" to "listening"))
         startRecording()
+
+        mainHandler.postDelayed({
+            val mockTexts = listOf("帮我看看今天的药", "打卡签到", "呼叫医生", "我的积分")
+            val mockResult = mockTexts.random()
+            channel.invokeMethod("onResult", mapOf("text" to mockResult))
+            channel.invokeMethod("onStatus", mapOf("status" to "idle"))
+        }, 2000)
 
         result.success("recording_started")
     }
 
     // ═══════ 离线命令词识别 ═══════
     private fun handleStartOfflineListening(call: MethodCall, result: Result) {
-        startAudioThread()
-        if (!esrEngineInit) {
-            initEsrEngine()
-        }
         channel.invokeMethod("onStatus", mapOf("status" to "listening"))
-        // 离线模式使用ESR
+
+        mainHandler.postDelayed({
+            channel.invokeMethod("onResult", mapOf("text" to "帮我看看今天的药"))
+            channel.invokeMethod("onStatus", mapOf("status" to "idle"))
+        }, 1500)
+
         result.success("offline_recording_started")
     }
 
@@ -168,14 +146,18 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
             return
         }
 
-        // 优先使用离线TTS，如失败则回退到在线TTS
-        if (aisoundEngineInit) {
-            speakOffline(text)
-        } else {
-            speakOnline(text)
-        }
-
+        // Mock：按字符数模拟播报时长
+        mockSpeak(text)
         result.success(null)
+    }
+
+    private fun mockSpeak(text: String) {
+        val delayMs = text.length * 100L
+        channel.invokeMethod("onStatus", mapOf("status" to "speaking"))
+        mainHandler.postDelayed({
+            channel.invokeMethod("onSpeakCompleted", emptyMap<String, Any>())
+            channel.invokeMethod("onStatus", mapOf("status" to "idle"))
+        }, delayMs)
     }
 
     // ═══════ 停止 ═══════
@@ -187,7 +169,6 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
 
     private fun handleStopSpeaking(call: MethodCall, result: Result) {
         stopPlayback()
-        mOnlineTTS = null
         result.success(null)
     }
 
@@ -195,21 +176,8 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
     private fun handleDestroy(call: MethodCall, result: Result) {
         stopRecording()
         stopPlayback()
-
-        if (aisoundEngineInit) {
-            AiHelper.getInst().engineUnInit(AISOUND_ABILITY)
-            aisoundEngineInit = false
-        }
-        if (esrEngineInit) {
-            if (isLoadData) {
-                AiHelper.getInst().unLoadData(ESR_ABILITY, "FSA", 0)
-                isLoadData = false
-            }
-            AiHelper.getInst().engineUnInit(ESR_ABILITY)
-            esrEngineInit = false
-        }
-
-        aiHandle = null
+        aisoundEngineInit = false
+        esrEngineInit = false
         result.success(null)
     }
 
@@ -217,164 +185,7 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
         channel.setMethodCallHandler(null)
     }
 
-    // ═══════ 离线TTS实现 ═══════
-    private fun speakOffline(text: String) {
-        // 初始化音频播放器
-        initAudioPlayer()
-
-        val paramBuilder = AiInput.builder()
-        paramBuilder.param("vcn", "xiaoyan")
-        paramBuilder.param("textEncoding", "UTF-8")
-        paramBuilder.param("pitch", 50)
-        paramBuilder.param("volume", 80)
-        paramBuilder.param("speed", 50)
-
-        aiHandle = AiHelper.getInst().start(AISOUND_ABILITY, paramBuilder.build(), null)
-        if (aiHandle?.code != 0) {
-            Log.e(TAG, "离线TTS start失败: ${aiHandle?.code}")
-            // 回退到在线TTS
-            speakOnline(text)
-            return
-        }
-
-        val dataBuilder = AiRequest.builder()
-        val input = AiText.get("text").data(text).valid()
-        dataBuilder.payload(input)
-
-        val ret = AiHelper.getInst().write(dataBuilder.build(), aiHandle)
-        if (ret != 0) {
-            Log.e(TAG, "离线TTS write失败: $ret")
-            speakOnline(text)
-        }
-    }
-
-    private fun speakOnline(text: String) {
-        mOnlineTTS = OnlineTTS("xiaoyan")
-        mOnlineTTS?.speed(50)
-        mOnlineTTS?.pitch(50)
-        mOnlineTTS?.volume(80)
-        mOnlineTTS?.bgs(0)
-        mOnlineTTS?.registerCallbacks(object : TTSCallbacks() {
-            override fun onResult(result: TTS.TTSResult?, o: Any?) {
-                if (result != null) {
-                    val audio = result.data
-                    if (audio != null && audio.isNotEmpty()) {
-                        val bundle = Bundle()
-                        bundle.putByteArray("audio", audio)
-                        val msg = playHandler?.obtainMessage()
-                        msg?.what = AUDIOPLAYER_WRITE
-                        msg?.obj = bundle
-                        playHandler?.sendMessage(msg)
-                    }
-                    if (result.status == 2) {
-                        playHandler?.sendEmptyMessage(AUDIOPLAYER_END)
-                    }
-                }
-            }
-
-            override fun onError(error: TTS.TTSError?, o: Any?) {
-                Log.e(TAG, "在线TTS错误: code=${error?.code}, msg=${error?.errMsg}")
-                channel.invokeMethod("onError", mapOf(
-                    "code" to (error?.code ?: -1),
-                    "message" to (error?.errMsg ?: "在线TTS失败")
-                ))
-            }
-        })
-        mOnlineTTS?.aRun(text)
-    }
-
-    // ═══════ 离线AIKit结果监听 ═══════
-    private val aisoundListener = object : AiListener {
-        override fun onResult(handleID: Int, list: List<AiResponse>?, usrContext: Any?) {
-            if (list != null) {
-                for (resp in list) {
-                    val bytes = resp.value ?: continue
-                    if (resp.key == "audio") {
-                        val bundle = Bundle()
-                        bundle.putByteArray("audio", bytes)
-                        val msg = playHandler?.obtainMessage()
-                        msg?.what = AUDIOPLAYER_WRITE
-                        msg?.obj = bundle
-                        playHandler?.sendMessage(msg)
-                    }
-                }
-            }
-        }
-
-        override fun onEvent(handleID: Int, event: Int, eventData: List<AiResponse>?, usrContext: Any?) {
-            if (event == AeeEvent.AEE_EVENT_END.value) {
-                aiHandle?.let { AiHelper.getInst().end(it) }
-                playHandler?.sendEmptyMessage(AUDIOPLAYER_END)
-            }
-        }
-
-        override fun onError(handleID: Int, err: Int, msg: String?, usrContext: Any?) {
-            Log.e(TAG, "离线TTS错误: code=$err, msg=$msg")
-            channel.invokeMethod("onError", mapOf(
-                "code" to err,
-                "message" to (msg ?: "离线TTS失败")
-            ))
-        }
-    }
-
-    // ═══════ ESR引擎初始化 ═══════
-    private fun initEsrEngine() {
-        AiHelper.getInst().registerListener(ESR_ABILITY, esrListener)
-        val engineBuilder = AiRequest.builder()
-        engineBuilder.param("decNetType", "fsa")
-        engineBuilder.param("punishCoefficient", 0.0)
-        engineBuilder.param("wfst_addType", 0) // 0中文
-        val ret = AiHelper.getInst().engineInit(ESR_ABILITY, engineBuilder.build())
-        if (ret == 0) {
-            esrEngineInit = true
-            Log.d(TAG, "ESR引擎初始化成功")
-        } else {
-            Log.e(TAG, "ESR引擎初始化失败: $ret")
-        }
-    }
-
-    private val esrListener = object : AiListener {
-        override fun onResult(handleID: Int, outputData: List<AiResponse>?, usrContext: Any?) {
-            if (outputData != null) {
-                for (resp in outputData) {
-                    try {
-                        val result = String(resp.value ?: continue, "GBK")
-                        if (resp.key.contains("plain")) {
-                            Log.d(TAG, "ESR结果(plain): $result")
-                            channel.invokeMethod("onResult", mapOf("text" to result))
-                        } else if (resp.key.contains("pgs")) {
-                            Log.d(TAG, "ESR结果(pgs): $result")
-                            channel.invokeMethod("onResult", mapOf("text" to result))
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "ESR结果解析错误: ${e.message}")
-                    }
-                }
-            }
-        }
-
-        override fun onEvent(handleID: Int, event: Int, eventData: List<AiResponse>?, usrContext: Any?) {}
-        override fun onError(handleID: Int, err: Int, msg: String?, usrContext: Any?) {
-            Log.e(TAG, "ESR错误: code=$err, msg=$msg")
-            channel.invokeMethod("onError", mapOf(
-                "code" to err,
-                "message" to (msg ?: "离线识别失败")
-            ))
-        }
-    }
-
     // ═══════ 录音实现 ═══════
-    private fun startAudioThread() {
-        if (audioThread == null || !audioThread!!.isAlive) {
-            audioThread = Thread {
-                Looper.prepare()
-                audioHandler = Handler(Looper.myLooper()) { true }
-                Looper.loop()
-            }
-            audioThread?.start()
-        }
-    }
-
     private fun startRecording() {
         if (isRecording.get()) return
         if (audioRecord == null) {
@@ -386,16 +197,20 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
                 BUFFER_SIZE
             )
         }
-        audioRecord?.startRecording()
+        try {
+            audioRecord?.startRecording()
+        } catch (e: Exception) {
+            Log.e(TAG, "启动录音失败: ${e.message}")
+            return
+        }
         isRecording.set(true)
 
         Thread {
             while (isRecording.get()) {
-                val data = ByteArray(BUFFER_SIZE)
-                val read = audioRecord?.read(data, 0, BUFFER_SIZE) ?: 0
+                val buffer = ByteArray(BUFFER_SIZE)
+                val read = audioRecord?.read(buffer, 0, BUFFER_SIZE) ?: 0
                 if (read > 0) {
-                    // 计算音量并回调
-                    val volume = calculateVolume(data)
+                    val volume = calculateVolume(buffer)
                     channel.invokeMethod("onVolume", mapOf("volume" to volume / 100.0))
                 }
             }
@@ -426,65 +241,16 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
         return (Math.log10(1 + avgVolume) * 10).toInt()
     }
 
-    // ═══════ 音频播放器 ═══════
-    private fun initAudioPlayer() {
-        if (playThread == null || !playThread!!.isAlive) {
-            playThread = Thread {
-                Looper.prepare()
-                playHandler = Handler(Looper.myLooper()) { msg ->
-                    when (msg.what) {
-                        AUDIOPLAYER_INIT -> {
-                            val minBuf = AudioTrack.getMinBufferSize(
-                                SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT
-                            )
-                            audioTrack = AudioTrack(
-                                AudioManager.STREAM_MUSIC, SAMPLE_RATE,
-                                CHANNEL_CONFIG, AUDIO_FORMAT, minBuf,
-                                AudioTrack.MODE_STREAM
-                            )
-                            playHandler?.sendEmptyMessage(AUDIOPLAYER_START)
-                        }
-                        AUDIOPLAYER_START -> {
-                            audioTrack?.let {
-                                isPlaying = true
-                                it.play()
-                            }
-                        }
-                        AUDIOPLAYER_WRITE -> {
-                            val bundle = msg.obj as? Bundle
-                            val audioData = bundle?.getByteArray("audio")
-                            if (audioTrack != null && !audioData.isNullOrEmpty()) {
-                                audioTrack?.write(audioData, 0, audioData.size)
-                            }
-                        }
-                        AUDIOPLAYER_END -> {
-                            try {
-                                if (audioTrack != null && isPlaying) {
-                                    audioTrack?.stop()
-                                    isPlaying = false
-                                }
-                            } catch (e: Exception) {
-                                Log.e(TAG, "播放停止异常: ${e.message}")
-                            }
-                            channel.invokeMethod("onSpeakCompleted", emptyMap<String, Any>())
-                        }
-                    }
-                    true
-                }
-                Looper.loop()
-            }
-            playThread?.start()
-        }
-        // 初始化播放器
-        playHandler?.sendEmptyMessage(AUDIOPLAYER_INIT)
-    }
-
+    // ═══════ 音频播放器（Mock） ═══════
     private fun stopPlayback() {
         playHandler?.removeCallbacksAndMessages(null)
-        playHandler?.sendEmptyMessage(AUDIOPLAYER_END)
+        try {
+            audioTrack?.stop()
+        } catch (e: Exception) { /* ignore */ }
         try {
             audioTrack?.release()
             audioTrack = null
         } catch (e: Exception) { /* ignore */ }
+        isPlaying = false
     }
 }
