@@ -377,8 +377,23 @@ def confirm_medication(
     )
     db.add(log)
 
-    # 更新连续打卡
+    # 更新积分 + 连续打卡
     user = db.query(User).filter(User.id == elder_id).first()
+    points_to_add = 10
+    if user.total_points is None:
+        user.total_points = 0
+    user.total_points += points_to_add
+
+    # 创建积分流水
+    from app.models.point import PointTransaction, TransactionType
+    tx = PointTransaction(
+        elder_id=elder_id,
+        type=TransactionType.REWARD_DOSE,
+        amount=points_to_add,
+        balance_after=user.total_points,
+        description=f"按时用药奖励：{med.name}",
+    )
+    db.add(tx)
     yesterday = datetime(now.year, now.month, now.day)
     if user.last_medication_date:
         last = user.last_medication_date

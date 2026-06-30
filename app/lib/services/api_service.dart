@@ -73,19 +73,13 @@ class ApiService {
   // ─── 认证 ───
 
   /// 手机号登录（一期固定验证码 123456）
-  /// 后端返回: { access_token, token_type, user_id, role, nickname }
   Future<UserProfile> login(String phone, String code) async {
     final result = await post(ApiConfig.authLogin, body: {
       'phone': phone,
       'code': code,
     });
     _token = result['access_token'] as String?;
-    return UserProfile(
-      id: result['user_id'] as int? ?? 0,
-      phone: phone,
-      role: result['role'] as String? ?? 'elder',
-      name: result['nickname'] as String?,
-    );
+    return UserProfile.fromJson({...result, 'phone': phone});
   }
 
   /// 发送验证码（后端POST，phone在query）
@@ -103,19 +97,12 @@ class ApiService {
   /// 获取当前用户信息
   Future<UserProfile> getMe() async {
     final result = await get('${ApiConfig.authMe}?token=$_token');
-    return UserProfile(
-      id: result['id'] as int? ?? 0,
-      phone: result['phone'] as String? ?? '',
-      role: result['role'] as String? ?? 'elder',
-      name: result['nickname'] as String?,
-      avatarUrl: result['avatar_url'] as String?,
-    );
+    return UserProfile.fromJson(result);
   }
 
   // ─── 药品 ───
 
   /// 获取药品列表
-  /// 后端返回: { items: [...] }
   Future<List<Medication>> getMedications({int? elderId}) async {
     final params = <String, String>{};
     if (elderId != null) params['elder_id'] = elderId.toString();
@@ -132,7 +119,7 @@ class ApiService {
     return result;
   }
 
-  /// 添加药品 — 后端返回完整药品对象
+  /// 添加药品
   Future<Map<String, dynamic>> addMedication(Map<String, dynamic> body, {required int elderId}) async {
     final result = await post('${ApiConfig.medications}?elder_id=$elderId', body: body);
     return result;

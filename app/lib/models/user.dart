@@ -4,6 +4,10 @@ class UserProfile {
   final String role;  // elder | child
   final String? name;
   final String? avatarUrl;
+  final int totalPoints;
+  final int currentStreak;
+  final int longestStreak;
+  final List<Map<String, dynamic>> familyMembers;
 
   UserProfile({
     required this.id,
@@ -11,15 +15,29 @@ class UserProfile {
     required this.role,
     this.name,
     this.avatarUrl,
+    this.totalPoints = 0,
+    this.currentStreak = 0,
+    this.longestStreak = 0,
+    this.familyMembers = const [],
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
+    final members = (json['family_members'] as List<dynamic>? ?? [])
+        .map((m) => {
+              'name': (m as Map)['nickname'] ?? '',
+              'role': m['role'] ?? '',
+            })
+        .toList();
     return UserProfile(
       id: json['id'] as int? ?? 0,
       phone: json['phone'] as String? ?? '',
       role: json['role'] as String? ?? 'elder',
-      name: json['name'] as String?,
+      name: json['nickname'] as String? ?? (json['name'] as String?),  // nickname from auth/me
       avatarUrl: json['avatar_url'] as String?,
+      totalPoints: json['total_points'] as int? ?? 0,
+      currentStreak: json['current_streak'] as int? ?? 0,
+      longestStreak: json['longest_streak'] as int? ?? 0,
+      familyMembers: members,
     );
   }
 }

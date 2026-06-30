@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
-import '../../config/api_config.dart';
 import '../../services/api_service.dart';
 import '../../models/user.dart';
 import '../auth/kid_binding_screen.dart';
@@ -30,29 +29,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadData() async {
     try {
-      // 获取用户信息
-      final me = await _api.get('${ApiConfig.authMe}?token=${_api.token ?? ""}');
-      // 也会返回积分和家庭信息
-      // 但还需要老年人ID才能查积分
+      final user = await _api.getMe();
+      if (!mounted) return;
       setState(() {
-        _user = UserProfile(
-          id: me['id'] as int? ?? 0,
-          phone: me['phone'] as String? ?? '',
-          role: me['role'] as String? ?? 'elder',
-          name: me['nickname'] as String? ?? '用户',
-          avatarUrl: me['avatar_url'] as String?,
-        );
-        _totalPoints = me['total_points'] as int? ?? 0;
-        _streak = me['current_streak'] as int? ?? 0;
-        final members = me['family_members'] as List<dynamic>? ?? [];
-        _family = members.map((m) => {
-          'name': (m as Map)['nickname'] ?? '',
-          'role': m['role'] ?? '',
-        }).toList();
+        _user = user;
+        _totalPoints = user.totalPoints;
+        // family_members 在 UserProfile 模型里不包含，下次扩展
         _loading = false;
       });
     } catch (e) {
-      // 降级：登录信息尚未设置
+      if (!mounted) return;
       setState(() => _loading = false);
     }
   }
