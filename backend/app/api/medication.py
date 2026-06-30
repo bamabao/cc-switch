@@ -314,6 +314,28 @@ def submit_medication(
     return {"message": "已提交审核", "status": "pending"}
 
 
+@router.delete("/{medication_id}")
+def delete_medication(
+    medication_id: int,
+    db: Session = Depends(get_db),
+):
+    """删除药品（仅DRAFT/PENDING状态可删）"""
+    med = db.query(Medication).filter(Medication.id == medication_id).first()
+    if not med:
+        raise HTTPException(404, "药品不存在")
+    if med.status == MedicationStatus.APPROVED or med.status == MedicationStatus.DISABLED:
+        raise HTTPException(400, "已通过的药品不可删除，请先联系子女")
+    # 删除关联记录（含审计、订单、日志）
+    from app.models.audit import AuditRecord
+    from app.models.point import PointTransaction, PointOrder
+    db.query(AuditRecord).filter(AuditRecord.medication_id == medication_id).delete()
+    db.query(MedicationLog).filter(MedicationLog.medication_id == medication_id).delete()
+    db.query(MedicationSchedule).filter(MedicationSchedule.medication_id == medication_id).delete()
+    db.delete(med)
+    db.commit()
+    return {"message": "已删除", "id": medication_id}
+
+
 @router.post("/{medication_id}/audit")
 def audit_medication(
     medication_id: int,

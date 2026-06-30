@@ -34,6 +34,16 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  /// 通用 DELETE 请求
+  Future<Map<String, dynamic>> delete(String endpoint) async {
+    final uri = Uri.parse('$baseUrl$endpoint');
+    final response = await _client.delete(
+      uri,
+      headers: await _headers(),
+    );
+    return _handleResponse(response);
+  }
+
   /// 通用 POST 请求
   Future<Map<String, dynamic>> post(String endpoint,
       {Map<String, dynamic>? body}) async {
@@ -145,6 +155,11 @@ class ApiService {
   /// 提交审核
   Future<Map<String, dynamic>> submitMedication(int medicationId) async {
     return await post(ApiConfig.medicationSubmit(medicationId));
+  }
+
+  /// 删除药品
+  Future<Map<String, dynamic>> deleteMedication(int medicationId) async {
+    return await delete('${ApiConfig.medications}/$medicationId');
   }
 
   /// 获取用药历史

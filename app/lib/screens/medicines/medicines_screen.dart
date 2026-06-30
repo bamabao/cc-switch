@@ -281,11 +281,53 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                   await _submitForAudit(ctx, med['id'] as int, med['name'] as String? ?? '');
                 },
               ),
+            if (med['status'] != 'APPROVED')
+              TextButton.icon(
+                icon: const Icon(Icons.delete_outline, color: AppTheme.dangerColor),
+                label: const Text('删除', style: TextStyle(color: AppTheme.dangerColor)),
+                onPressed: () async {
+                  Navigator.pop(dialogCtx);
+                  await _deleteMedication(ctx, med['id'] as int, med['name'] as String? ?? '');
+                },
+              ),
             TextButton(onPressed: () => Navigator.pop(dialogCtx), child: const Text('关闭')),
           ],
         );
       },
     );
+  }
+
+  Future<void> _deleteMedication(BuildContext ctx, int medicationId, String name) async {
+    final confirmed = await showDialog<bool>(
+      context: ctx,
+      builder: (c) => AlertDialog(
+        title: const Text('确认删除'),
+        content: Text('确定删除「$name」吗？\n（仅未批准的药品可删）'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('取消')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.dangerColor),
+            onPressed: () => Navigator.pop(c, true),
+            child: const Text('删除', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await _api.deleteMedication(medicationId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('🗑️ 已删除「$name」')),
+      );
+      _loadMedications();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('删除失败: $e')),
+      );
+    }
   }
 
   Future<void> _submitForAudit(BuildContext ctx, int medicationId, String name) async {
