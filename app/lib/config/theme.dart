@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 
-/// 爸妈宝 — 适老化主题配置
-/// 原则：超大字体、高对比配色、按钮≥80px、圆角友好
+/// 爸妈宝 — 黏土软萌主题配置 (v2)
+/// 对标 3D 黏土 Logo：暖橙 #FF9F40 / 嫩绿 #76D160 / 浅薄荷底 #E6F7DD
+/// 原则：适老尺寸不动（字号≥32px、按钮≥80px）
 class AppTheme {
-  // ─── 颜色 — 高对比 ───
-  static const Color primaryColor = Color(0xFF1565C0); // 深蓝 — 主色调
-  static const Color primaryLight = Color(0xFF5E92F3);
-  static const Color primaryDark = Color(0xFF003C8F);
-  static const Color secondaryColor = Color(0xFF43A047); // 绿色 — 确认/完成
-  static const Color warningColor = Color(0xFFEF6C00); // 橙色 — 提醒
-  static const Color dangerColor = Color(0xFFE53935); // 红色 — 紧急/SOS
-  static const Color bgColor = Color(0xFFFAFAFA);
-  static const Color cardColor = Colors.white;
-  static const Color textPrimary = Color(0xFF212121);
+  // ─── 颜色 — 对标 Logo 色值 ───
+  static const Color primaryColor = Color(0xFFFF9F40); // 暖橙 — 主品牌色（新增/提醒/重点按钮）
+  static const Color primaryLight = Color(0xFFFFB866);
+  static const Color primaryDark = Color(0xFFE07A1A);
+  static const Color secondaryColor = Color(0xFF76D160); // 嫩绿 — 确认/完成/勾选
+  static const Color warningColor = Color(0xFFE53935); // 红色 — 紧急/SOS
+  static const Color dangerColor = warningColor; // 别名
+  static const Color bgColor = Color(0xFFE6F7DD); // 浅薄荷 — 全局页面底色
+  static const Color cardColor = Color(0xFFF2F7F0); // 浅灰白 — 卡片/弹窗底色
+  static const Color textPrimary = Color(0xFF3A4437); // 柔和深灰 — 正文
   static const Color textSecondary = Color(0xFF616161);
-  static const Color textOnDark = Colors.white;
+  static const Color textOnDark = Color(0xFFFFFBF5); // 柔和米白 — 按钮文字
 
   // ─── 字号 — 正常2倍 ───
   static const double displayLarge = 48;
@@ -35,14 +36,40 @@ class AppTheme {
   static const double spacingXl = 32;
 
   // ─── 按钮尺寸 ───
-  static const double buttonHeight = 56; // 不小于80px建议，56为Material默认大按钮
+  static const double buttonHeight = 80; // 适老规范 ≥80px
   static const double buttonMinWidth = 200;
   static const double iconSize = 32;
 
-  // ─── 圆角 ───
+  // ─── 圆角 — 黏土椭圆大圆角 ───
   static const double radiusSm = 8;
-  static const double radiusMd = 12;
+  static const double radiusMd = 16;
   static const double radiusLg = 20;
+  static const double radiusButton = 24;
+  static const double radiusCard = 20;
+
+  // ─── 阴影 — 柔和黏土悬浮阴影 ───
+  static const Color shadowColor = Color(0xFF3A4437);
+  static List<BoxShadow> shadowCard = [
+    BoxShadow(
+      color: Color(0xFF3A4437).withValues(alpha: 0.08),
+      blurRadius: 20,
+      offset: Offset(0, 8),
+    ),
+  ];
+  static List<BoxShadow> shadowButton = [
+    BoxShadow(
+      color: Color(0xFF3A4437).withValues(alpha: 0.10),
+      blurRadius: 16,
+      offset: Offset(0, 6),
+    ),
+  ];
+  static List<BoxShadow> shadowElevated = [
+    BoxShadow(
+      color: Color(0xFF3A4437).withValues(alpha: 0.12),
+      blurRadius: 28,
+      offset: Offset(0, 12),
+    ),
+  ];
 
   static ThemeData get theme {
     return ThemeData(
@@ -56,8 +83,6 @@ class AppTheme {
       ),
       scaffoldBackgroundColor: bgColor,
       fontFamily: 'Roboto',
-
-      // ─── 文字样式 ───
       textTheme: const TextTheme(
         displayLarge: TextStyle(fontSize: displayLarge, fontWeight: FontWeight.bold, color: textPrimary),
         displayMedium: TextStyle(fontSize: displayMedium, fontWeight: FontWeight.bold, color: textPrimary),
@@ -69,32 +94,42 @@ class AppTheme {
         bodyMedium: TextStyle(fontSize: bodyMedium, color: textSecondary),
         labelLarge: TextStyle(fontSize: labelLarge, fontWeight: FontWeight.w500, color: textPrimary),
       ),
-
-      // ─── 按钮 ───
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(buttonMinWidth, buttonHeight),
           backgroundColor: primaryColor,
           foregroundColor: textOnDark,
-          textStyle: const TextStyle(fontSize: titleMedium, fontWeight: FontWeight.w600),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusMd)),
+          elevation: 4,
+          shadowColor: const Color(0xFF3A4437).withValues(alpha: 0.15),
+          textStyle: const TextStyle(
+            fontSize: titleMedium,
+            fontWeight: FontWeight.w600,
+            shadows: [
+              Shadow(
+                color: Color(0xFF3A4437),
+                offset: Offset(0, 2),
+                blurRadius: 4,
+              ),
+            ],
+          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusButton)),
           padding: const EdgeInsets.symmetric(horizontal: spacingLg, vertical: spacingMd),
         ),
       ),
-
-      // ─── 卡片 ───
       cardTheme: CardTheme(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusMd)),
+        elevation: 4,
+        shadowColor: const Color(0xFF3A4437).withValues(alpha: 0.10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusCard)),
         margin: const EdgeInsets.symmetric(horizontal: spacingMd, vertical: spacingSm),
         color: cardColor,
+        surfaceTintColor: Colors.transparent,
       ),
-
-      // ─── AppBar ───
       appBarTheme: const AppBarTheme(
         backgroundColor: primaryColor,
         foregroundColor: textOnDark,
         centerTitle: true,
+        elevation: 0,
+        scrolledUnderElevation: 3,
         titleTextStyle: TextStyle(
           fontSize: titleLarge,
           fontWeight: FontWeight.w600,
@@ -102,16 +137,13 @@ class AppTheme {
         ),
         toolbarHeight: 72,
       ),
-
-      // ─── 底部导航 ───
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         selectedItemColor: primaryColor,
         unselectedItemColor: textSecondary,
         selectedLabelStyle: TextStyle(fontSize: bodyMedium, fontWeight: FontWeight.w600),
         unselectedLabelStyle: TextStyle(fontSize: bodyMedium, fontWeight: FontWeight.w400),
+        elevation: 8,
       ),
-
-      // ─── ICON ───
       iconTheme: const IconThemeData(size: iconSize, color: primaryColor),
     );
   }
