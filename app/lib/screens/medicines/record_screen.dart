@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
+import '../../config/api_config.dart';
+import '../../services/api_service.dart';
 
 /// 用药记录页 — 日历视图 + 明细列表
-/// P0-4：超大日历格子 ≥80×80px，直观区分服药/漏服
+/// 对接后端真实用药日志API
 class RecordScreen extends StatefulWidget {
   const RecordScreen({super.key});
 
@@ -11,20 +13,67 @@ class RecordScreen extends StatefulWidget {
 }
 
 class _RecordScreenState extends State<RecordScreen> {
+  final ApiService _api = ApiService();
   DateTime _selectedDate = DateTime.now();
   int _currentMonth = DateTime.now().month;
   int _currentYear = DateTime.now().year;
 
-  // 模拟数据
-  final Map<String, bool> _medicationStatus = {
-    '2026-06-30': true,
-    '2026-06-29': true,
-    '2026-06-28': false,
-    '2026-06-27': true,
-    '2026-06-26': false,
-  };
+  // 从后端拉的实际数据
+  List<dynamic> _allLogs = [];
+  bool _loading = true;
 
-  bool _hasTaken(String dateStr) => _medicationStatus[dateStr] ?? false;
+  // 用药统计
+  int _total = 0;
+  int _confirmed = 0;
+  int _missed = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLogs();
+  }
+
+  Future<void> _loadLogs() async {
+    setState(() => _loading = true);
+    try {
+      final result = await _api.get('${ApiConfig.medications}/logs/history',
+          queryParams: {'elder_id': '1', 'days': '30'});
+      if (!mounted) return;
+      setState(() {
+        _allLogs = result['items'] as List<dynamic>? ?? [];
+        _total = result['total'] as int? ?? 0;
+        _confirmed = result['confirmed'] as int? ?? 0;
+        _missed = result['missed'] as int? ?? 0;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+    }
+  }
+
+  /// 某一天的状态：true=全部已服 false=有漏服 null=无数据
+  bool? _dayStatus(int year, int month, int day) {
+    final dateStr =
+        '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+    final dayLogs = _allLogs.where((log) {
+      final scheduled = log['scheduled_time'] as String? ?? '';
+      return scheduled.startsWith(dateStr);
+    }).toList();
+    if (dayLogs.isEmpty) return null;
+    // 只要有一条 confirmed 就算至少有服药记录
+    return dayLogs.any((log) => log['status'] == 'confirmed');
+  }
+
+  /// 选中日期对应的明细
+  List<dynamic> get _selectedDayLogs {
+    final dateStr =
+        '${_selectedDate.year.toString().padLeft(4, '0')}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}';
+    return _allLogs.where((log) {
+      final scheduled = log['scheduled_time'] as String? ?? '';
+      return scheduled.startsWith(dateStr);
+    }).toList();
+  }
 
   void _prevMonth() {
     setState(() {
@@ -52,15 +101,27 @@ class _RecordScreenState extends State<RecordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.bgColor,
-      appBar: AppBar(title: const Text('用药记录')),
-      body: Column(
-        children: [
-          _buildCalendar(),
-          const SizedBox(height: 8),
-          _buildLegend(),
-          const SizedBox(height: 8),
-          Expanded(child: _buildDetailList()),
+      appBar: AppBar(
+        title: const Text('用药记录'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, size: 28),
+            onPressed: _loadLogs,
+            tooltip: '刷新',
+          ),
         ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: _loadLogs,
+        child: Column(
+          children: [
+            _buildCalendar(),
+            const SizedBox(height: 8),
+            _buildLegend(),
+            const SizedBox(height: 8),
+            Expanded(child: _buildDetailList()),
+          ],
+        ),
       ),
     );
   }
@@ -126,74 +187,78 @@ class _RecordScreenState extends State<RecordScreen> {
             ),
             const SizedBox(height: 8),
             // 日期格子
-            ...List.generate(
-              (startWeekday + daysInMonth + 6) ~/ 7,
-              (weekIndex) => Row(
-                children: List.generate(7, (dayIndex) {
-                  final dayNum = weekIndex * 7 + dayIndex - startWeekday + 1;
-                  if (dayNum < 1 || dayNum > daysInMonth) {
-                    return const Expanded(child: SizedBox(height: 56));
-                  }
-                  final dateStr =
-                      '$_currentYear-${_currentMonth.toString().padLeft(2, '0')}-${dayNum.toString().padLeft(2, '0')}';
-                  final isToday = dateStr ==
-                      '${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}';
-                  final isSelected = dayNum == _selectedDate.day &&
-                      _currentMonth == _selectedDate.month;
-                  final hasStatus =
-                      _medicationStatus.containsKey(dateStr);
-                  final taken = hasStatus && _medicationStatus[dateStr]!;
+            if (_loading)
+              const Padding(
+                padding: EdgeInsets.all(24),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else
+              ...List.generate(
+                (startWeekday + daysInMonth + 6) ~/ 7,
+                (weekIndex) => Row(
+                  children: List.generate(7, (dayIndex) {
+                    final dayNum =
+                        weekIndex * 7 + dayIndex - startWeekday + 1;
+                    if (dayNum < 1 || dayNum > daysInMonth) {
+                      return const Expanded(child: SizedBox(height: 56));
+                    }
+                    final isToday = dayNum == DateTime.now().day &&
+                        _currentMonth == DateTime.now().month &&
+                        _currentYear == DateTime.now().year;
+                    final isSelected = dayNum == _selectedDate.day &&
+                        _currentMonth == _selectedDate.month &&
+                        _currentYear == _selectedDate.year;
+                    final status = _dayStatus(_currentYear, _currentMonth, dayNum);
 
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedDate = DateTime(
-                              _currentYear, _currentMonth, dayNum);
-                        });
-                      },
-                      child: Container(
-                        height: 56,
-                        margin: const EdgeInsets.all(1),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppTheme.primaryColor
-                                  .withValues(alpha: 0.15)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '$dayNum',
-                              style: TextStyle(
-                                fontSize: AppTheme.bodyLarge,
-                                color: AppTheme.textPrimary,
-                                fontWeight:
-                                    isToday ? FontWeight.bold : FontWeight.normal,
-                              ),
-                            ),
-                            if (hasStatus)
-                              Container(
-                                width: 8,
-                                height: 8,
-                                margin: const EdgeInsets.only(top: 2),
-                                decoration: BoxDecoration(
-                                  color: taken
-                                      ? AppTheme.secondaryColor
-                                      : AppTheme.warningColor,
-                                  shape: BoxShape.circle,
+                    return Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedDate = DateTime(
+                                _currentYear, _currentMonth, dayNum);
+                          });
+                        },
+                        child: Container(
+                          height: 56,
+                          margin: const EdgeInsets.all(1),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppTheme.primaryColor.withValues(alpha: 0.15)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '$dayNum',
+                                style: TextStyle(
+                                  fontSize: AppTheme.bodyLarge,
+                                  color: AppTheme.textPrimary,
+                                  fontWeight:
+                                      isToday ? FontWeight.bold : FontWeight.normal,
                                 ),
                               ),
-                          ],
+                              if (status != null)
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  margin: const EdgeInsets.only(top: 2),
+                                  decoration: BoxDecoration(
+                                    color: status
+                                        ? AppTheme.secondaryColor
+                                        : AppTheme.warningColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -235,9 +300,7 @@ class _RecordScreenState extends State<RecordScreen> {
   }
 
   Widget _buildDetailList() {
-    final dateStr =
-        '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}';
-    final taken = _hasTaken(dateStr);
+    final logs = _selectedDayLogs;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppTheme.spacingMd),
@@ -251,65 +314,104 @@ class _RecordScreenState extends State<RecordScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(AppTheme.spacingMd),
-            child: Text(
-              '${_selectedDate.month}月${_selectedDate.day}日 用药记录',
-              style: const TextStyle(
-                fontSize: AppTheme.titleMedium,
-                color: AppTheme.textPrimary,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${_selectedDate.month}月${_selectedDate.day}日 用药记录',
+                  style: const TextStyle(
+                    fontSize: AppTheme.titleMedium,
+                    color: AppTheme.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '总$_total · 已服$_confirmed · 漏服$_missed',
+                  style: const TextStyle(
+                    fontSize: AppTheme.bodyMedium,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
           const Divider(height: 1),
-          if (taken)
-            _buildRecordItem('阿莫西林胶囊', '2粒', '早餐后', true)
+          if (logs.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(AppTheme.spacingLg),
+              child: Center(
+                child: Text(
+                  '今日暂无用药记录',
+                  style: TextStyle(
+                    fontSize: AppTheme.bodyLarge,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ),
+            )
           else
-            _buildRecordItem('阿莫西林胶囊', '2粒', '早餐后', false),
-          _buildRecordItem('维生素D片', '1粒', '早餐后', taken),
-          Padding(
-            padding: const EdgeInsets.all(AppTheme.spacingMd),
-            child: Center(
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: taken ? AppTheme.secondaryColor : AppTheme.warningColor,
-                  shape: BoxShape.circle,
+            ...logs.map((log) => _buildLogItem(log)),
+          if (logs.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.all(AppTheme.spacingMd),
+              child: Center(
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: logs.every((l) => l['status'] == 'confirmed')
+                        ? AppTheme.secondaryColor
+                        : AppTheme.warningColor,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-                left: AppTheme.spacingMd,
-                right: AppTheme.spacingMd,
-                bottom: AppTheme.spacingMd),
-            child: Text(
-              taken ? '✅ 今日已按量服药' : '⚠️ 今日可能有药品漏服',
-              style: TextStyle(
-                fontSize: AppTheme.bodyLarge,
-                color: taken ? AppTheme.secondaryColor : AppTheme.warningColor,
-                fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: AppTheme.spacingMd,
+                  right: AppTheme.spacingMd,
+                  bottom: AppTheme.spacingMd),
+              child: Text(
+                logs.every((l) => l['status'] == 'confirmed')
+                    ? '✅ 今日已按量服药'
+                    : '⚠️ 有药品漏服',
+                style: TextStyle(
+                  fontSize: AppTheme.bodyLarge,
+                  color: logs.every((l) => l['status'] == 'confirmed')
+                      ? AppTheme.secondaryColor
+                      : AppTheme.warningColor,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
-          ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildRecordItem(
-      String name, String dosage, String time, bool taken) {
+  Widget _buildLogItem(dynamic log) {
+    final name = log['medication_name'] as String? ?? '未知药品';
+    final status = log['status'] as String? ?? 'missed';
+    final scheduledTime = log['scheduled_time'] as String? ?? '';
+    final dosage = log['dosage_taken'] as double?;
+    final isConfirmed = status == 'confirmed';
+    final timeOnly = scheduledTime.length >= 16
+        ? scheduledTime.substring(11, 16)
+        : '';
+
     return Padding(
       padding: const EdgeInsets.symmetric(
           horizontal: AppTheme.spacingMd, vertical: AppTheme.spacingSm),
       child: Row(
         children: [
           Icon(
-            taken ? Icons.check_circle : Icons.cancel,
-            color:
-                taken ? AppTheme.secondaryColor : AppTheme.textSecondary.withValues(alpha: 0.5),
+            isConfirmed ? Icons.check_circle : Icons.cancel,
+            color: isConfirmed
+                ? AppTheme.secondaryColor
+                : AppTheme.textSecondary.withValues(alpha: 0.5),
             size: 28,
           ),
           const SizedBox(width: 12),
@@ -322,7 +424,7 @@ class _RecordScreenState extends State<RecordScreen> {
                         fontSize: AppTheme.bodyLarge,
                         color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w500)),
-                Text('$dosage · $time',
+                Text(dosage != null ? '$timeOnly · ${dosage}剂量' : timeOnly,
                     style: const TextStyle(
                         fontSize: AppTheme.bodyMedium,
                         color: AppTheme.textSecondary)),
@@ -330,20 +432,21 @@ class _RecordScreenState extends State<RecordScreen> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 12, vertical: 4),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: taken
+              color: isConfirmed
                   ? AppTheme.secondaryColor.withValues(alpha: 0.15)
                   : AppTheme.warningColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              taken ? '已服' : '漏服',
+              isConfirmed ? '已服' : '漏服',
               style: TextStyle(
                 fontSize: AppTheme.bodyMedium,
-                color:
-                    taken ? AppTheme.secondaryColor : AppTheme.warningColor,
+                color: isConfirmed
+                    ? AppTheme.secondaryColor
+                    : AppTheme.warningColor,
                 fontWeight: FontWeight.bold,
               ),
             ),
