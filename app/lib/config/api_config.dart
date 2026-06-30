@@ -22,4 +22,8 @@ class ApiConfig {
 
   // 积分兑换
   static const String redeem = '$apiPrefix/points/redeem';
+
+  // 审核（静态方法）
+  static String medicationSubmit(int id) => '$apiPrefix/medications/$id/submit';
+  static String medicationAudit(int id) => '$apiPrefix/medications/$id/audit';
 }

@@ -142,6 +142,11 @@ class ApiService {
     return result;
   }
 
+  /// 提交审核
+  Future<Map<String, dynamic>> submitMedication(int medicationId) async {
+    return await post(ApiConfig.medicationSubmit(medicationId));
+  }
+
   /// 获取用药历史
   Future<Map<String, dynamic>> getMedicationLogs({
     required int elderId,

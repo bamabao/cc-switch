@@ -272,11 +272,49 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
             ),
           ),
           actions: [
+            if (med['status'] == 'DRAFT' || med['status'] == 'REJECTED')
+              ElevatedButton.icon(
+                icon: const Icon(Icons.send),
+                label: const Text('提交审核'),
+                onPressed: () async {
+                  Navigator.pop(dialogCtx);
+                  await _submitForAudit(ctx, med['id'] as int, med['name'] as String? ?? '');
+                },
+              ),
             TextButton(onPressed: () => Navigator.pop(dialogCtx), child: const Text('关闭')),
           ],
         );
       },
     );
+  }
+
+  Future<void> _submitForAudit(BuildContext ctx, int medicationId, String name) async {
+    final confirmed = await showDialog<bool>(
+      context: ctx,
+      builder: (c) => AlertDialog(
+        title: const Text('提交审核'),
+        content: Text('将「$name」提交给子女审核？\n提交后子女可以查看并确认药品信息。'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('取消')),
+          ElevatedButton(onPressed: () => Navigator.pop(c, true), child: const Text('提交')),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await _api.submitMedication(medicationId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('✅ 「$name」已提交审核')),
+      );
+      _loadMedications();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('提交失败: $e')),
+      );
+    }
   }
 
   Widget _detailRow(String label, String value, {Color? color}) {
