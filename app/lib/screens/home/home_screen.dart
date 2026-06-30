@@ -19,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final ApiService _api = ApiService();
   String _greeting = '早上好！';
   int _medicationCount = 0;
+  int _pendingCount = 0;
   int _alertCount = 0;
   List<dynamic> _alerts = [];
   bool _loading = true;
@@ -56,9 +57,16 @@ class _HomeScreenState extends State<HomeScreen> {
       });
       final alerts = alertsResult['items'] as List<dynamic>? ?? [];
 
+      // 待审核药品
+      final pendingResult = await _api.get('${ApiConfig.medications}/pending', queryParams: {
+        'elder_id': '1',
+      });
+      final pendingList = pendingResult['items'] as List<dynamic>? ?? [];
+
       if (!mounted) return;
       setState(() {
         _medicationCount = approved.length;
+        _pendingCount = pendingList.length;
         _alertCount = alerts.length;
         _alerts = alerts;
         _loading = false;
@@ -120,6 +128,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
+
+              const SizedBox(height: AppTheme.spacingMd),
+
+              // ── 待审核提醒 ──
+              if (!_loading && _pendingCount > 0)
+                Card(
+                  color: AppTheme.warningColor.withValues(alpha: 0.1),
+                  child: ListTile(
+                    leading: const Icon(Icons.checklist, color: AppTheme.warningColor, size: 32),
+                    title: Text('$_pendingCount 种药品待子女审核',
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: const Text('子女审核通过后才能开始服药提醒哦',
+                        style: TextStyle(fontSize: AppTheme.bodyMedium)),
+                    trailing: const Icon(Icons.chevron_right, size: 28),
+                    onTap: () => Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const MedicinesScreen())),
+                  ),
+                ),
 
               const SizedBox(height: AppTheme.spacingMd),
 
