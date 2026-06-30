@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
+import 'add_medicine_screen.dart';
 
 /// 药品列表页 — P04
 class MedicinesScreen extends StatelessWidget {
@@ -9,6 +10,16 @@ class MedicinesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('我的药品')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AddMedicineScreen()),
+        ),
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: AppTheme.textOnDark,
+        icon: const Icon(Icons.add, size: 28),
+        label: const Text('添加药品'),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(AppTheme.spacingMd),
         children: [
@@ -40,13 +51,6 @@ class MedicinesScreen extends StatelessWidget {
             status: '正常',
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
-        backgroundColor: AppTheme.primaryColor,
-        foregroundColor: AppTheme.textOnDark,
-        icon: const Icon(Icons.add, size: 32),
-        label: const Text('添加药品', style: TextStyle(fontSize: AppTheme.titleMedium)),
       ),
     );
   }
