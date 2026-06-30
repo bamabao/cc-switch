@@ -92,7 +92,7 @@ class MallScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
-            Text('$points 积分', style: TextStyle(
+            Text('$points 积分', style: const TextStyle(
               fontSize: AppTheme.titleMedium,
               color: AppTheme.warningColor,
               fontWeight: FontWeight.w600,

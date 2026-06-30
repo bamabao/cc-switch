@@ -62,7 +62,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(
+            child: const Text(
               '子女帮我录入',
               style: TextStyle(
                 fontSize: AppTheme.bodyMedium,
@@ -173,7 +173,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
             const SizedBox(height: 8),
             Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: AppTheme.bodyLarge,
                 color: AppTheme.textPrimary,
                 fontWeight: FontWeight.bold,
@@ -182,7 +182,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: AppTheme.bodyMedium,
                 color: AppTheme.textSecondary,
               ),
@@ -206,7 +206,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               '药品分类',
               style: TextStyle(
                 fontSize: AppTheme.bodyLarge,
@@ -333,7 +333,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: AppTheme.bodyLarge,
             color: AppTheme.textPrimary,
             fontWeight: FontWeight.w500,
@@ -348,7 +348,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
           child: TextField(
             controller: controller,
             focusNode: focusNode,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: AppTheme.titleMedium,
               color: AppTheme.textPrimary,
             ),
@@ -381,7 +381,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusButton),
           ),
-          textStyle: TextStyle(
+          textStyle: const TextStyle(
             fontSize: AppTheme.titleMedium,
             fontWeight: FontWeight.w600,
           ),

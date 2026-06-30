@@ -122,7 +122,7 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
             color: AppTheme.primaryColor.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
-          child: Center(
+          child: const Center(
             child: Text(
               '⏰',
               style: TextStyle(
@@ -133,7 +133,7 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
         const SizedBox(height: 16),
         Text(
           widget.isReminder ? '您可能忘记吃药了' : '吃药时间到啦',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: AppTheme.headlineLarge,
             fontWeight: FontWeight.bold,
             color: AppTheme.textPrimary,
@@ -153,7 +153,7 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
             children: [
               Text(
                 widget.medicationName,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: AppTheme.headlineMedium,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
@@ -162,7 +162,7 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
               const SizedBox(height: 8),
               Text(
                 '用量：${widget.dosage}',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: AppTheme.titleMedium,
                   color: AppTheme.textPrimary,
                 ),
@@ -170,7 +170,7 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
               const SizedBox(height: 4),
               Text(
                 '注意：${widget.note}',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: AppTheme.bodyLarge,
                   color: AppTheme.textSecondary,
                 ),
@@ -191,8 +191,8 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
               ),
             );
           },
-          icon: Icon(Icons.volume_up, color: AppTheme.primaryColor, size: 28),
-          label: Text(
+          icon: const Icon(Icons.volume_up, color: AppTheme.primaryColor, size: 28),
+          label: const Text(
             '大声重读',
             style: TextStyle(
               fontSize: AppTheme.bodyLarge,
@@ -216,7 +216,7 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.radiusButton),
               ),
-              textStyle: TextStyle(
+              textStyle: const TextStyle(
                 fontSize: AppTheme.titleMedium,
                 fontWeight: FontWeight.bold,
               ),
@@ -242,7 +242,7 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppTheme.radiusButton),
                     ),
-                    textStyle: TextStyle(
+                    textStyle: const TextStyle(
                       fontSize: AppTheme.bodyLarge,
                       color: AppTheme.primaryColor,
                     ),
@@ -266,7 +266,7 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppTheme.radiusButton),
                     ),
-                    textStyle: TextStyle(
+                    textStyle: const TextStyle(
                       fontSize: AppTheme.bodyLarge,
                       color: AppTheme.warningColor,
                     ),
@@ -278,7 +278,7 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
         ),
         SizedBox(height: widget.isReminder ? 12 : 24),
         if (widget.isReminder)
-          Text(
+          const Text(
             '现在补上还来得及哦',
             style: TextStyle(
               fontSize: AppTheme.bodyMedium,
@@ -296,7 +296,7 @@ class _MedicationReminderPopupState extends State<MedicationReminderPopup>
         children: [
           Text(
             _feedbackMessage!,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: AppTheme.headlineLarge,
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimary,

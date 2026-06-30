@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../config/theme.dart';
+import '../../services/api_service.dart';
 import 'kid_binding_screen.dart';
+import '../../main.dart';
 
 /// 登录注册页 — 仅手机号验证码登录
 /// P0-3：老年友好 + 家属协助
@@ -18,10 +20,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _codeController = TextEditingController();
   final FocusNode _phoneFocus = FocusNode();
   final FocusNode _codeFocus = FocusNode();
+  final ApiService _api = ApiService();
 
   int _countdown = 0;
   bool _sendingCode = false;
+  bool _loggingIn = false;
   bool _agreePolicy = false;
+  String? _errorMsg;
 
   @override
   void dispose() {
@@ -54,13 +59,19 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  void _sendCode() {
+  void _sendCode() async {
     if (!_canGetCode) return;
-    setState(() => _sendingCode = true);
-    // TODO: 调用后端验证码接口
-    Future.delayed(const Duration(milliseconds: 500), () {
+    setState(() {
+      _sendingCode = true;
+      _errorMsg = null;
+    });
+    try {
+      await _api.sendSmsCode(_phoneController.text);
       if (!mounted) return;
-      setState(() => _sendingCode = false);
+      setState(() {
+        _sendingCode = false;
+        _errorMsg = null;
+      });
       _startCountdown();
       _codeFocus.requestFocus();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -70,17 +81,35 @@ class _LoginScreenState extends State<LoginScreen> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-    });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _sendingCode = false;
+        _errorMsg = '发送失败，请检查网络后重试';
+      });
+    }
   }
 
-  void _login() {
-    if (!_canLogin) return;
-    // TODO: 调用后端登录接口
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => const _MainPlaceholder(),
-      ),
-    );
+  void _login() async {
+    if (!_canLogin || _loggingIn) return;
+    setState(() {
+      _loggingIn = true;
+      _errorMsg = null;
+    });
+    try {
+      await _api.login(_phoneController.text, _codeController.text);
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const MainScreen()),
+        (_) => false,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loggingIn = false;
+        _errorMsg = '登录失败，请检查手机号和验证码';
+      });
+    }
   }
 
   void _goKidBinding() {
@@ -293,11 +322,25 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 32),
 
+              // 错误提示
+              if (_errorMsg != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Text(
+                    _errorMsg!,
+                    style: TextStyle(
+                      fontSize: AppTheme.bodyMedium,
+                      color: AppTheme.dangerColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
               // 登录按钮
               SizedBox(
                 height: AppTheme.buttonHeight,
                 child: ElevatedButton(
-                  onPressed: _canLogin ? _login : null,
+                  onPressed: (_canLogin && !_loggingIn) ? _login : null,
                   style: ElevatedButton.styleFrom(
                     disabledBackgroundColor:
                         AppTheme.cardColor.withValues(alpha: 0.6),
@@ -319,7 +362,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                   ),
-                  child: const Text('开始使用'),
+                  child: _loggingIn
+                      ? const SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('开始使用'),
                 ),
               ),
               const SizedBox(height: 24),
@@ -343,44 +395,6 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 40),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 临时主页占位（登录成功后跳转）
-class _MainPlaceholder extends StatelessWidget {
-  const _MainPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.bgColor,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.check_circle,
-                size: 80, color: AppTheme.secondaryColor),
-            const SizedBox(height: 24),
-            Text(
-              '登录成功！',
-              style: TextStyle(
-                fontSize: AppTheme.headlineMedium,
-                color: AppTheme.textPrimary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              '欢迎使用爸妈宝',
-              style: TextStyle(
-                fontSize: AppTheme.bodyLarge,
-                color: AppTheme.textSecondary,
-              ),
-            ),
-          ],
         ),
       ),
     );

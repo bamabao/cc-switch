@@ -94,7 +94,7 @@ class _RecordScreenState extends State<RecordScreen> {
                 ),
                 Text(
                   '$_currentYear 年 $_currentMonth 月',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: AppTheme.titleMedium,
                     color: AppTheme.textPrimary,
                     fontWeight: FontWeight.bold,
@@ -115,7 +115,7 @@ class _RecordScreenState extends State<RecordScreen> {
                   .map((d) => Expanded(
                         child: Center(
                           child: Text(d,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: AppTheme.bodyLarge,
                                 color: AppTheme.textSecondary,
                                 fontWeight: FontWeight.w600,
@@ -227,7 +227,7 @@ class _RecordScreenState extends State<RecordScreen> {
         ),
         const SizedBox(width: 6),
         Text(label,
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize: AppTheme.bodyMedium,
                 color: AppTheme.textSecondary)),
       ],
@@ -253,7 +253,7 @@ class _RecordScreenState extends State<RecordScreen> {
             padding: const EdgeInsets.all(AppTheme.spacingMd),
             child: Text(
               '${_selectedDate.month}月${_selectedDate.day}日 用药记录',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: AppTheme.titleMedium,
                 color: AppTheme.textPrimary,
                 fontWeight: FontWeight.bold,
@@ -318,12 +318,12 @@ class _RecordScreenState extends State<RecordScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(name,
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: AppTheme.bodyLarge,
                         color: AppTheme.textPrimary,
                         fontWeight: FontWeight.w500)),
                 Text('$dosage · $time',
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: AppTheme.bodyMedium,
                         color: AppTheme.textSecondary)),
               ],

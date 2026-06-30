@@ -96,21 +96,21 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppTheme.spacingSm),
 
-            _MedicationCard(
+            const _MedicationCard(
               name: '阿莫西林胶囊',
               dosage: '一粒',
               time: '08:00',
               status: '已服',
               statusColor: AppTheme.secondaryColor,
             ),
-            _MedicationCard(
+            const _MedicationCard(
               name: '苯磺酸氨氯地平片',
               dosage: '一片',
               time: '12:00',
               status: '待服',
               statusColor: AppTheme.warningColor,
             ),
-            _MedicationCard(
+            const _MedicationCard(
               name: '阿托伐他汀钙片',
               dosage: '一片',
               time: '20:00',

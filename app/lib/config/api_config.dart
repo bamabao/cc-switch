@@ -6,10 +6,12 @@ class ApiConfig {
   static const String baseUrl = 'http://192.168.10.3:8000';
   static const String apiPrefix = '/api/v1';
 
-  // 端点
+  // 端点 — 与后端 FastAPI 路由完全一致
   static const String health = '$apiPrefix/health';
-  static const String authLogin = '$apiPrefix/auth/login';
+  static const String authLogin = '$apiPrefix/auth/login/phone';
+  static const String authSendSms = '$apiPrefix/auth/send-sms';
   static const String authMe = '$apiPrefix/auth/me';
+  static const String authBindFamily = '$apiPrefix/auth/bind-family';
   static const String medications = '$apiPrefix/medications';
   static const String auditRecords = '$apiPrefix/audit-records';
   static const String points = '$apiPrefix/points';

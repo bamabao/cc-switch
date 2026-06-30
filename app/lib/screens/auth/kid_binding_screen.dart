@@ -152,10 +152,10 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.family_restroom,
+          const Icon(Icons.family_restroom,
               size: 100, color: AppTheme.primaryColor),
           const SizedBox(height: 24),
-          Text(
+          const Text(
             '让子女帮您管理用药，\n更加省心',
             style: TextStyle(
               fontSize: AppTheme.headlineMedium,
@@ -166,7 +166,7 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          Text(
+          const Text(
             '绑定后子女可以查看您的\n用药记录、添加提醒、接收漏服通知',
             style: TextStyle(
               fontSize: AppTheme.bodyLarge,
@@ -194,10 +194,10 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.qr_code_scanner,
+          const Icon(Icons.qr_code_scanner,
               size: 100, color: AppTheme.primaryColor),
           const SizedBox(height: 24),
-          Text(
+          const Text(
             '请子女用微信扫码',
             style: TextStyle(
               fontSize: AppTheme.headlineMedium,
@@ -207,7 +207,7 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
-          Text(
+          const Text(
             '扫码后子女可在手机上\n查看您的用药情况',
             style: TextStyle(
               fontSize: AppTheme.bodyLarge,
@@ -230,13 +230,13 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
                 width: 2,
               ),
             ),
-            child: Center(
+            child: const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.qr_code,
                       size: 120, color: AppTheme.textPrimary),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Text(
                     '扫一扫，绑定家人',
                     style: TextStyle(
@@ -259,10 +259,10 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.phone_android,
+          const Icon(Icons.phone_android,
               size: 80, color: AppTheme.primaryColor),
           const SizedBox(height: 24),
-          Text(
+          const Text(
             '或者输入子女的手机号',
             style: TextStyle(
               fontSize: AppTheme.headlineMedium,
@@ -272,7 +272,7 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
-          Text(
+          const Text(
             '输入子女手机号后，我们会\n发送邀请短信',
             style: TextStyle(
               fontSize: AppTheme.bodyLarge,
@@ -295,7 +295,7 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
             child: TextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: AppTheme.titleLarge,
                 color: AppTheme.textPrimary,
                 fontWeight: FontWeight.w500,
@@ -327,7 +327,7 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
                       BorderRadius.circular(AppTheme.radiusButton),
                 ),
               ),
-              child: Text(
+              child: const Text(
                 '发送邀请',
                 style: TextStyle(
                   fontSize: AppTheme.titleMedium,
@@ -350,7 +350,7 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
           Container(
             width: 100,
             height: 100,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppTheme.secondaryColor,
               shape: BoxShape.circle,
             ),
@@ -366,7 +366,7 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          Text(
+          const Text(
             '用药提醒将同步通知给子女',
             style: TextStyle(
               fontSize: AppTheme.bodyLarge,
@@ -375,7 +375,7 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          Text(
+          const Text(
             '子女可以帮您添加药品、查看记录',
             style: TextStyle(
               fontSize: AppTheme.bodyLarge,
@@ -417,7 +417,7 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
                     ),
                     child: Text(
                       _currentStep == 3 ? '' : '上一步',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: AppTheme.titleMedium,
                         color: AppTheme.textPrimary,
                       ),
@@ -444,10 +444,10 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
                       borderRadius:
                           BorderRadius.circular(AppTheme.radiusButton),
                     ),
-                    textStyle: TextStyle(
+                    textStyle: const TextStyle(
                       fontSize: AppTheme.titleMedium,
                       fontWeight: FontWeight.w600,
-                      shadows: const [
+                      shadows: [
                         Shadow(
                           color: AppTheme.textPrimary,
                           offset: Offset(0, 2),
@@ -476,7 +476,7 @@ class _KidBindingScreenState extends State<KidBindingScreen> {
                             BorderRadius.circular(AppTheme.radiusButton),
                       ),
                     ),
-                    child: Text(
+                    child: const Text(
                       '跳过',
                       style: TextStyle(
                         fontSize: AppTheme.titleMedium,

@@ -71,7 +71,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           child: Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: AppTheme.bodyLarge,
               color: AppTheme.textSecondary,
               fontWeight: FontWeight.w600,
@@ -99,7 +99,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(fontSize: AppTheme.bodyLarge, color: AppTheme.textPrimary)),
+          Text(label, style: const TextStyle(fontSize: AppTheme.bodyLarge, color: AppTheme.textPrimary)),
           Slider(
             value: value,
             min: 0,
@@ -117,13 +117,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildDropdownTile(String label, String value, ValueChanged<String?> onChanged) {
     return ListTile(
-      title: Text(label, style: TextStyle(fontSize: AppTheme.bodyLarge, color: AppTheme.textPrimary)),
+      title: Text(label, style: const TextStyle(fontSize: AppTheme.bodyLarge, color: AppTheme.textPrimary)),
       trailing: DropdownButton<String>(
         value: value,
         underline: const SizedBox(),
         items: _dialects.map((d) => DropdownMenuItem(
           value: d,
-          child: Text(d, style: TextStyle(fontSize: AppTheme.bodyLarge, color: AppTheme.textPrimary)),
+          child: Text(d, style: const TextStyle(fontSize: AppTheme.bodyLarge, color: AppTheme.textPrimary)),
         )).toList(),
         onChanged: onChanged,
       ),
@@ -132,20 +132,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildSwitchTile(String label, bool value, ValueChanged<bool> onChanged) {
     return ListTile(
-      title: Text(label, style: TextStyle(fontSize: AppTheme.bodyLarge, color: AppTheme.textPrimary)),
+      title: Text(label, style: const TextStyle(fontSize: AppTheme.bodyLarge, color: AppTheme.textPrimary)),
       trailing: Switch(value: value, activeColor: AppTheme.secondaryColor, onChanged: onChanged),
     );
   }
 
   Widget _buildActionTile(String label, String hint) {
     return ListTile(
-      title: Text(label, style: TextStyle(fontSize: AppTheme.bodyLarge, color: AppTheme.textPrimary)),
+      title: Text(label, style: const TextStyle(fontSize: AppTheme.bodyLarge, color: AppTheme.textPrimary)),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(hint, style: TextStyle(fontSize: AppTheme.bodyMedium, color: AppTheme.textSecondary)),
+          Text(hint, style: const TextStyle(fontSize: AppTheme.bodyMedium, color: AppTheme.textSecondary)),
           const SizedBox(width: 4),
-          Icon(Icons.chevron_right, size: 24, color: AppTheme.textSecondary),
+          const Icon(Icons.chevron_right, size: 24, color: AppTheme.textSecondary),
         ],
       ),
       onTap: () {},
@@ -154,8 +154,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildInfoTile(String label, String value) {
     return ListTile(
-      title: Text(label, style: TextStyle(fontSize: AppTheme.bodyLarge, color: AppTheme.textPrimary)),
-      trailing: Text(value, style: TextStyle(fontSize: AppTheme.bodyMedium, color: AppTheme.textSecondary)),
+      title: Text(label, style: const TextStyle(fontSize: AppTheme.bodyLarge, color: AppTheme.textPrimary)),
+      trailing: Text(value, style: const TextStyle(fontSize: AppTheme.bodyMedium, color: AppTheme.textSecondary)),
     );
   }
 }

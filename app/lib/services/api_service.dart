@@ -70,47 +70,95 @@ class ApiService {
   // ─── 认证 ───
 
   /// 手机号登录（一期固定验证码 123456）
+  /// 后端返回: { access_token, token_type, user_id, role, nickname }
   Future<UserProfile> login(String phone, String code) async {
     final result = await post(ApiConfig.authLogin, body: {
       'phone': phone,
       'code': code,
     });
-    _token = result['token'] as String?;
-    return UserProfile.fromJson(result['user'] as Map<String, dynamic>);
+    _token = result['access_token'] as String?;
+    return UserProfile(
+      id: result['user_id'] as int? ?? 0,
+      phone: phone,
+      role: result['role'] as String? ?? 'elder',
+      name: result['nickname'] as String?,
+    );
+  }
+
+  /// 发送验证码
+  Future<String> sendSmsCode(String phone) async {
+    final result = await get('${ApiConfig.authSendSms}?phone=$phone');
+    return result['code'] as String? ?? '123456';
   }
 
   /// 获取当前用户信息
   Future<UserProfile> getMe() async {
     final result = await get('${ApiConfig.authMe}?token=$_token');
-    return UserProfile.fromJson(result);
+    return UserProfile(
+      id: result['id'] as int? ?? 0,
+      phone: result['phone'] as String? ?? '',
+      role: result['role'] as String? ?? 'elder',
+      name: result['nickname'] as String?,
+      avatarUrl: result['avatar_url'] as String?,
+    );
   }
 
   // ─── 药品 ───
 
   /// 获取药品列表
+  /// 后端返回: { items: [...] }
   Future<List<Medication>> getMedications({int? elderId}) async {
     final params = <String, String>{};
     if (elderId != null) params['elder_id'] = elderId.toString();
     if (_token != null) params['token'] = _token!;
 
     final result = await get(ApiConfig.medications, queryParams: params);
-    final list = result['data'] as List<dynamic>? ?? [];
+    final list = result['items'] as List<dynamic>? ?? [];
     return list.map((e) => Medication.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   /// 获取单个药品详情
-  Future<Medication> getMedication(int id) async {
-    final result = await get('${ApiConfig.medications}/$id?token=$_token');
-    return Medication.fromJson(result);
+  Future<Map<String, dynamic>> getMedication(int id, {required int elderId}) async {
+    final result = await get('${ApiConfig.medications}/$id?elder_id=$elderId&token=$_token');
+    return result;
   }
 
-  /// 添加药品（子女入口 or 语音录入）
-  Future<Medication> addMedication(Medication medication) async {
-    final result = await post(ApiConfig.medications, body: {
-      ...medication.toJson(),
-      'token': _token,
+  /// 添加药品 — 后端返回完整药品对象
+  Future<Map<String, dynamic>> addMedication(Map<String, dynamic> body, {required int elderId}) async {
+    final result = await post('${ApiConfig.medications}?elder_id=$elderId', body: body);
+    return result;
+  }
+
+  /// 确认用药
+  Future<Map<String, dynamic>> confirmMedication({
+    required int medicationId,
+    required int scheduleId,
+    required int elderId,
+    required double dosageTaken,
+    String? remark,
+  }) async {
+    final result = await post('${ApiConfig.medications}/confirm?elder_id=$elderId', body: {
+      'medication_id': medicationId,
+      'schedule_id': scheduleId,
+      'dosage_taken': dosageTaken,
+      'remark': remark ?? '',
     });
-    return Medication.fromJson(result);
+    return result;
+  }
+
+  /// 获取用药历史
+  Future<Map<String, dynamic>> getMedicationLogs({
+    required int elderId,
+    int? medicationId,
+    int days = 7,
+  }) async {
+    final params = <String, String>{
+      'elder_id': elderId.toString(),
+      'days': days.toString(),
+    };
+    if (medicationId != null) params['medication_id'] = medicationId.toString();
+    if (_token != null) params['token'] = _token!;
+    return await get('${ApiConfig.medications}/logs/history', queryParams: params);
   }
 
   // ─── 健康检查 ───
@@ -118,7 +166,7 @@ class ApiService {
   Future<bool> healthCheck() async {
     try {
       final result = await get(ApiConfig.health);
-      return result['status'] == 'healthy';
+      return result['status'] == 'ok';
     } catch (_) {
       return false;
     }

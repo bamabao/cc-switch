@@ -87,7 +87,7 @@ class _CheckinPopupState extends State<CheckinPopup>
             mainAxisSize: MainAxisSize.min,
             children: [
               // 🎉 标题
-              Text(
+              const Text(
                 '🎉 打卡成功！',
                 style: TextStyle(
                   fontSize: AppTheme.displayMedium,
@@ -113,7 +113,7 @@ class _CheckinPopupState extends State<CheckinPopup>
                   ),
                 ),
               ),
-              Text(
+              const Text(
                 '积分已到账',
                 style: TextStyle(
                   fontSize: AppTheme.bodyLarge,
@@ -123,7 +123,7 @@ class _CheckinPopupState extends State<CheckinPopup>
               const SizedBox(height: 12),
 
               // 每日主文案
-              Text(
+              const Text(
                 '今天又按时吃药了，真棒！',
                 style: TextStyle(
                   fontSize: AppTheme.titleMedium,
@@ -137,14 +137,14 @@ class _CheckinPopupState extends State<CheckinPopup>
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     '🔥',
                     style: TextStyle(fontSize: AppTheme.titleLarge),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '连续打卡 ${widget.consecutiveDays} 天',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: AppTheme.bodyLarge,
                       color: AppTheme.primaryColor,
                       fontWeight: FontWeight.bold,
@@ -158,7 +158,7 @@ class _CheckinPopupState extends State<CheckinPopup>
                 const SizedBox(height: 12),
                 Text(
                   _motivationText,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: AppTheme.bodyLarge,
                     color: AppTheme.textSecondary,
                     height: 1.5,
@@ -181,10 +181,10 @@ class _CheckinPopupState extends State<CheckinPopup>
                     elevation: 4,
                     shadowColor:
                         const Color(0xFF3A4437).withValues(alpha: 0.15),
-                    textStyle: TextStyle(
+                    textStyle: const TextStyle(
                       fontSize: AppTheme.titleMedium,
                       fontWeight: FontWeight.w600,
-                      shadows: const [
+                      shadows: [
                         Shadow(
                           color: AppTheme.textPrimary,
                           offset: Offset(0, 2),

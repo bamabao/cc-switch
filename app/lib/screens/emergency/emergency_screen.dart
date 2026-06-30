@@ -26,7 +26,7 @@ class _EmergencyScreenState extends State<EmergencyScreen>
             children: [
               const SizedBox(height: 20),
               // 标题
-              Text(
+              const Text(
                 '⚠️ 需要帮助吗？',
                 style: TextStyle(
                   fontSize: AppTheme.headlineLarge,
@@ -88,7 +88,7 @@ class _EmergencyScreenState extends State<EmergencyScreen>
                         borderRadius: BorderRadius.circular(AppTheme.radiusButton),
                       ),
                     ),
-                    child: Text(
+                    child: const Text(
                       '不需要帮助，返回',
                       style: TextStyle(
                         fontSize: AppTheme.titleMedium,
@@ -137,7 +137,7 @@ class _EmergencyScreenState extends State<EmergencyScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: TextStyle(fontSize: AppTheme.headlineMedium, fontWeight: FontWeight.bold)),
+                  Text(label, style: const TextStyle(fontSize: AppTheme.headlineMedium, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   Text(subtitle, style: TextStyle(fontSize: AppTheme.bodyMedium, color: AppTheme.textOnDark.withValues(alpha: 0.8))),
                 ],

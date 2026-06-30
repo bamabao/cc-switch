@@ -51,23 +51,23 @@ class AppTheme {
   static const Color shadowColor = Color(0xFF3A4437);
   static List<BoxShadow> shadowCard = [
     BoxShadow(
-      color: Color(0xFF3A4437).withValues(alpha: 0.08),
+      color: const Color(0xFF3A4437).withValues(alpha: 0.08),
       blurRadius: 20,
-      offset: Offset(0, 8),
+      offset: const Offset(0, 8),
     ),
   ];
   static List<BoxShadow> shadowButton = [
     BoxShadow(
-      color: Color(0xFF3A4437).withValues(alpha: 0.10),
+      color: const Color(0xFF3A4437).withValues(alpha: 0.10),
       blurRadius: 16,
-      offset: Offset(0, 6),
+      offset: const Offset(0, 6),
     ),
   ];
   static List<BoxShadow> shadowElevated = [
     BoxShadow(
-      color: Color(0xFF3A4437).withValues(alpha: 0.12),
+      color: const Color(0xFF3A4437).withValues(alpha: 0.12),
       blurRadius: 28,
-      offset: Offset(0, 12),
+      offset: const Offset(0, 12),
     ),
   ];
 

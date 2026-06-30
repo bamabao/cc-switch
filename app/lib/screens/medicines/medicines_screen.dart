@@ -98,7 +98,7 @@ class MedicinesScreen extends StatelessWidget {
                   ),
                   child: Text(
                     status,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: AppTheme.bodyMedium,
                       color: AppTheme.secondaryColor,
                       fontWeight: FontWeight.w600,
