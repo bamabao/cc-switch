@@ -1,0 +1,209 @@
+import 'package:flutter/material.dart';
+import '../../config/theme.dart';
+
+/// 紧急求助页 — 三连紧急救援链路
+/// P1-6：一键打电话、返回首页、在线帮助
+class EmergencyScreen extends StatefulWidget {
+  const EmergencyScreen({super.key});
+
+  @override
+  State<EmergencyScreen> createState() => _EmergencyScreenState();
+}
+
+class _EmergencyScreenState extends State<EmergencyScreen>
+    with SingleTickerProviderStateMixin {
+  bool _isCalling = false;
+  int _countdown = 5;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.warningColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppTheme.spacingLg),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              // 标题
+              Text(
+                '⚠️ 需要帮助吗？',
+                style: TextStyle(
+                  fontSize: AppTheme.headlineLarge,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textOnDark,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '别着急，我们来帮您',
+                style: TextStyle(
+                  fontSize: AppTheme.bodyLarge,
+                  color: AppTheme.textOnDark.withValues(alpha: 0.8),
+                ),
+              ),
+              const SizedBox(height: 48),
+
+              // 三大按钮
+              _buildEmergencyButton(
+                icon: Icons.phone,
+                label: '一键打电话',
+                subtitle: '联系紧急联系人',
+                color: const Color(0xFF2BA84A),
+                onTap: _startEmergencyCall,
+              ),
+              const SizedBox(height: 16),
+              _buildEmergencyButton(
+                icon: Icons.home,
+                label: '返回首页',
+                subtitle: '回到主页面',
+                color: const Color(0xFF1565C0),
+                onTap: () => Navigator.pushReplacementNamed(context, '/home'),
+              ),
+              const SizedBox(height: 16),
+              _buildEmergencyButton(
+                icon: Icons.headset_mic,
+                label: '在线帮助',
+                subtitle: '联系客服人员',
+                color: AppTheme.primaryColor,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('正在为您连接客服…')),
+                  );
+                },
+              ),
+
+              const Spacer(),
+
+              // 取消按钮
+              if (!_isCalling)
+                SizedBox(
+                  width: double.infinity,
+                  height: AppTheme.buttonHeight,
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.white54, width: 2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+                      ),
+                    ),
+                    child: Text(
+                      '不需要帮助，返回',
+                      style: TextStyle(
+                        fontSize: AppTheme.titleMedium,
+                        color: AppTheme.textOnDark,
+                      ),
+                    ),
+                  ),
+                ),
+
+              if (_isCalling) _buildCallingOverlay(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmergencyButton({
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      height: 120,
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: AppTheme.textOnDark,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+          ),
+          elevation: 6,
+          shadowColor: color.withValues(alpha: 0.4),
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 16),
+            Icon(icon, size: 48),
+            const SizedBox(width: 24),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: TextStyle(fontSize: AppTheme.headlineMedium, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(subtitle, style: TextStyle(fontSize: AppTheme.bodyMedium, color: AppTheme.textOnDark.withValues(alpha: 0.8))),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _startEmergencyCall() {
+    setState(() {
+      _isCalling = true;
+      _countdown = 5;
+    });
+    // 倒计时 — 5秒内可取消
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted) return false;
+      setState(() {
+        if (_countdown > 0) _countdown--;
+      });
+      return _countdown > 0 && mounted;
+    }).then((_) {
+      if (mounted) {
+        // TODO: url_launcher tel: 发起拨号
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('正在呼叫紧急联系人…'), duration: Duration(seconds: 3)),
+        );
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) setState(() => _isCalling = false);
+        });
+      }
+    });
+  }
+
+  Widget _buildCallingOverlay() {
+    return Container(
+      padding: const EdgeInsets.all(AppTheme.spacingMd),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+      ),
+      child: Column(
+        children: [
+          Text(
+            '$_countdown',
+            style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          const Text('秒后将自动拨打电话', style: TextStyle(color: Colors.white70, fontSize: 20)),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 64,
+            child: ElevatedButton(
+              onPressed: () => setState(() => _isCalling = false),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppTheme.warningColor,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+              ),
+              child: const Text('取消拨号', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -4,6 +4,10 @@ import 'screens/home/home_screen.dart';
 import 'screens/medicines/medicines_screen.dart';
 import 'screens/mall/mall_screen.dart';
 import 'screens/profile/profile_screen.dart';
+import 'screens/medicines/record_screen.dart';
+import 'screens/profile/settings_screen.dart';
+import 'screens/emergency/emergency_screen.dart';
+import 'screens/auth/login_screen.dart';
 import 'widgets/clay_icons/clay_icons.dart';
 
 void main() {
@@ -20,7 +24,13 @@ class BamabaoApp extends StatelessWidget {
       title: '爸妈宝',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
-      home: const MainScreen(),
+      home: const LoginScreen(),
+      routes: {
+        '/home': (_) => const MainScreen(),
+        '/record': (_) => const RecordScreen(),
+        '/settings': (_) => const SettingsScreen(),
+        '/emergency': (_) => const EmergencyScreen(),
+      },
     );
   }
 }
