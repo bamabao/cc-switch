@@ -1,0 +1,19 @@
+/// 爸妈宝 — API 配置
+class ApiConfig {
+  // 后端服务地址
+  // 开发环境：localhost:8000
+  // 生产环境：替换为实际服务器地址
+  static const String baseUrl = 'http://192.168.10.3:8000';
+  static const String apiPrefix = '/api/v1';
+
+  // 端点
+  static const String health = '$apiPrefix/health';
+  static const String authLogin = '$apiPrefix/auth/login';
+  static const String authMe = '$apiPrefix/auth/me';
+  static const String medications = '$apiPrefix/medications';
+  static const String auditRecords = '$apiPrefix/audit-records';
+  static const String points = '$apiPrefix/points';
+  static const String pointProducts = '$apiPrefix/points/products';
+  static const String pointOrders = '$apiPrefix/points/orders';
+  static const String reminders = '$apiPrefix/reminders';
+}
