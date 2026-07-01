@@ -1,29 +1,63 @@
+import 'dart:async';
 import 'package:flutter/services.dart';
 
-/// 爸妈宝 — 语音服务
+/// 爸妈宝 — 离线语音服务 (AIKit SDK)
 ///
-/// 通过 MethodChannel 与原生层（讯飞MSC SDK）通信
-/// 封装：在线ASR、离线命令词、TTS播报、状态控制
+/// 通过 MethodChannel 与原生层 (AIKit 离线引擎) 通信
+/// 封装: 离线语音合成 (TTS) + 离线命令词识别 (ESR)
 ///
-/// 原生端需要实现：
-///   Android: VoicePlugin.kt
-///   iOS: VoicePlugin.swift
+/// 类型别名 — 语音事件回调
+typedef OnStatusCallback = void Function(String status);
+typedef OnVolumeCallback = void Function(double volume);
+typedef OnResultCallback = void Function(String text, bool isFinal);
+typedef OnSpeakCompletedCallback = void Function();
+
 class VoiceService {
   static const _channel = MethodChannel('com.bamaobao/voice');
 
   static final VoiceService _instance = VoiceService._internal();
   factory VoiceService() => _instance;
-  VoiceService._internal();
+  VoiceService._internal() {
+    _channel.setMethodCallHandler(_handleNativeCall);
+  }
 
-  /// 是否已初始化
+  // ─── 状态 ───
   bool _initialized = false;
   bool get isInitialized => _initialized;
+  String _status = 'idle';
+  String get status => _status;
 
-  /// 当前状态（保留用作状态追踪）
-  // ignore: unused_field
-  String _status = 'idle'; // idle | listening | speaking
+  // ─── 事件回调注册 ───
+  OnStatusCallback? onStatus;
+  OnVolumeCallback? onVolume;
+  OnResultCallback? onResult;
+  OnSpeakCompletedCallback? onSpeakCompleted;
 
-  /// 初始化讯飞语音 SDK
+  /// 处理原生层发来的事件
+  Future<dynamic> _handleNativeCall(MethodCall call) async {
+    switch (call.method) {
+      case 'onStatus':
+        final s = call.arguments['status'] as String? ?? 'idle';
+        _status = s;
+        onStatus?.call(s);
+      case 'onVolume':
+        onVolume?.call((call.arguments['volume'] as num?)?.toDouble() ?? 0.0);
+      case 'onResult':
+        final text = call.arguments['text'] as String? ?? '';
+        final isFinal = call.arguments['isFinal'] as bool? ?? false;
+        onResult?.call(text, isFinal);
+      case 'onSpeakCompleted':
+        _status = 'idle';
+        onSpeakCompleted?.call();
+    }
+    return null;
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  公共 API
+  // ═══════════════════════════════════════════════════════════
+
+  /// 初始化 AIKit 离线语音引擎
   Future<bool> init() async {
     try {
       final result = await _channel.invokeMethod<bool>('init');
@@ -35,11 +69,7 @@ class VoiceService {
     }
   }
 
-  /// 设置语音识别参数
-  ///
-  /// [vadTimeout] 静音检测超时（毫秒），老人说话慢，建议 2000ms+
-  /// [language] 语种，默认 "zh_cn"
-  /// [accent] 方言，默认 "mandarin"，可选 "cantonese" "sichuan" 等
+  /// 设置语音识别参数（离线模式暂无运行时参数）
   Future<void> setParams({
     int vadTimeout = 2000,
     String language = 'zh_cn',
@@ -52,8 +82,11 @@ class VoiceService {
     });
   }
 
-  /// 开始在线语音识别
-  /// 返回识别文本
+  /// 开始语音识别（离线命令词模式）
+  ///
+  /// 返回匹配到的命令词文本。
+  /// 识别过程中通过 [onResult] 回调获取中间结果，
+  /// 通过 [onVolume] 获取实时音量。
   Future<String> startListening() async {
     _status = 'listening';
     try {
@@ -66,12 +99,12 @@ class VoiceService {
     }
   }
 
-  /// 开始离线命令词识别
-  /// 无网络时使用，返回匹配的关键词
+  /// 开始离线命令词识别（与 startListening 等效）
   Future<String> startOfflineListening() async {
     _status = 'listening';
     try {
-      final result = await _channel.invokeMethod<String>('startOfflineListening');
+      final result =
+          await _channel.invokeMethod<String>('startOfflineListening');
       _status = 'idle';
       return result ?? '';
     } catch (e) {
@@ -81,6 +114,9 @@ class VoiceService {
   }
 
   /// TTS 语音播报
+  ///
+  /// 播报过程中通过 [onStatus] 回调通知 "speaking" 状态，
+  /// 完成后通过 [onSpeakCompleted] 回调通知。
   Future<void> speak(String text) async {
     _status = 'speaking';
     try {

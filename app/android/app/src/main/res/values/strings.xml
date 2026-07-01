@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 讯飞 AIKit SDK 配置 -->
+    <!-- APPID: 2d77802d (在 AndroidManifest.xml 的 meta-data 中配置) -->
+    <!--
+    ⚠️ APIKey 和 APISecret 需要从讯飞控制台获取:
+    1. 登 https://console.xfyun.cn
+    2. 我的应用 → 选择应用 (APPID: 2d77802d)
+    3. 找到 APIKey / APISecret
+    4. 替换下面的占位值
+    -->
+    <string name="appId">2d77802d</string>
+    <string name="apiKey">ee02041f9cb95bc05d222c4aa8ed1be9</string>
+    <string name="apiSecret">YjUzMDkyYTNiOWMzODY1NDlkZDdjZGEx</string>
+    <string name="workDir">/sdcard/iflytek/</string>
+</resources>
