@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="bamabao"
+        android:label="爸妈宝"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <!-- 科大讯飞语音SDK -->
