@@ -2,14 +2,10 @@ package com.bamaobao.bamabao
 
 import android.content.Context
 import android.media.AudioFormat
-import android.media.AudioManager
 import android.media.AudioRecord
-import android.media.AudioTrack
 import android.media.MediaRecorder
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.Message
 import android.util.Log
 import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -17,32 +13,25 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import java.nio.charset.Charset
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * 爸妈宝 — 语音插件桥接
+ * 爸妈宝 — 语音插件桥接 (Mock版)
  *
- * 集成讯飞SDK：离线AIKit TTS + ESR + 在线SparkChain
- * Kotlin 2.x 空安全渐进式适配版
+ * 当前状态：Mock实现，模拟语音识别和TTS
+ *
+ * 讯飞SDK集成待下载MSC完整SDK后替换：
+ * - 在线ASR: com.iflytek.cloud.SpeechRecognizer
+ * - 在线TTS: com.iflytek.cloud.SpeechSynthesizer
+ * - AIKit离线: com.iflytek.aikit.*
+ *
+ * APPID已在AndroidManifest.xml配置: 2d77802d
+ * 下载地址: https://console.xfyun.cn/services/iat → 下载SDK
  */
 class VoicePlugin : FlutterPlugin, MethodCallHandler {
 
     companion object {
         private const val TAG = "VoicePlugin"
-        // 离线能力ID
-        private const val AISOUND_ABILITY = "ece9d3c90"   // 离线TTS
-        private const val ESR_ABILITY = "e75f07b62"      // 离线命令词识别
-
-        // 音频播放常量
-        private const val AUDIOPLAYER_INIT = 0x0000
-        private const val AUDIOPLAYER_START = 0x0001
-        private const val AUDIOPLAYER_WRITE = 0x0002
-        private const val AUDIOPLAYER_END = 0x0003
         private const val SAMPLE_RATE = 16000
-        private const val CHANNEL_CONFIG = AudioFormat.CHANNEL_OUT_MONO
-        private const val AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT
-        // 录音常量
         private const val BUFFER_SIZE = 1280
     }
 
@@ -50,29 +39,19 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var context: Context
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    // 离线SDK状态
-    private var aisoundEngineInit = false
-    private var esrEngineInit = false
-    private var isLoadData = false
-
     // 录音
     private var audioRecord: AudioRecord? = null
-    private val isRecording = AtomicBoolean(false)
+    private var isRecording = false
+    private var recordingThread: Thread? = null
 
-    // 录音线程
-    private var audioThread: Thread? = null
-    private var audioHandler: Handler? = null
+    // 状态
+    private var isListening = false
+    private var isSpeaking = false
 
-    // 音频播放线程
-    private var audioTrack: AudioTrack? = null
-    private var isPlaying = false
-    private var playHandler: Handler? = null
-    private var playThread: Thread? = null
-
-    override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "com.bamaobao/voice")
+    override fun onAttachedToEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+        channel = MethodChannel(binding.binaryMessenger, "com.bamaobao/voice")
         channel.setMethodCallHandler(this)
-        context = flutterPluginBinding.applicationContext
+        context = binding.applicationContext
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -89,14 +68,14 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
-    // ═══════ 初始化 ═══════
+    // ═══════════════════════════ 初始化 ═══════════════════════════
+
     private fun handleInit(call: MethodCall, result: Result) {
         try {
-            // 初始化离线AIKit语音合成引擎（Mock版，待真实SDK接入）
-            if (!aisoundEngineInit) {
-                Log.d(TAG, "初始化离线TTS引擎（Mock）")
-                aisoundEngineInit = true
-            }
+            // Mock: 语音引擎初始化成功模拟
+            // TODO: 替换为真实初始化
+            // SpeechUtility.createUtility(context, SpeechConstant.APPID + "=2d77802d")
+            Log.d(TAG, "语音引擎初始化成功 (Mock)")
             result.success(true)
         } catch (e: Exception) {
             Log.e(TAG, "初始化异常: ${e.message}")
@@ -104,40 +83,63 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
-    // ═══════ 设置参数 ═══════
     private fun handleSetParams(call: MethodCall, result: Result) {
         result.success(null)
     }
 
-    // ═══════ 在线语音识别（ASR） ═══════
+    // ═══════════════════════════ 语音识别 (Mock) ═══════════════════════════
+
     private fun handleStartListening(call: MethodCall, result: Result) {
-        // Mock实现：模拟2秒后返回识别结果
-        channel.invokeMethod("onStatus", mapOf("status" to "listening"))
+        if (isListening) {
+            result.success("already_listening")
+            return
+        }
+        isListening = true
         startRecording()
 
+        channel.invokeMethod("onStatus", mapOf("status" to "listening"))
+
+        // Mock: 模拟2秒后返回识别结果
+        // TODO: 替换为真实在线ASR
+        // val recognizer = SpeechRecognizer.createRecognizer(context)
+        // recognizer.startListening(recognizerListener)
         mainHandler.postDelayed({
-            val mockTexts = listOf("帮我看看今天的药", "打卡签到", "呼叫医生", "我的积分")
+            if (!isListening) return@postDelayed
+            val mockTexts = listOf(
+                "帮我看看今天的药", "打卡签到", "呼叫医生", "我的积分",
+                "添加药品", "打开设置", "积分商城", "紧急求助",
+                "返回首页", "用药记录", "查看药品列表"
+            )
             val mockResult = mockTexts.random()
-            channel.invokeMethod("onResult", mapOf("text" to mockResult))
+            channel.invokeMethod("onResult", mapOf(
+                "text" to mockResult,
+                "isFinal" to true
+            ))
+            isListening = false
+            stopRecording()
             channel.invokeMethod("onStatus", mapOf("status" to "idle"))
         }, 2000)
 
         result.success("recording_started")
     }
 
-    // ═══════ 离线命令词识别 ═══════
-    private fun handleStartOfflineListening(call: MethodCall, result: Result) {
-        channel.invokeMethod("onStatus", mapOf("status" to "listening"))
+    // ═══════════════════════════ 离线命令词 (Mock) ═══════════════════════════
 
+    private fun handleStartOfflineListening(call: MethodCall, result: Result) {
+        // TODO: 替换为AIKit离线命令词识别
+        channel.invokeMethod("onStatus", mapOf("status" to "listening"))
         mainHandler.postDelayed({
-            channel.invokeMethod("onResult", mapOf("text" to "帮我看看今天的药"))
+            channel.invokeMethod("onResult", mapOf(
+                "text" to "帮我看看今天的药",
+                "isFinal" to true
+            ))
             channel.invokeMethod("onStatus", mapOf("status" to "idle"))
         }, 1500)
-
         result.success("offline_recording_started")
     }
 
-    // ═══════ TTS 播报 ═══════
+    // ═══════════════════════════ 语音合成 (Mock) ═══════════════════════════
+
     private fun handleSpeak(call: MethodCall, result: Result) {
         val text = call.argument<String>("text") ?: ""
 
@@ -146,111 +148,118 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
             return
         }
 
-        // Mock：按字符数模拟播报时长
+        if (isSpeaking) {
+            stopSpeakingInternal()
+        }
+
+        isSpeaking = true
         mockSpeak(text)
         result.success(null)
     }
 
+    /** Mock语音（每个字模拟100ms） */
     private fun mockSpeak(text: String) {
-        val delayMs = text.length * 100L
+        val delayMs = (text.length * 100L).coerceIn(500, 8000)
         channel.invokeMethod("onStatus", mapOf("status" to "speaking"))
         mainHandler.postDelayed({
+            isSpeaking = false
             channel.invokeMethod("onSpeakCompleted", emptyMap<String, Any>())
             channel.invokeMethod("onStatus", mapOf("status" to "idle"))
         }, delayMs)
     }
 
-    // ═══════ 停止 ═══════
+    // ═══════════════════════════ 录音 ═══════════════════════════
+
+    private fun startRecording() {
+        if (isRecording) return
+        try {
+            val minBufferSize = AudioRecord.getMinBufferSize(
+                SAMPLE_RATE,
+                AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT
+            ).coerceAtLeast(BUFFER_SIZE)
+
+            audioRecord = AudioRecord(
+                MediaRecorder.AudioSource.MIC,
+                SAMPLE_RATE,
+                AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT,
+                minBufferSize
+            )
+            audioRecord?.startRecording()
+            isRecording = true
+
+            recordingThread = Thread {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO)
+                val buffer = ByteArray(minBufferSize)
+                while (isRecording) {
+                    val read = audioRecord?.read(buffer, 0, minBufferSize) ?: 0
+                    if (read > 0) {
+                        val volume = calculateVolume(buffer, read)
+                        val normalized = (volume.coerceIn(0, 100).toDouble() / 100.0)
+                            .coerceIn(0.0, 1.0)
+                        channel.invokeMethod("onVolume", mapOf("volume" to normalized))
+                    }
+                }
+            }.apply { start() }
+        } catch (e: Exception) {
+            Log.e(TAG, "启动录音失败: ${e.message}")
+        }
+    }
+
+    private fun stopRecording() {
+        isRecording = false
+        try {
+            recordingThread?.join(500)
+        } catch (_: Exception) { }
+        recordingThread = null
+        try {
+            audioRecord?.stop()
+            audioRecord?.release()
+            audioRecord = null
+        } catch (_: Exception) { }
+    }
+
+    private fun calculateVolume(buffer: ByteArray, readSize: Int): Int {
+        var sumVolume = 0.0
+        for (i in 0 until (readSize - 1) step 2) {
+            val sample = ((buffer[i + 1].toInt() shl 8) or (buffer[i].toInt() and 0xFF)).toShort()
+            sumVolume += kotlin.math.abs(sample.toDouble())
+        }
+        val rms = kotlin.math.sqrt(sumVolume / (readSize / 2))
+        return (20.0 * kotlin.math.log10(1.0 + rms / 32768.0 * 100.0)).toInt().coerceIn(0, 100)
+    }
+
+    // ═══════════════════════════ 停止 ═══════════════════════════
+
     private fun handleStopListening(call: MethodCall, result: Result) {
+        isListening = false
         stopRecording()
         channel.invokeMethod("onStatus", mapOf("status" to "idle"))
         result.success(null)
     }
 
     private fun handleStopSpeaking(call: MethodCall, result: Result) {
-        stopPlayback()
+        stopSpeakingInternal()
         result.success(null)
     }
 
-    // ═══════ 销毁 ═══════
+    private fun stopSpeakingInternal() {
+        isSpeaking = false
+        mainHandler.removeCallbacksAndMessages(null)
+    }
+
+    // ═══════════════════════════ 销毁 ═══════════════════════════
+
     private fun handleDestroy(call: MethodCall, result: Result) {
+        isListening = false
+        isSpeaking = false
         stopRecording()
-        stopPlayback()
-        aisoundEngineInit = false
-        esrEngineInit = false
+        mainHandler.removeCallbacksAndMessages(null)
         result.success(null)
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
-    }
-
-    // ═══════ 录音实现 ═══════
-    private fun startRecording() {
-        if (isRecording.get()) return
-        if (audioRecord == null) {
-            audioRecord = AudioRecord(
-                MediaRecorder.AudioSource.MIC,
-                16000,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
-                BUFFER_SIZE
-            )
-        }
-        try {
-            audioRecord?.startRecording()
-        } catch (e: Exception) {
-            Log.e(TAG, "启动录音失败: ${e.message}")
-            return
-        }
-        isRecording.set(true)
-
-        Thread {
-            while (isRecording.get()) {
-                val buffer = ByteArray(BUFFER_SIZE)
-                val read = audioRecord?.read(buffer, 0, BUFFER_SIZE) ?: 0
-                if (read > 0) {
-                    val volume = calculateVolume(buffer)
-                    channel.invokeMethod("onVolume", mapOf("volume" to volume / 100.0))
-                }
-            }
-        }.start()
-    }
-
-    private fun stopRecording() {
-        isRecording.set(false)
-        try {
-            audioRecord?.stop()
-            audioRecord?.release()
-            audioRecord = null
-        } catch (e: Exception) {
-            Log.e(TAG, "停止录音异常: ${e.message}")
-        }
-    }
-
-    private fun calculateVolume(buffer: ByteArray): Int {
-        var sumVolume = 0.0
-        for (i in buffer.indices step 2) {
-            val v1 = buffer[i].toInt() and 0xFF
-            val v2 = buffer[i + 1].toInt() and 0xFF
-            var temp = v1 + (v2 shl 8)
-            if (temp >= 0x8000) temp = 0xFFFF - temp
-            sumVolume += Math.abs(temp)
-        }
-        val avgVolume = sumVolume / buffer.size / 2
-        return (Math.log10(1 + avgVolume) * 10).toInt()
-    }
-
-    // ═══════ 音频播放器（Mock） ═══════
-    private fun stopPlayback() {
-        playHandler?.removeCallbacksAndMessages(null)
-        try {
-            audioTrack?.stop()
-        } catch (e: Exception) { /* ignore */ }
-        try {
-            audioTrack?.release()
-            audioTrack = null
-        } catch (e: Exception) { /* ignore */ }
-        isPlaying = false
     }
 }
