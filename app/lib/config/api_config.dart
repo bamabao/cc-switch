@@ -3,7 +3,7 @@ class ApiConfig {
   // 后端服务地址
   // 开发环境：localhost:8000
   // 生产环境：替换为实际服务器地址
-  static const String baseUrl = 'http://192.168.10.3:8000';
+  static const String baseUrl = 'https://bambao.loca.lt';
   static const String apiPrefix = '/api/v1';
 
   // 端点 — 与后端 FastAPI 路由完全一致

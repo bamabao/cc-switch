@@ -15,4 +15,7 @@ Start-Sleep -Seconds 5
 $watchdog = "C:\Users\74897\.openclaw\general-manager-agent\projects\爸妈宝\scripts\watchdog.ps1"
 Start-Process -NoNewWindow -FilePath powershell -ArgumentList "-NoProfile -WindowStyle Hidden -File "$watchdog""
 
+# 启动 localtunnel 穿透（让 App 可以从外网访问）
+Start-Process -NoNewWindow -FilePath lt -ArgumentList "--port 8000 --subdomain bambao"
+
 Write-Host "爸妈宝启动完成"
