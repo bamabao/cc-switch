@@ -4,6 +4,10 @@ import '../../services/api_service.dart';
 import '../../models/user.dart';
 import '../auth/kid_binding_screen.dart';
 import '../profile/settings_screen.dart';
+import 'messages_screen.dart';
+import 'health_record_screen.dart';
+import 'emergency_contact_screen.dart';
+import 'about_screen.dart';
 
 /// 个人中心 — 对接后端真实API
 class ProfileScreen extends StatefulWidget {
@@ -34,7 +38,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _user = user;
         _totalPoints = user.totalPoints;
-        // family_members 在 UserProfile 模型里不包含，下次扩展
+        _family = user.familyMembers.map((m) => {
+          'name': m['name'] ?? (m['nickname'] ?? ''),
+        }).toList();
         _loading = false;
       });
     } catch (e) {
@@ -105,17 +111,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onTap: () => Navigator.push(context,
                     MaterialPageRoute(builder: (_) => const KidBindingScreen()))),
             _buildMenuItem(context,
-                icon: Icons.notifications, title: '消息通知'),
+                icon: Icons.notifications, title: '消息通知',
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const MessagesScreen()))),
             _buildMenuItem(context,
-                icon: Icons.assignment, title: '健康档案'),
+                icon: Icons.assignment, title: '健康档案',
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const HealthRecordScreen()))),
             _buildMenuItem(context,
                 icon: Icons.settings, title: '设置',
                 onTap: () => Navigator.push(context,
                     MaterialPageRoute(builder: (_) => const SettingsScreen()))),
             _buildMenuItem(context,
-                icon: Icons.phone_in_talk, title: '紧急联系人'),
+                icon: Icons.phone_in_talk, title: '紧急联系人',
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const EmergencyContactManageScreen()))),
             _buildMenuItem(context,
-                icon: Icons.info_outline, title: '关于'),
+                icon: Icons.info_outline, title: '关于',
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const AboutScreen()))),
           ],
         ),
       ),

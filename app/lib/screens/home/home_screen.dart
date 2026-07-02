@@ -23,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _alertCount = 0;
   List<dynamic> _alerts = [];
   bool _loading = true;
+  int _elderId = 1;
 
   @override
   void initState() {
@@ -46,20 +47,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadData() async {
     try {
+      // 尝试获取真实用户ID
+      try {
+        final user = await _api.getMe();
+        _elderId = user.id;
+      } catch (_) {}
+
       final medsResult = await _api.get(ApiConfig.medications, queryParams: {
-        'elder_id': '1',
+        'elder_id': '$_elderId',
       });
       final medications = medsResult['items'] as List<dynamic>? ?? [];
       final approved = medications.where((m) => m['status'] == 'approved').toList();
 
       final alertsResult = await _api.get('${ApiConfig.medications}/alerts', queryParams: {
-        'elder_id': '1',
+        'elder_id': '$_elderId',
       });
       final alerts = alertsResult['items'] as List<dynamic>? ?? [];
 
       // 待审核药品
       final pendingResult = await _api.get('${ApiConfig.medications}/pending', queryParams: {
-        'elder_id': '1',
+        'elder_id': '$_elderId',
       });
       final pendingList = pendingResult['items'] as List<dynamic>? ?? [];
 

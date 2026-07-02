@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import '../../config/api_config.dart';
 import '../../services/api_service.dart';
+import '../medicines/medicines_screen.dart';
+import 'emergency_contact_screen.dart';
 
 /// 设置页 — 方言语音切换、音量调节、个人信息
 /// 对接后端 persist 用户偏好
@@ -18,7 +20,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   double _volume = 1.0;
   String _dialect = '普通话';
   bool _autoPlayVoice = true;
+  bool _selfAudit = false;
   bool _loading = true;
+  String? _userName;
+  String? _userPhone;
 
   static const List<String> _dialects = [
     '普通话', '粤语', '四川话', '上海话', '东北话',
@@ -51,6 +56,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       setState(() {
         _dialect = _voiceToDialect[user.voicePreference] ?? '普通话';
         _volume = user.fontScale != null ? (user.fontScale! / 100.0) : 1.0;
+        _userName = user.name;
+        _userPhone = user.phone;
+        _selfAudit = user.selfAudit;
         _loading = false;
       });
     } catch (_) {
@@ -102,16 +110,120 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ]),
                 const SizedBox(height: AppTheme.spacingMd),
                 _buildSection('个人信息', [
-                  _buildActionTile('姓名', '点击修改'),
-                  _buildActionTile('手机号', '138****8888'),
-                  _buildActionTile('紧急联系人', '设置'),
-                  _buildActionTile('常用药箱', '管理药品'),
+                  // 姓名
+                  _buildActionTile('姓名', '点击修改', onTap: () async {
+                    final ctrl = TextEditingController(text: _userName ?? '');
+                    final newName = await showDialog<String>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('修改姓名'),
+                        content: TextField(
+                          controller: ctrl,
+                          decoration: const InputDecoration(
+                            hintText: '请输入姓名',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+                          ElevatedButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: const Text('保存')),
+                        ],
+                      ),
+                    );
+                    if (newName != null && newName.isNotEmpty && mounted) {
+                      await _api.put('${ApiConfig.authProfile}?nickname=$newName&token=${_api.token ?? ""}');
+                      _loadPrefs();
+                    }
+                  }),
+                  // 手机号
+                  _buildActionTile('手机号', _userPhone ?? '138****8888', onTap: () async {
+                    final ctrl = TextEditingController(text: _userPhone ?? '');
+                    final newPhone = await showDialog<String>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('修改手机号'),
+                        content: TextField(
+                          controller: ctrl,
+                          decoration: const InputDecoration(
+                            hintText: '请输入新手机号',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.phone,
+                        ),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+                          ElevatedButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: const Text('保存')),
+                        ],
+                      ),
+                    );
+                    if (newPhone != null && newPhone.isNotEmpty && mounted) {
+                      await _api.put('${ApiConfig.authProfile}?phone=$newPhone&token=${_api.token ?? ""}');
+                      _loadPrefs();
+                    }
+                  }),
+                  // 紧急联系人
+                  _buildActionTile('紧急联系人', '设置', onTap: () {
+                    Navigator.push(context, MaterialPageRoute(
+                      builder: (_) => const EmergencyContactManageScreen(),
+                    ));
+                  }),
+                  // 常用药箱
+                  _buildActionTile('常用药箱', '管理药品', onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const MedicinesScreen()),
+                    );
+                  }),
+                ]),
+                const SizedBox(height: AppTheme.spacingMd),
+                _buildSection('药品审核', [
+                  _buildSwitchTile('自审核模式（开启后新药品自动通过）', _selfAudit, (v) async {
+                    setState(() => _selfAudit = v);
+                    try {
+                      await _api.put('${ApiConfig.authProfile}?self_audit=$v&token=${_api.token ?? ""}');
+                    } catch (_) {}
+                  }),
                 ]),
                 const SizedBox(height: AppTheme.spacingMd),
                 _buildSection('关于', [
                   _buildInfoTile('版本', 'v0.2.0'),
-                  _buildInfoTile('用户协议', '查看'),
-                  _buildInfoTile('隐私政策', '查看'),
+                  _buildActionTile('用户协议', '查看', onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('用户协议'),
+                        content: const Text(
+                          '爸妈宝用户协议\n\n'
+                          '1. 本应用为老人用药管理工具\n'
+                          '2. 用户应按照医嘱使用药品\n'
+                          '3. 本应用不提供医疗建议\n'
+                          '4. 用户需自行确认用药信息的准确性\n'
+                          '5. 子女对老人的用药管理承担监护责任',
+                        ),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('关闭')),
+                        ],
+                      ),
+                    );
+                  }),
+                  _buildActionTile('隐私政策', '查看', onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('隐私政策'),
+                        content: const Text(
+                          '爸妈宝隐私政策\n\n'
+                          '1. 我们收集您的用药信息仅用于提醒服务\n'
+                          '2. 您的个人信息不会分享给第三方\n'
+                          '3. 用药数据仅您和绑定子女可见\n'
+                          '4. 您可随时删除账户和所有数据',
+                        ),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('关闭')),
+                        ],
+                      ),
+                    );
+                  }),
                 ]),
               ],
             ),
@@ -171,7 +283,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildActionTile(String label, String hint) {
+  Widget _buildActionTile(String label, String hint, {VoidCallback? onTap}) {
     return ListTile(
       title: Text(label, style: const TextStyle(fontSize: AppTheme.bodyLarge, color: AppTheme.textPrimary)),
       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -179,7 +291,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(width: 4),
         const Icon(Icons.chevron_right, size: 24, color: AppTheme.textSecondary),
       ]),
-      onTap: () {},
+      onTap: onTap,
     );
   }
 

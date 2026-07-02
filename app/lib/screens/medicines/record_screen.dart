@@ -21,6 +21,7 @@ class _RecordScreenState extends State<RecordScreen> {
   // 从后端拉的实际数据
   List<dynamic> _allLogs = [];
   bool _loading = true;
+  int _elderId = 1;
 
   // 用药统计
   int _total = 0;
@@ -36,8 +37,13 @@ class _RecordScreenState extends State<RecordScreen> {
   Future<void> _loadLogs() async {
     setState(() => _loading = true);
     try {
+      // 尝试获取真实用户ID
+      try {
+        final user = await _api.getMe();
+        _elderId = user.id;
+      } catch (_) {}
       final result = await _api.get('${ApiConfig.medications}/logs/history',
-          queryParams: {'elder_id': '1', 'days': '30'});
+          queryParams: {'elder_id': '$_elderId', 'days': '30'});
       if (!mounted) return;
       setState(() {
         _allLogs = result['items'] as List<dynamic>? ?? [];

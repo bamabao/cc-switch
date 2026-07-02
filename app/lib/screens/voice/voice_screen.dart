@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import '../../services/voice_service.dart';
+import '../../config/api_config.dart';
+import '../../services/api_service.dart';
+import '../profile/settings_screen.dart';
 
 /// 语音助手全屏页 — P27
 ///
@@ -14,6 +17,7 @@ class VoiceScreen extends StatefulWidget {
 
 class _VoiceScreenState extends State<VoiceScreen> {
   final VoiceService _voice = VoiceService();
+  final ApiService _api = ApiService();
 
   bool _isInitialized = false;
   bool _isListening = false;
@@ -80,25 +84,78 @@ class _VoiceScreenState extends State<VoiceScreen> {
   /// 根据识别结果执行对应操作
   void _handleCommand(String text) {
     if (text.contains('吃药') || text.contains('用药') || text.contains('药品')) {
-      _responseText = '好的，您今天有 3 次服药安排：\n'
-          '1. 阿莫西林胶囊 08:00 ✅ 已服\n'
-          '2. 苯磺酸氨氯地平片 12:00 ⏳ 待服\n'
-          '3. 阿托伐他汀钙片 20:00 ⏳ 待服';
-      _voice.speak('您今天有3次服药安排，请查看屏幕');
+      _queryMedicationsAndRespond();
     } else if (text.contains('打卡') || text.contains('签到')) {
-      _responseText = '✅ 今日已打卡签到！';
-      _voice.speak('今日打卡签到成功');
+      _checkInAndRespond();
     } else if (text.contains('积分')) {
-      _responseText = '您的当前积分为: 1280 分';
-      _voice.speak('您的积分为一千二百八十分');
+      _queryPointsAndRespond();
     } else if (text.contains('紧急') || text.contains('帮帮我')) {
-      _responseText = '⚠️ 已发送紧急求助！';
+      setState(() {
+        _responseText = '⚠️ 紧急求助已发送，正在为您联系子女';
+      });
       _voice.speak('紧急求助已发送');
     } else if (text.contains('首页') || text.contains('返回')) {
       Navigator.pop(context);
     } else {
-      _responseText = '抱歉，我没有听懂，请再说一遍';
-      _voice.speak('抱歉，我没有听懂');
+      setState(() {
+        _responseText = '抱歉，我没有听懂，请再说一遍\n您可以试试说：\n"今天要吃什么药"\n"我的积分"\n"打卡"';
+      });
+      _voice.speak('抱歉，我没有听懂，您可以试试说吃药或积分');
+    }
+  }
+
+  Future<void> _queryMedicationsAndRespond() async {
+    setState(() => _responseText = '正在查询您的用药安排…');
+    try {
+      final result = await _api.get(ApiConfig.medications, queryParams: {
+        'elder_id': '1', 'status': 'approved'
+      });
+      final items = result['items'] as List<dynamic>? ?? [];
+      if (!mounted) return;
+      if (items.isEmpty) {
+        setState(() => _responseText = '您目前没有需要服用的药品');
+        _voice.speak('您目前没有需要服用的药品');
+        return;
+      }
+      final sb = StringBuffer('您今天有 ${items.length} 种药品需要服用：\n');
+      int index = 1;
+      for (var med in items) {
+        final name = med['name'] ?? '药品$index';
+        sb.writeln('$index. $name');
+        index++;
+      }
+      setState(() => _responseText = sb.toString());
+      _voice.speak('您今天有 ${items.length} 种药品需要服用，请看屏幕');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _responseText = '查询药品信息失败，请稍后再试');
+      _voice.speak('查询失败');
+    }
+  }
+
+  Future<void> _checkInAndRespond() async {
+    setState(() => _responseText = '正在处理打卡…');
+    _voice.speak('请您到药品页面确认用药完成打卡');
+    setState(() {
+      _responseText = '✅ 请在药品页面确认用药即可自动打卡！\n坚持打卡可获得积分奖励！';
+    });
+  }
+
+  Future<void> _queryPointsAndRespond() async {
+    setState(() => _responseText = '正在查询您的积分…');
+    try {
+      final pts = await _api.get('${ApiConfig.points}/profile?elder_id=1');
+      final points = pts['total_points'] as int? ?? 0;
+      final streak = pts['current_streak'] as int? ?? 0;
+      if (!mounted) return;
+      setState(() {
+        _responseText = '您的当前积分: $points 分\n已连续打卡 $streak 天\n继续坚持按时服药获取积分！';
+      });
+      _voice.speak('您的积分为 $points 分');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _responseText = '查询积分失败，请稍后再试');
+      _voice.speak('查询失败');
     }
   }
 
@@ -238,13 +295,26 @@ class _VoiceScreenState extends State<VoiceScreen> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.settings, size: 32),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                      );
+                    },
                     tooltip: '语音设置',
                   ),
                   const SizedBox(width: AppTheme.spacingXl),
                   IconButton(
                     icon: const Icon(Icons.volume_up, size: 32),
-                    onPressed: () {},
+                    onPressed: () {
+                      if (_responseText.isNotEmpty) {
+                        _voice.speak(_responseText
+                            .replaceAll('\n', '，')
+                            .replaceAll('*', ''));
+                      } else {
+                        _voice.speak('还没有内容可以朗读');
+                      }
+                    },
                     tooltip: '朗读当前内容',
                   ),
                   const SizedBox(width: AppTheme.spacingXl),

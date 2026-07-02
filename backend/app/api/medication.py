@@ -230,6 +230,11 @@ def create_medication(
             except ValueError:
                 raise HTTPException(400, f"无效的{form_field}值: {create_data[form_field]}")
 
+    # 自审核覆盖status
+    if elder.self_audit:
+        create_data["status"] = MedicationStatus.APPROVED
+        create_data["created_by"] = "elder"
+
     med = Medication(elder_id=elder_id, **create_data)
     db.add(med)
     db.flush()  # 获取 id

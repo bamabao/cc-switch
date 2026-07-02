@@ -18,21 +18,31 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
   List<dynamic> _medications = [];
   bool _loading = true;
   String? _error;
+  int _elderId = 0;
 
   @override
   void initState() {
     super.initState();
+    _initUser();
+  }
+
+  Future<void> _initUser() async {
+    try {
+      final user = await _api.getMe();
+      if (mounted) setState(() => _elderId = user.id);
+    } catch (_) {}
     _loadMedications();
   }
 
   Future<void> _loadMedications() async {
+    if (_elderId == 0) return;
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
       final result = await _api.get(ApiConfig.medications, queryParams: {
-        'elder_id': '1',
+        'elder_id': '$_elderId',
         'token': _api.token ?? '',
       });
       setState(() {
@@ -272,7 +282,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
             ),
           ),
           actions: [
-            if (med['status'] == 'DRAFT' || med['status'] == 'REJECTED')
+            if (med['status'] == 'pending' || med['status'] == 'rejected')
               ElevatedButton.icon(
                 icon: const Icon(Icons.send),
                 label: const Text('提交审核'),
@@ -281,7 +291,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                   await _submitForAudit(ctx, med['id'] as int, med['name'] as String? ?? '');
                 },
               ),
-            if (med['status'] != 'APPROVED')
+            if (med['status'] != 'approved')
               TextButton.icon(
                 icon: const Icon(Icons.delete_outline, color: AppTheme.dangerColor),
                 label: const Text('删除', style: TextStyle(color: AppTheme.dangerColor)),

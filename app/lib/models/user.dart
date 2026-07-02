@@ -9,6 +9,7 @@ class UserProfile {
   final int longestStreak;
   final String? voicePreference;
   final int? fontScale;
+  final bool selfAudit;
   final List<Map<String, dynamic>> familyMembers;
 
   UserProfile({
@@ -22,6 +23,7 @@ class UserProfile {
     this.longestStreak = 0,
     this.voicePreference,
     this.fontScale,
+    this.selfAudit = false,
     this.familyMembers = const [],
   });
 
@@ -43,6 +45,7 @@ class UserProfile {
       longestStreak: json['longest_streak'] as int? ?? 0,
       voicePreference: json['voice_preference'] as String?,
       fontScale: json['font_scale'] as int?,
+      selfAudit: json['self_audit'] as bool? ?? false,
       familyMembers: members,
     );
   }

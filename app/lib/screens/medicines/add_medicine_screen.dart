@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
 import '../../config/theme.dart';
 import '../../config/api_config.dart';
 import '../../services/api_service.dart';
+import '../voice/voice_screen.dart';
 
 /// 药品录入页 — 三通道录入
 /// 支持：药盒拍照 / 语音录入 / 手动手写录入
@@ -25,6 +30,20 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
   String _selectedCategory = '内服';
   bool _showForm = true;
   bool _submitting = false;
+  int _elderId = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserId();
+  }
+
+  Future<void> _loadUserId() async {
+    try {
+      final user = await _api.getMe();
+      if (mounted) setState(() => _elderId = user.id);
+    } catch (_) {}
+  }
 
   static const List<String> _categories = ['内服', '外用', '针剂', '滋补'];
   static const Map<String, String> _categoryApiMap = {
@@ -55,7 +74,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
     if (_submitting) return;
     setState(() => _submitting = true);
     try {
-      await _api.post('${ApiConfig.medications}?elder_id=1', body: {
+      await _api.post('${ApiConfig.medications}?elder_id=$_elderId', body: {
         'name': _nameController.text,
         'category': _categoryApiMap[_selectedCategory] ?? 'oral',
         'oral_form': 'tablet',
@@ -92,7 +111,15 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
         title: const Text('添加药品'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('已通知子女帮忙添加药品'),
+                  duration: Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
             child: const Text(
               '子女帮我录入',
               style: TextStyle(
@@ -140,11 +167,34 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
             label: '拍照',
             subtitle: '拍药盒自动识别',
             color: AppTheme.primaryColor,
-            onTap: () {
-              // TODO: 调用相机/相册
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('正在打开相机…')),
+            onTap: () async {
+              final picker = ImagePicker();
+              final XFile? image = await picker.pickImage(
+                source: ImageSource.camera,
+                maxWidth: 2048,
+                imageQuality: 85,
               );
+              if (image != null && context.mounted) {
+                if (!context.mounted) return;
+                await showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    content: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.file(
+                        File(image.path),
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('确定'),
+                      ),
+                    ],
+                  ),
+                );
+              }
             },
           ),
         ),
@@ -156,10 +206,8 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
             subtitle: '说话填写药品信息',
             color: AppTheme.secondaryColor,
             onTap: () {
-              // TODO: 语音识别录入
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('请说出药品名称和用量…')),
-              );
+              // 跳转语音助手页进行语音录入
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const VoiceScreen()));
             },
           ),
         ),
@@ -189,7 +237,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(AppTheme.spacingMd),
+        padding: const EdgeInsets.all(AppTheme.spacingLg),
         decoration: BoxDecoration(
           color: AppTheme.cardColor,
           borderRadius: BorderRadius.circular(AppTheme.radiusCard),
@@ -198,28 +246,28 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
         child: Column(
           children: [
             Container(
-              width: 48,
-              height: 48,
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 28),
+              child: Icon(icon, color: color, size: 42),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             Text(
               label,
               style: const TextStyle(
-                fontSize: AppTheme.bodyLarge,
+                fontSize: 30,
                 color: AppTheme.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
               subtitle,
               style: const TextStyle(
-                fontSize: AppTheme.bodyMedium,
+                fontSize: 24,
                 color: AppTheme.textSecondary,
               ),
               textAlign: TextAlign.center,
@@ -328,6 +376,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
               label: '药品名称',
               hint: '例如：阿莫西林胶囊',
               icon: Icons.medication,
+              large: true,
             ),
             const SizedBox(height: AppTheme.spacingMd),
             _buildInputField(
@@ -336,6 +385,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
               label: '每次用量',
               hint: '例如：2粒',
               icon: Icons.calculate,
+              large: true,
             ),
             const SizedBox(height: AppTheme.spacingMd),
             _buildInputField(
@@ -343,6 +393,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
               label: '服用时间',
               hint: '例如：早餐后',
               icon: Icons.access_time,
+              large: true,
             ),
             const SizedBox(height: AppTheme.spacingMd),
             _buildInputField(
@@ -350,6 +401,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
               label: '注意事项',
               hint: '例如：忌酒',
               icon: Icons.info_outline,
+              large: true,
             ),
           ],
         ),
@@ -363,19 +415,20 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
     required String label,
     required String hint,
     required IconData icon,
+    bool large = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: AppTheme.bodyLarge,
+          style: TextStyle(
+            fontSize: large ? 28 : AppTheme.bodyLarge,
             color: AppTheme.textPrimary,
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: large ? 12 : 8),
         Container(
           decoration: BoxDecoration(
             color: AppTheme.bgColor,
@@ -384,20 +437,20 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
           child: TextField(
             controller: controller,
             focusNode: focusNode,
-            style: const TextStyle(
-              fontSize: AppTheme.titleMedium,
+            style: TextStyle(
+              fontSize: large ? 28 : AppTheme.titleMedium,
               color: AppTheme.textPrimary,
             ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(
-                fontSize: AppTheme.titleMedium,
+                fontSize: large ? 26 : AppTheme.titleMedium,
                 color: AppTheme.textSecondary.withValues(alpha: 0.5),
               ),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
+                horizontal: 20,
+                vertical: 20,
               ),
             ),
             onChanged: (_) => setState(() {}),

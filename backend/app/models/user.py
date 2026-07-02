@@ -26,6 +26,7 @@ class User(Base):
     # 老人端额外字段
     voice_preference = Column(String(32), default="mandarin")  # 方言/普通话
     font_scale = Column(Integer, default=200)  # 字号缩放百分比
+    self_audit = Column(Boolean, default=False)  # 药品自审核模式（True=自动通过，False=需子女审核）
 
     # Streak tracking
     current_streak = Column(Integer, default=0)

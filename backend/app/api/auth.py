@@ -55,6 +55,7 @@ class UserInfoResponse(BaseModel):
     font_scale: Optional[int] = None
     total_points: Optional[int] = None
     current_streak: Optional[int] = None
+    self_audit: Optional[bool] = None
     family_members: list = []
 
 
@@ -240,6 +241,7 @@ def get_my_info(
         font_scale=user.font_scale if user.role == UserRole.ELDER else None,
         total_points=user.total_points if user.role == UserRole.ELDER else None,
         current_streak=user.current_streak if user.role == UserRole.ELDER else None,
+        self_audit=user.self_audit if user.role == UserRole.ELDER else None,
         family_members=family,
     )
 
@@ -250,6 +252,7 @@ def update_profile(
     avatar_url: Optional[str] = Query(None),
     voice_preference: Optional[str] = Query(None),
     font_scale: Optional[int] = Query(None),
+    self_audit: Optional[bool] = Query(None),
     token: str = Query(...),
     db: Session = Depends(get_db),
 ):
@@ -263,5 +266,7 @@ def update_profile(
         user.voice_preference = voice_preference
     if font_scale is not None and user.role == UserRole.ELDER:
         user.font_scale = font_scale
+    if self_audit is not None and user.role == UserRole.ELDER:
+        user.self_audit = self_audit
     db.commit()
     return {"message": "更新成功"}

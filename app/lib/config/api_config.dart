@@ -29,4 +29,8 @@ class ApiConfig {
 
   // 用户
   static const String authProfile = '$apiPrefix/auth/profile';
+
+  // 紧急联系人
+  static const String emergencyContacts = '$apiPrefix/emergency-contacts';
+  static const String emergencyContactPrimary = '$apiPrefix/emergency-contacts/primary/phone';
 }

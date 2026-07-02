@@ -26,6 +26,7 @@ class AppTheme {
   static const double titleMedium = 22;
   static const double bodyLarge = 20;
   static const double bodyMedium = 18;
+  static const double bodySmall = 14;
   static const double labelLarge = 18;
 
   // ─── 间距 ───

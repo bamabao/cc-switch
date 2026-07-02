@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
+import '../../config/api_config.dart';
+import '../../services/api_service.dart';
 
 /// 紧急求助页 — 三连紧急救援链路
 /// P1-6：一键打电话、返回首页、在线帮助
@@ -13,8 +15,27 @@ class EmergencyScreen extends StatefulWidget {
 
 class _EmergencyScreenState extends State<EmergencyScreen>
     with SingleTickerProviderStateMixin {
+  final ApiService _api = ApiService();
   bool _isCalling = false;
   int _countdown = 5;
+  String _emergencyPhone = '120';
+  String _emergencyName = '紧急联系人';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrimaryContact();
+  }
+
+  Future<void> _loadPrimaryContact() async {
+    try {
+      final result = await _api.get('${ApiConfig.emergencyContactPrimary}?token=${_api.token ?? ""}');
+      if (result['phone'] != null && (result['phone'] as String).isNotEmpty) {
+        _emergencyPhone = result['phone'] as String;
+        _emergencyName = result['name'] as String? ?? '紧急联系人';
+      }
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,8 +89,15 @@ class _EmergencyScreenState extends State<EmergencyScreen>
                 subtitle: '联系客服人员',
                 color: AppTheme.primaryColor,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('正在为您连接客服…')),
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('在线帮助'),
+                      content: Text('如需帮助，请联系您的子女或拨打紧急联系人电话：$_emergencyPhone\n\n客服功能即将上线，敬请期待。'),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('好的')),
+                      ],
+                    ),
                   );
                 },
               ),
@@ -165,7 +193,7 @@ class _EmergencyScreenState extends State<EmergencyScreen>
       return _countdown > 0 && mounted;
     }).then((_) {
       if (mounted) {
-        _makePhoneCall('tel:120');
+        _makePhoneCall('tel:$_emergencyPhone');
       }
     });
   }
@@ -178,13 +206,13 @@ class _EmergencyScreenState extends State<EmergencyScreen>
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('暂无法拨打电话，请手动拨打120')),
+          SnackBar(content: Text('暂无法拨打电话，请手动拨打$_emergencyPhone')),
         );
       }
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('暂无法拨打电话，请手动拨打120')),
+        SnackBar(content: Text('暂无法拨打电话，请手动拨打$_emergencyPhone')),
       );
     }
     if (mounted) setState(() => _isCalling = false);

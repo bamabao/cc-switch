@@ -16,7 +16,7 @@ class _MallScreenState extends State<MallScreen> {
   List<dynamic> _products = [];
   int _points = 0;
   bool _loading = true;
-
+  int _elderId = 1;
 
   @override
   void initState() {
@@ -32,8 +32,13 @@ class _MallScreenState extends State<MallScreen> {
     try {
       final prodResult = await _api.get(ApiConfig.pointProducts);
       // 尝试获取积分（需要elder_id, 没有的话静默）
+      // 尝试获取用户ID
       try {
-        final pts = await _api.get('${ApiConfig.points}/profile?elder_id=1');
+        final user = await _api.getMe();
+        _elderId = user.id;
+      } catch (_) {}
+      try {
+        final pts = await _api.get('${ApiConfig.points}/profile?elder_id=$_elderId');
         _points = pts['total_points'] as int? ?? 0;
       } catch (_) {}
 
@@ -72,7 +77,7 @@ class _MallScreenState extends State<MallScreen> {
     if (confirmed != true) return;
 
     try {
-      await _api.post('${ApiConfig.redeem}?elder_id=1&product_id=$productId');
+      await _api.post('${ApiConfig.redeem}?elder_id=$_elderId&product_id=$productId');
       if (!mounted) return;
       // 刷新积分
       await _loadData();
