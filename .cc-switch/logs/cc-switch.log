@@ -1,0 +1,159 @@
+[2026-06-10][10:50:05][INFO][cc_switch_lib::usage_events] [usage-event] AppHandle 已注入，事件推送启用
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 检测到 user_version=0，迁移到 1（补齐缺失列并设置版本）
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 迁移数据库从 v1 到 v2（添加使用统计表和完整字段，重构 skills 表）
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 已为表 providers 添加缺失列 cost_multiplier
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 已为表 providers 添加缺失列 limit_daily_usd
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 已为表 providers 添加缺失列 limit_monthly_usd
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 已为表 providers 添加缺失列 provider_type
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 已插入 148 条默认模型定价数据
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] skills 表已经是 v3 结构，跳过 v1 -> v2 迁移
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] proxy_config 已经是三行结构，跳过迁移
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 迁移数据库从 v2 到 v3（Skills 统一管理架构）
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] skills 表已经是 v3 结构，跳过迁移
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 迁移数据库从 v3 到 v4（OpenCode 支持）
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] v3 -> v4 迁移完成：已添加 OpenCode 支持
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 迁移数据库从 v4 到 v5（计费模式支持）
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] v4 -> v5 迁移完成：已添加计费模式与请求模型字段
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 迁移数据库从 v5 到 v6（使用量聚合表 + Copilot 模板类型统一）
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] v5 -> v6 迁移完成：已添加使用量日聚合表，统一 copilot 模板类型
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 迁移数据库从 v6 到 v7（Skills 更新检测支持）
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] v6 -> v7 迁移完成：已添加 content_hash 和 updated_at 列
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 迁移数据库从 v7 到 v8（会话日志使用追踪 + 修正模型定价）
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] v7 -> v8 迁移完成：data_source 列、session_log_sync 表、修正 13 个模型定价
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 迁移数据库从 v8 到 v9（全面补充模型定价）
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 已插入 148 条默认模型定价数据
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] v8 -> v9 迁移完成：已刷新全部模型定价数据
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 迁移数据库从 v9 到 v10（添加 Hermes Agent 支持）
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] v9 -> v10 迁移完成：已添加 Hermes Agent 支持
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::schema] 已插入 148 条默认模型定价数据
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::dao::skills] 补充默认 Skill 仓库: anthropics/skills
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::dao::skills] 补充默认 Skill 仓库: ComposioHQ/awesome-claude-skills
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::dao::skills] 补充默认 Skill 仓库: cexll/myclaude
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::dao::skills] 补充默认 Skill 仓库: JimLiu/baoyu-skills
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::dao::skills] 补充默认 Skill 仓库完成，新增 4 个
+[2026-06-10][10:50:05][INFO][cc_switch_lib] ✓ Initialized 4 default skill repositories
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No live config to import for claude: Claude Code 配置文件不存在 (Claude settings file is missing)
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No live config to import for claude-desktop: Claude Desktop 3P 配置不能通过通用导入读取，请使用“从 Claude 导入兼容供应商”。 (Claude Desktop 3P config cannot be imported through the generic import flow. Use 'Import compatible providers from Claude' instead.)
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No live config to import for codex: Codex 配置文件不存在 (Codex configuration is missing)
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No live config to import for gemini: Gemini 配置文件不存在 (Gemini configuration file is missing)
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::dao::providers] ✓ Seeded official provider: Claude Official (claude)
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::dao::providers] ✓ Seeded official provider: Claude Desktop Official (claude-desktop)
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::dao::providers] ✓ Seeded official provider: OpenAI Official (codex)
+[2026-06-10][10:50:05][INFO][cc_switch_lib::database::dao::providers] ✓ Seeded official provider: Google Official (gemini)
+[2026-06-10][10:50:05][INFO][cc_switch_lib] ✓ Seeded 4 official provider(s)
+[2026-06-10][10:50:05][INFO][cc_switch_lib] ✓ First-run welcome notice pending
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No new OpenCode providers to import
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ Codex history provider bucket migration skipped: no_third_party_provider_ids
+[2026-06-10][10:50:05][WARN][cc_switch_lib::services::provider::live] Skipping OpenClaw provider 'qwen': no models defined
+[2026-06-10][10:50:05][WARN][cc_switch_lib::services::provider::live] Skipping OpenClaw provider 'deepseek': no models defined
+[2026-06-10][10:50:05][WARN][cc_switch_lib::services::provider::live] Skipping OpenClaw provider 'moonshot': no models defined
+[2026-06-10][10:50:05][WARN][cc_switch_lib::services::provider::live] Skipping OpenClaw provider 'minimax': no models defined
+[2026-06-10][10:50:05][WARN][cc_switch_lib::services::provider::live] Skipping OpenClaw provider 'ollama': no models defined
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No new OpenClaw providers to import
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No new Hermes providers to import
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No OMO config to import
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No OMO Slim config to import
+[2026-06-10][10:50:05][INFO][cc_switch_lib] MCP table empty, importing from live configurations...
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No Claude MCP servers found to import
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No Codex MCP servers found to import
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No Gemini MCP servers found to import
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No OpenCode MCP servers found to import
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No Hermes MCP servers found to import
+[2026-06-10][10:50:05][INFO][cc_switch_lib] Prompts table empty, importing from live configurations...
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No prompt file found for claude
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No prompt file found for codex
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No prompt file found for gemini
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No prompt file found for opencode
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No prompt file found for openclaw
+[2026-06-10][10:50:05][DEBUG][cc_switch_lib] ○ No prompt file found for hermes
+[2026-06-10][10:50:05][INFO][cc_switch_lib::app_store] app_config_dir 迁移功能已移除，请在设置中重新配置
+[2026-06-10][10:50:05][INFO][cc_switch_lib] === Registering deep-link URL handler ===
+[2026-06-10][10:50:05][INFO][cc_switch_lib] ✓ Deep-link URL handler registered
+[2026-06-10][10:50:05][INFO][cc_switch_lib] 已加载日志配置: enabled=true, level=info
+[2026-06-10][10:50:05][INFO][cc_switch_lib] ✓ CopilotAuthManager initialized
+[2026-06-10][10:50:05][INFO][cc_switch_lib] ✓ CodexOAuthManager initialized
+[2026-06-10][10:50:05][INFO][cc_switch_lib::proxy::http_client] [GlobalProxy] Initialized: direct connection
+[2026-06-10][10:50:05][INFO][cc_switch_lib] ✓ Auto-extracted common config snippet for openclaw
+[2026-06-10][10:50:05][INFO][cc_switch_lib] 正常启动模式：主窗口已显示
+[2026-06-10][10:50:36][ERROR][tauri_plugin_updater::updater] failed to check for updates: error sending request for url (https://github.com/farion1231/cc-switch/releases/latest/download/latest.json)
+[2026-06-10][10:53:00][WARN][cc_switch_lib::services::provider::live] Skipping OpenClaw provider 'qwen': no models defined
+[2026-06-10][10:53:00][WARN][cc_switch_lib::services::provider::live] Skipping OpenClaw provider 'deepseek': no models defined
+[2026-06-10][10:53:00][WARN][cc_switch_lib::services::provider::live] Skipping OpenClaw provider 'moonshot': no models defined
+[2026-06-10][10:53:00][WARN][cc_switch_lib::services::provider::live] Skipping OpenClaw provider 'minimax': no models defined
+[2026-06-10][10:53:00][WARN][cc_switch_lib::services::provider::live] Skipping OpenClaw provider 'ollama': no models defined
+[2026-06-10][11:23:41][INFO][cc_switch_lib] === Single Instance Callback Triggered ===
+[2026-06-10][11:23:41][INFO][cc_switch_lib] ℹ No deep link URL found in args (this is expected on macOS when launched via system)
+[2026-06-10][11:31:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 0 条, 扫描 1 个会话
+[2026-06-10][11:37:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 0 条, 扫描 2 个会话
+[2026-06-10][11:38:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 2 条, 扫描 2 个会话
+[2026-06-10][11:40:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 5 条, 跳过 4 条, 扫描 2 个会话
+[2026-06-10][12:13:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 9 条, 扫描 2 个会话
+[2026-06-10][12:14:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 4 条, 跳过 11 条, 扫描 2 个会话
+[2026-06-10][12:15:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 5 条, 跳过 15 条, 扫描 2 个会话
+[2026-06-10][12:16:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 3 条, 跳过 20 条, 扫描 2 个会话
+[2026-06-10][12:17:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 3 条, 跳过 23 条, 扫描 2 个会话
+[2026-06-10][12:20:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 26 条, 扫描 2 个会话
+[2026-06-10][12:21:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 3 条, 跳过 27 条, 扫描 2 个会话
+[2026-06-10][12:22:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 30 条, 扫描 2 个会话
+[2026-06-10][12:23:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 32 条, 扫描 2 个会话
+[2026-06-10][12:24:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 33 条, 扫描 2 个会话
+[2026-06-10][12:25:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 35 条, 扫描 2 个会话
+[2026-06-10][12:26:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 3 条, 跳过 36 条, 扫描 2 个会话
+[2026-06-10][12:27:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 4 条, 跳过 39 条, 扫描 2 个会话
+[2026-06-10][12:28:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 5 条, 跳过 43 条, 扫描 2 个会话
+[2026-06-10][12:29:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 48 条, 扫描 2 个会话
+[2026-06-10][12:32:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 49 条, 扫描 2 个会话
+[2026-06-10][12:33:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 50 条, 扫描 2 个会话
+[2026-06-10][12:34:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 3 条, 跳过 52 条, 扫描 2 个会话
+[2026-06-10][12:35:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 3 条, 跳过 55 条, 扫描 2 个会话
+[2026-06-10][12:36:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 4 条, 跳过 58 条, 扫描 2 个会话
+[2026-06-10][12:37:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 3 条, 跳过 62 条, 扫描 2 个会话
+[2026-06-10][12:38:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 65 条, 扫描 2 个会话
+[2026-06-10][13:55:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 4 条, 跳过 66 条, 扫描 2 个会话
+[2026-06-10][13:56:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 3 条, 跳过 70 条, 扫描 2 个会话
+[2026-06-10][13:57:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 5 条, 跳过 73 条, 扫描 2 个会话
+[2026-06-10][13:58:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 7 条, 跳过 78 条, 扫描 2 个会话
+[2026-06-10][14:00:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 85 条, 扫描 2 个会话
+[2026-06-10][14:01:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 87 条, 扫描 2 个会话
+[2026-06-10][14:02:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 89 条, 扫描 2 个会话
+[2026-06-10][14:03:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 3 条, 跳过 91 条, 扫描 2 个会话
+[2026-06-10][14:15:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 94 条, 扫描 2 个会话
+[2026-06-10][14:16:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 95 条, 扫描 2 个会话
+[2026-06-10][14:18:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 96 条, 扫描 2 个会话
+[2026-06-10][14:19:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 3 条, 跳过 97 条, 扫描 2 个会话
+[2026-06-10][15:18:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 1 条, 扫描 2 个会话
+[2026-06-10][15:19:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 2 条, 扫描 2 个会话
+[2026-06-10][15:20:05][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 3 条, 扫描 2 个会话
+[2026-06-10][22:59:02][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 3 条, 跳过 0 条, 扫描 5 个会话
+[2026-06-11][08:10:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 8 条, 跳过 0 条, 扫描 6 个会话
+[2026-06-11][08:11:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 5 条, 跳过 8 条, 扫描 6 个会话
+[2026-06-11][10:50:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 13 条, 扫描 6 个会话
+[2026-06-11][10:51:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 4 条, 跳过 15 条, 扫描 6 个会话
+[2026-06-11][10:52:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 3 条, 跳过 19 条, 扫描 6 个会话
+[2026-06-11][10:53:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 22 条, 扫描 6 个会话
+[2026-06-11][10:54:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 24 条, 扫描 6 个会话
+[2026-06-11][10:55:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 25 条, 扫描 6 个会话
+[2026-06-11][10:56:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 26 条, 扫描 6 个会话
+[2026-06-11][10:57:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 28 条, 扫描 6 个会话
+[2026-06-11][10:58:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 29 条, 扫描 6 个会话
+[2026-06-11][10:59:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 31 条, 扫描 6 个会话
+[2026-06-11][11:00:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 32 条, 扫描 6 个会话
+[2026-06-11][11:01:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 34 条, 扫描 6 个会话
+[2026-06-11][11:02:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 35 条, 扫描 6 个会话
+[2026-06-11][11:03:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 37 条, 扫描 6 个会话
+[2026-06-11][11:04:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 2 条, 跳过 38 条, 扫描 6 个会话
+[2026-06-11][11:05:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 40 条, 扫描 6 个会话
+[2026-06-11][11:06:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 5 条, 跳过 41 条, 扫描 6 个会话
+[2026-06-11][11:07:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 6 条, 跳过 46 条, 扫描 6 个会话
+[2026-06-11][11:08:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 6 条, 跳过 52 条, 扫描 6 个会话
+[2026-06-11][11:09:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 5 条, 跳过 58 条, 扫描 6 个会话
+[2026-06-11][11:10:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 5 条, 跳过 63 条, 扫描 6 个会话
+[2026-06-11][11:11:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 6 条, 跳过 68 条, 扫描 6 个会话
+[2026-06-11][11:12:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 5 条, 跳过 74 条, 扫描 6 个会话
+[2026-06-11][11:13:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 6 条, 跳过 79 条, 扫描 6 个会话
+[2026-06-11][11:14:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 7 条, 跳过 85 条, 扫描 6 个会话
+[2026-06-11][11:15:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 6 条, 跳过 92 条, 扫描 6 个会话
+[2026-06-11][11:16:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 6 条, 跳过 98 条, 扫描 6 个会话
+[2026-06-11][11:17:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 6 条, 跳过 104 条, 扫描 6 个会话
+[2026-06-11][11:18:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 6 条, 跳过 110 条, 扫描 6 个会话
+[2026-06-11][11:19:57][INFO][cc_switch_lib::services::session_usage_opencode] [OPENCODE-SYNC] 同步完成: 导入 1 条, 跳过 116 条, 扫描 6 个会话
