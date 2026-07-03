@@ -35,20 +35,24 @@ class VoiceService {
 
   /// 处理原生层发来的事件
   Future<dynamic> _handleNativeCall(MethodCall call) async {
-    switch (call.method) {
-      case 'onStatus':
-        final s = call.arguments['status'] as String? ?? 'idle';
-        _status = s;
-        onStatus?.call(s);
-      case 'onVolume':
-        onVolume?.call((call.arguments['volume'] as num?)?.toDouble() ?? 0.0);
-      case 'onResult':
-        final text = call.arguments['text'] as String? ?? '';
-        final isFinal = call.arguments['isFinal'] as bool? ?? false;
-        onResult?.call(text, isFinal);
-      case 'onSpeakCompleted':
-        _status = 'idle';
-        onSpeakCompleted?.call();
+    try {
+      switch (call.method) {
+        case 'onStatus':
+          final s = call.arguments['status'] as String? ?? 'idle';
+          _status = s;
+          onStatus?.call(s);
+        case 'onVolume':
+          onVolume?.call((call.arguments['volume'] as num?)?.toDouble() ?? 0.0);
+        case 'onResult':
+          final text = call.arguments['text'] as String? ?? '';
+          final isFinal = call.arguments['isFinal'] as bool? ?? false;
+          onResult?.call(text, isFinal);
+        case 'onSpeakCompleted':
+          _status = 'idle';
+          onSpeakCompleted?.call();
+      }
+    } catch (e) {
+      print('VoiceService native call 异常（非致命）: $e');
     }
     return null;
   }

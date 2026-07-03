@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../config/theme.dart';
 import '../../services/voice_service.dart';
 import '../../config/api_config.dart';
@@ -66,12 +67,26 @@ class _VoiceScreenState extends State<VoiceScreen> {
     };
   }
 
-  void _onTapMic() {
+  Future<void> _onTapMic() async {
     if (!_isInitialized) return;
 
     if (_isListening) {
       _voice.stopListening();
     } else {
+      // 运行时动态申请麦克风权限（Android 6.0+ 必需）
+      final status = await Permission.microphone.request();
+      if (status != PermissionStatus.granted) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('需要麦克风权限才能使用语音功能'),
+              duration: Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
       setState(() {
         _recognizedText = '';
         _responseText = '';

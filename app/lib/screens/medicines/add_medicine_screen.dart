@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../config/theme.dart';
 import '../../config/api_config.dart';
@@ -168,6 +169,20 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
             subtitle: '拍药盒自动识别',
             color: AppTheme.primaryColor,
             onTap: () async {
+              // 运行时动态申请相机权限
+              final cameraStatus = await Permission.camera.request();
+              if (cameraStatus != PermissionStatus.granted) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('需要相机权限才能拍照识别'),
+                      duration: Duration(seconds: 3),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+                return;
+              }
               final picker = ImagePicker();
               final XFile? image = await picker.pickImage(
                 source: ImageSource.camera,

@@ -154,8 +154,14 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
 
             sdkInitialized = true
 
-            // 6. 初始化 ESR 引擎 (预初始化，避免后续卡顿)
-            initEsrEngine(workDir)
+            // 6. 异步初始化 ESR 引擎（避免主线程阻塞导致ANR）
+            Thread {
+                try {
+                    initEsrEngine(workDir)
+                } catch (e: Exception) {
+                    Log.w(TAG, "ESR异步初始化异常（非致命）: ${e.message}")
+                }
+            }.start()
 
             Log.i(TAG, "离线语音引擎初始化成功")
             result.success(true)
@@ -369,8 +375,12 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
 
         Thread {
             try {
-                // 确保引擎已初始化
-                initEsrEngine(workDir)
+                // 确保引擎已初始化（安全兜底）
+                try {
+                    initEsrEngine(workDir)
+                } catch (e: Exception) {
+                    Log.w(TAG, "ESR初始化重试异常: ${e.message}")
+                }
 
                 // 1. 加载 FSA 命令词 (仅首次)
                 if (!fsaLoaded) {
@@ -433,18 +443,27 @@ class VoicePlugin : FlutterPlugin, MethodCallHandler {
                 esrRecording.set(true)
 
                 // 5. 先写 BEGIN 帧
-                writeEsrAudio(ByteArray(0), AiStatus.BEGIN)
+                try {
+                    writeEsrAudio(ByteArray(0), AiStatus.BEGIN)
+                } catch (e: Exception) {
+                    Log.w(TAG, "ESR BEGIN帧异常: ${e.message}")
+                }
 
                 // 6. 录音循环 → write → read
                 val buf = ByteArray(minBuf)
                 while (esrRecording.get() && esrRunning.get()) {
-                    val read = esrAudioRecord?.read(buf, 0, minBuf) ?: -1
-                    if (read <= 0) continue
+                    try {
+                        val read = esrAudioRecord?.read(buf, 0, minBuf) ?: -1
+                        if (read <= 0) continue
 
-                    writeEsrAudio(buf.copyOf(read), AiStatus.CONTINUE)
+                        writeEsrAudio(buf.copyOf(read), AiStatus.CONTINUE)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "ESR录音读取异常: ${e.message}")
+                        break
+                    }
 
                     // 音量上报
-                    val vol = calculateVolume(buf, read)
+                    val vol = calculateVolume(buf, minBuf.coerceAtMost(1280))
                     mainHandler.post {
                         channel.invokeMethod(
                             "onVolume", mapOf("volume" to (vol / 100.0).coerceIn(0.0, 1.0))
