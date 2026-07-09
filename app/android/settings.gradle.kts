@@ -1,14 +1,6 @@
 pluginManagement {
-    val flutterSdkPath = run {
-        // CI: FLUTTER_ROOT env var from flutter-action; local: local.properties
-        val envSdk = System.getenv("FLUTTER_ROOT")
-        if (envSdk != null) return@run envSdk
-        val properties = java.util.Properties()
-        file("local.properties").inputStream().use { properties.load(it) }
-        val sdk = properties.getProperty("flutter.sdk")
-        require(sdk != null) { "flutter.sdk not set in local.properties, and FLUTTER_ROOT env is not set" }
-        sdk
-    }
+    val flutterSdkPath = System.getenv("FLUTTER_ROOT")
+        ?: error("FLUTTER_ROOT env var not set — this must be set by flutter-action in CI or via local.properties on local dev machines")
 
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
