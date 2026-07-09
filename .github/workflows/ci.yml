@@ -80,7 +80,8 @@ jobs:
         run: flutter pub get
 
       - name: Flutter analyze
-        run: flutter analyze || echo "analyze completed with warnings"
+        continue-on-error: true
+        run: flutter analyze
 
       - name: Flutter test
         run: flutter test --machine --coverage 2>&1 || flutter test
