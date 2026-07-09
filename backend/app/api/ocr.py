@@ -20,7 +20,7 @@ import tempfile
 import logging
 import time
 import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Optional
 from fastapi import APIRouter, File, UploadFile, HTTPException
@@ -291,7 +291,6 @@ def _morphology_enhance_digits(binary_img, kernel_size: int = 2):
     - 闭运算：填补数字笔画断裂
     """
     import cv2
-    import numpy as np
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
     opened = cv2.morphologyEx(binary_img, cv2.MORPH_OPEN, kernel)
     closed = cv2.morphologyEx(opened, cv2.MORPH_CLOSE, kernel)
@@ -325,10 +324,10 @@ def _preprocess_image(img, strategy: str = "auto"):
     # ─── 轻量策略（25-50ms） ───
     if strategy == "light":
         lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
-        l, a, b = cv2.split(lab)
+        lightness_chan, a, b = cv2.split(lab)
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        l = clahe.apply(l)
-        enhanced = cv2.merge([l, a, b])
+        lightness_chan = clahe.apply(lightness_chan)
+        enhanced = cv2.merge([lightness_chan, a, b])
         enhanced = cv2.cvtColor(enhanced, cv2.COLOR_LAB2BGR)
 
         # 轻微锐化
@@ -343,10 +342,10 @@ def _preprocess_image(img, strategy: str = "auto"):
     if strategy == "heavy":
         # 1. CLAHE
         lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
-        l, a, b = cv2.split(lab)
+        lightness_chan, a, b = cv2.split(lab)
         clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
-        l = clahe.apply(l)
-        enhanced = cv2.merge([l, a, b])
+        lightness_chan = clahe.apply(lightness_chan)
+        enhanced = cv2.merge([lightness_chan, a, b])
         enhanced = cv2.cvtColor(enhanced, cv2.COLOR_LAB2BGR)
 
         # 2. 灰度
@@ -824,5 +823,5 @@ async def recognize_medicine(file: UploadFile = File(...)):
         if tmp_path and os.path.exists(tmp_path):
             try:
                 os.unlink(tmp_path)
-            except:
+            except Exception:
                 pass

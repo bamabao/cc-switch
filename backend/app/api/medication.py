@@ -1,6 +1,6 @@
 """药品管理 API"""
 from datetime import date, datetime, timedelta, time as dt_time
-from typing import List, Optional
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
@@ -124,7 +124,6 @@ def get_medication_alerts(
     - 余量预警（stock）：药品剩余用量不足7天
     - 已过期（expired）：已过保质期
     """
-    from datetime import date, timedelta
     today = date.today()
 
     q = db.query(Medication).filter(
@@ -260,7 +259,7 @@ def create_medication(
     db: Session = Depends(get_db),
 ):
     """老人/子女新增药品"""
-    elder = _get_elder(db, elder_id)
+    _get_elder(db, elder_id)
 
     # 检查是否同名药品已存在
     existing = db.query(Medication).filter(
@@ -445,7 +444,7 @@ def checkin_medication(
 
     schedules = db.query(MedicationSchedule).filter(
         MedicationSchedule.medication_id == med.id,
-        MedicationSchedule.is_active == True,
+        MedicationSchedule.is_active,
     ).order_by(MedicationSchedule.time_of_day).all()
 
     if not schedules:
@@ -631,18 +630,18 @@ def get_medication_logs(
     logs = q.all()
     return {
         "total": len(logs),
-        "confirmed": sum(1 for l in logs if l.status == "confirmed"),
-        "missed": sum(1 for l in logs if l.status == "missed"),
+        "confirmed": sum(1 for log in logs if log.status == "confirmed"),
+        "missed": sum(1 for log in logs if log.status == "missed"),
         "items": [
             {
-                "id": l.id,
-                "medication_name": l.medication.name,
-                "scheduled_time": l.scheduled_time.isoformat(),
-                "confirmed_time": l.confirmed_time.isoformat() if l.confirmed_time else None,
-                "status": l.status,
-                "dosage_taken": l.dosage_taken,
+                "id": log.id,
+                "medication_name": log.medication.name,
+                "scheduled_time": log.scheduled_time.isoformat(),
+                "confirmed_time": log.confirmed_time.isoformat() if log.confirmed_time else None,
+                "status": log.status,
+                "dosage_taken": log.dosage_taken,
             }
-            for l in logs
+            for log in logs
         ],
     }
 

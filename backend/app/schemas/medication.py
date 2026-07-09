@@ -1,9 +1,9 @@
 """用药管理 API Schemas"""
 from datetime import date, time, datetime
 from typing import Optional, List
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict
 
-from app.models.medication import DrugCategory, OralForm, ExternalForm, InjectionForm, MedicationStatus
+from app.models.medication import DrugCategory, OralForm, ExternalForm, InjectionForm
 
 
 # ========== 药品创建/更新 ==========

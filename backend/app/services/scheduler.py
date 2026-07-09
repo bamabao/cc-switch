@@ -12,9 +12,7 @@
     # 方式二：独立运行（推荐生产环境）
     python -m app.scheduler
 """
-import asyncio
 import logging
-from datetime import datetime
 
 from app.models.base import SessionLocal
 from app.services.reminder import ReminderService
@@ -65,7 +63,6 @@ def run_streak_check():
     try:
         service = ReminderService(db)
         from app.models.user import User
-        from sqlalchemy import func
         # 查找昨日有用药记录但还没领连续奖励的老人
         users = db.query(User).filter(
             User.role == "elder",

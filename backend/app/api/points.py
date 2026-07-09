@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -84,7 +84,7 @@ def list_products(
     db: Session = Depends(get_db),
 ):
     """商品列表"""
-    q = db.query(PointProduct).filter(PointProduct.is_active == True)
+    q = db.query(PointProduct).filter(PointProduct.is_active)
     if category:
         q = q.filter(PointProduct.category == category)
     products = q.all()

@@ -9,7 +9,6 @@ from datetime import datetime, timedelta, time
 from typing import List, Optional
 from sqlalchemy.orm import Session
 
-from app.models.base import SessionLocal
 from app.models.medication import (
     Medication, MedicationSchedule, MedicationLog,
     MedicationStatus
@@ -39,7 +38,7 @@ class ReminderService:
             .join(Medication)
             .filter(
                 Medication.status == MedicationStatus.APPROVED,
-                MedicationSchedule.is_active == True,
+                MedicationSchedule.is_active,
             )
             .all()
         )
@@ -106,7 +105,7 @@ class ReminderService:
             .filter(
                 MedicationLog.confirmed_time.is_(None),
                 MedicationLog.reminder_sent_1.isnot(None),
-                MedicationLog.alert_sent_to_child == False,
+                not MedicationLog.alert_sent_to_child,
                 MedicationLog.scheduled_time <= threshold,
             )
             .all()
@@ -119,7 +118,7 @@ class ReminderService:
                 self.db.query(FamilyBinding)
                 .filter(
                     FamilyBinding.elder_id == med.elder_id,
-                    FamilyBinding.is_active == True,
+                    FamilyBinding.is_active,
                 )
                 .all()
             )

@@ -5,14 +5,14 @@ from typing import Optional
 
 from app.models.base import get_db
 from app.models.emergency_contact import EmergencyContact
-from app.models.user import User, UserRole
+from app.models.user import UserRole
 from app.schemas.emergency_contact import (
     EmergencyContactCreate,
     EmergencyContactUpdate,
     EmergencyContactResponse,
     EmergencyContactListResponse,
 )
-from app.api.auth import verify_token, get_current_user
+from app.api.auth import get_current_user
 
 router = APIRouter(prefix="/api/v1/emergency-contacts", tags=["紧急联系人"])
 
@@ -37,7 +37,7 @@ def list_emergency_contacts(
         db.query(EmergencyContact)
         .filter(
             EmergencyContact.elder_id == target_elder_id,
-            EmergencyContact.is_active == True,
+            EmergencyContact.is_active,
         )
         .order_by(EmergencyContact.priority)
         .order_by(EmergencyContact.created_at)
@@ -86,7 +86,7 @@ def get_emergency_contact(
     db: Session = Depends(get_db),
 ):
     """获取单个紧急联系人详情"""
-    user = get_current_user(token, db)
+    get_current_user(token, db)
     contact = db.query(EmergencyContact).filter(EmergencyContact.id == contact_id).first()
     if not contact:
         raise HTTPException(404, "紧急联系人不存在")
@@ -101,7 +101,7 @@ def update_emergency_contact(
     db: Session = Depends(get_db),
 ):
     """更新紧急联系人"""
-    user = get_current_user(token, db)
+    get_current_user(token, db)
     contact = db.query(EmergencyContact).filter(EmergencyContact.id == contact_id).first()
     if not contact:
         raise HTTPException(404, "紧急联系人不存在")
@@ -129,7 +129,7 @@ def delete_emergency_contact(
     db: Session = Depends(get_db),
 ):
     """删除紧急联系人（软删除）"""
-    user = get_current_user(token, db)
+    get_current_user(token, db)
     contact = db.query(EmergencyContact).filter(EmergencyContact.id == contact_id).first()
     if not contact:
         raise HTTPException(404, "紧急联系人不存在")
@@ -158,7 +158,7 @@ def get_primary_contact_phone(
         db.query(EmergencyContact)
         .filter(
             EmergencyContact.elder_id == target_elder_id,
-            EmergencyContact.is_active == True,
+            EmergencyContact.is_active,
         )
         .order_by(EmergencyContact.priority)
         .first()

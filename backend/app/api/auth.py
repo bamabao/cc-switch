@@ -179,7 +179,7 @@ def bind_family(
     existing = db.query(FamilyBinding).filter(
         FamilyBinding.elder_id == elder.id,
         FamilyBinding.child_id == child_id,
-        FamilyBinding.is_active == True,
+        FamilyBinding.is_active,
     ).first()
     if existing:
         raise HTTPException(400, "已绑定该老人")
@@ -203,7 +203,7 @@ def get_my_info(
     if user.role == UserRole.ELDER:
         bindings = db.query(FamilyBinding).filter(
             FamilyBinding.elder_id == user.id,
-            FamilyBinding.is_active == True,
+            FamilyBinding.is_active,
         ).all()
         for b in bindings:
             child = db.query(User).filter(User.id == b.child_id).first()
@@ -217,7 +217,7 @@ def get_my_info(
     else:
         bindings = db.query(FamilyBinding).filter(
             FamilyBinding.child_id == user.id,
-            FamilyBinding.is_active == True,
+            FamilyBinding.is_active,
         ).all()
         for b in bindings:
             elder = db.query(User).filter(User.id == b.elder_id).first()

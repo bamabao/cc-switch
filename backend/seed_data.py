@@ -2,10 +2,11 @@
 爸妈宝 — 数据库种子数据
 为所有功能页面提供真实展示数据
 """
-import sys, os
+import sys
+import os
 sys.path.insert(0, os.path.dirname(__file__))
 
-from datetime import date, time, datetime, timedelta
+from datetime import time, datetime, timedelta
 from app.models.base import SessionLocal
 from app.models import (
     User, FamilyBinding, Medication, MedicationSchedule,
@@ -140,7 +141,6 @@ def seed():
                 scheduled_at = datetime.combine(day, time(h, m))
                 is_future = scheduled_at > now
                 is_old = day_offset >= 2
-                is_recent_but_past = day_offset <= 1 and scheduled_at < now
 
                 if is_future:
                     log_status = "PENDING"
@@ -199,9 +199,9 @@ def seed():
         print("[OK] 种子数据写入成功！")
         print(f"  用户: {elder.nickname}(elder) + {child1.nickname}(child)")
         print(f"  药品: {med1.name}, {med2.name}, {med3.name}(全部已批准)")
-        print(f"  日志: 过去7天")
+        print("  日志: 过去7天")
         print(f"  积分: 1280分 + {len(products)}种商品")
-        print(f"  老人手机号: 13800138000 (验证码: 123456)")
+        print("  老人手机号: 13800138000 (验证码: 123456)")
         print("  [注意] 审核流程已移除，所有药品添加直接可用")
     except Exception as e:
         db.rollback()
