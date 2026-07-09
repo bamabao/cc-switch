@@ -79,13 +79,13 @@ jobs:
           cache: true
       - run: flutter pub get
 
-      - name: Install NDK 27.0.12077973
+      - name: Install NDK 27.0.12077973 & platform
         run: |
           SDKMANAGER="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
           if [ ! -f "$SDKMANAGER" ]; then
             SDKMANAGER="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
           fi
-          echo "y" | "$SDKMANAGER" --install "ndk;27.0.12077973" 2>&1 || true
+          echo "y" | "$SDKMANAGER" --install "ndk;27.0.12077973" "platforms;android-35" 2>&1 || true
           echo "ANDROID_NDK=$ANDROID_HOME/ndk/27.0.12077973" >> "$GITHUB_ENV"
 
       - name: flutter build apk --debug
