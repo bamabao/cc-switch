@@ -1,4 +1,4 @@
-# 爸妈宝 CI - 诊断版 (CI #31)
+# 爸妈宝 CI
 name: CI
 
 on:
@@ -45,6 +45,14 @@ jobs:
         with: { flutter-version: "3.x", channel: "stable", cache: true }
       - run: flutter pub get
 
+      # Create local.properties early so settings.gradle.kts can find Flutter SDK
+      - name: Generate local.properties
+        run: |
+          echo "flutter.sdk=${FLUTTER_ROOT}" > android/local.properties
+          echo "sdk.dir=${ANDROID_HOME}" >> android/local.properties
+          echo "### local.properties created ###"
+          cat android/local.properties
+
       - name: Install Android platform & NDK
         run: |
           SDKMANAGER="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
@@ -53,36 +61,17 @@ jobs:
           ls "$ANDROID_HOME/ndk/" 2>/dev/null
           echo "ANDROID_NDK=$ANDROID_HOME/ndk/27.0.12077973" >> "$GITHUB_ENV"
 
-      - name: Flutter doctor
+      - name: Build APK (debug)
         run: |
-          flutter doctor -v
-          echo "=== Android SDK ==="
-          ls "$ANDROID_HOME/platforms/" 2>/dev/null
-          ls "$ANDROID_HOME/build-tools/" 2>/dev/null
-          echo "=== local.properties ==="
-          cat android/local.properties 2>/dev/null || echo "NO LOCAL.PROPERTIES"
-          echo "=== FLUTTER_ROOT ==="
-          echo "${FLUTTER_ROOT:-NOT SET}"
-          echo "=== Gradle wrapper ==="
-          ls -la android/gradlew 2>/dev/null || echo "NO GRADLEW"
-          cat android/gradle/wrapper/gradle-wrapper.properties 2>/dev/null
+          flutter build apk --debug 2>&1
+          ls -la build/app/outputs/flutter-apk/
 
-      - name: flutter build apk --debug
-        shell: bash
+      - name: Upload build log (always)
+        if: failure()
         run: |
-          flutter build apk --debug 2>&1 | tee /tmp/build.log
-          EXIT=$?
-          echo "EXIT_CODE=$EXIT" >> $GITHUB_ENV
-          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || echo "NO_APK_OUTPUT"
-          if [ $EXIT -ne 0 ]; then
-            tail -200 /tmp/build.log
-          fi
-          exit $EXIT
-
-      - if: always()
-        name: Upload build log
-        uses: actions/upload-artifact@v4
-        with: { name: build-log, path: /tmp/build.log }
+          find . -name "*.log" -path "*/android/*" 2>/dev/null | head -3
+          ls ~/.gradle/daemon/ 2>/dev/null || true
+          tail -100 android/.gradle/build.log 2>/dev/null || echo "No gradle build.log"
 
       - name: Upload APK
         if: success()
