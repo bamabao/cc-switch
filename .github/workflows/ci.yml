@@ -126,24 +126,36 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Install Android NDK
+      - name: Install Android NDK & Platform
         run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973" --sdk_root=$ANDROID_HOME 2>&1 || \
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973" --sdk_root=$ANDROID_SDK_ROOT 2>&1
+          sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          [ ! -f "$sdkmanager" ] && sdkmanager="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          yes | $sdkmanager "ndk;27.0.12077973" 2>&1
+          yes | $sdkmanager "platforms;android-35" 2>&1
           echo "ANDROID_NDK=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
 
-      - name: Build APK (debug)
+      - name: Flutter doctor
+        run: flutter doctor -v
+
+      - name: Android SDK list
         run: |
-          flutter build apk --debug 2>&1 | tee build_output.log; exit_code=${PIPESTATUS[0]}
-          if [ $exit_code -ne 0 ]; then
-            {
-              echo "### ❌ Build APK FAILED (tail -80)"
-              echo '```'
-              tail -80 build_output.log
-              echo '```'
-            } >> $GITHUB_STEP_SUMMARY
-          fi
-          exit $exit_code
+          echo "=== platforms ==="
+          ls $ANDROID_HOME/platforms/ 2>/dev/null || echo "NO PLATFORMS"
+          echo "=== build-tools ==="
+          ls $ANDROID_HOME/build-tools/ 2>/dev/null || echo "NO BUILD-TOOLS"
+          echo "=== ndk ==="
+          ls $ANDROID_HOME/ndk/ 2>/dev/null || echo "NO NDK"
+
+      - name: Build APK (debug)
+        run: flutter build apk --debug 2>&1 | tee ../build_output.log
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-apk-logs
+          path: build_output.log
+          if-no-files-found: warn
 
       - name: Rename APK with version
         run: |
