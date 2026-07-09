@@ -6,6 +6,9 @@ on:
     branches: [main, master, develop]
     tags: ["v*"]
 
+env:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.console=plain"
+
 jobs:
   backend-test:
     name: Backend Tests
@@ -45,39 +48,51 @@ jobs:
         with: { flutter-version: "3.x", channel: "stable", cache: true }
       - run: flutter pub get
 
-      # Create local.properties early so settings.gradle.kts can find Flutter SDK
       - name: Generate local.properties
         run: |
           echo "flutter.sdk=${FLUTTER_ROOT}" > android/local.properties
           echo "sdk.dir=${ANDROID_HOME}" >> android/local.properties
-          echo "### local.properties created ###"
-          cat android/local.properties
 
       - name: Install Android platform & NDK
         run: |
           SDKMANAGER="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
           echo "y" | "$SDKMANAGER" "platforms;android-35" 2>&1 || true
           echo "y" | "$SDKMANAGER" "ndk;27.0.12077973" 2>&1 || true
-          ls "$ANDROID_HOME/ndk/" 2>/dev/null
           echo "ANDROID_NDK=$ANDROID_HOME/ndk/27.0.12077973" >> "$GITHUB_ENV"
 
       - name: Build APK (debug)
+        id: build
+        shell: bash
         run: |
-          flutter build apk --debug 2>&1
-          ls -la build/app/outputs/flutter-apk/
+          # Redirect ALL output to file, capture exit code
+          flutter build apk --debug > /tmp/build-out.log 2>&1
+          EXIT_CODE=$?
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+          echo "### Exit code: $EXIT_CODE" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -100 /tmp/build-out.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          if [ $EXIT_CODE -ne 0 ]; then
+            # Extract error lines as annotations (publicly readable)
+            grep -i -E '(error|FAILURE|failed|BUILD FAILED|Exception|Caused by|Error while)' /tmp/build-out.log | head -30 | while read line; do
+              echo "::error file=ci.yml,title=Build Error::$line"
+            done
+          fi
+          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || true
+          exit $EXIT_CODE
 
-      - name: Upload build log (always)
-        if: failure()
-        run: |
-          find . -name "*.log" -path "*/android/*" 2>/dev/null | head -3
-          ls ~/.gradle/daemon/ 2>/dev/null || true
-          tail -100 android/.gradle/build.log 2>/dev/null || echo "No gradle build.log"
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: /tmp/build-out.log
 
       - name: Upload APK
-        if: success()
+        if: steps.build.outputs.exit_code == '0'
         run: |
           mkdir -p build-apk
           cp build/app/outputs/flutter-apk/app-debug.apk build-apk/
       - uses: actions/upload-artifact@v4
-        if: success()
+        if: steps.build.outputs.exit_code == '0'
         with: { name: bamabao-apk-debug, path: app/build-apk/*.apk }
