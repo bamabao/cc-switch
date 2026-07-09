@@ -56,9 +56,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       setState(() {
         _dialect = _voiceToDialect[user.voicePreference] ?? '普通话';
         _volume = user.fontScale != null ? (user.fontScale! / 100.0) : 1.0;
+        _selfAudit = user.selfAudit;
         _userName = user.name;
         _userPhone = user.phone;
-        _selfAudit = user.selfAudit;
         _loading = false;
       });
     } catch (_) {
@@ -74,6 +74,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (_) {
       // 静默失败
     }
+  }
+
+  Future<void> _saveSelfAudit(bool value) async {
+    try {
+      await _api.put('${ApiConfig.authProfile}?self_audit=$value&token=${_api.token ?? ""}');
+    } catch (_) {}
   }
 
   Future<void> _saveVolume(double volume) async {
@@ -174,16 +180,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       MaterialPageRoute(builder: (_) => const MedicinesScreen()),
                     );
                   }),
-                ]),
-                const SizedBox(height: AppTheme.spacingMd),
-                _buildSection('药品审核', [
-                  _buildSwitchTile('自审核模式（开启后新药品自动通过）', _selfAudit, (v) async {
+                  // 自审核模式
+                  _buildSwitchTile('药品自审核', _selfAudit, (v) {
                     setState(() => _selfAudit = v);
-                    try {
-                      await _api.put('${ApiConfig.authProfile}?self_audit=$v&token=${_api.token ?? ""}');
-                    } catch (_) {}
+                    _saveSelfAudit(v);
                   }),
                 ]),
+                const SizedBox(height: AppTheme.spacingMd),
                 const SizedBox(height: AppTheme.spacingMd),
                 _buildSection('关于', [
                   _buildInfoTile('版本', 'v0.2.0'),

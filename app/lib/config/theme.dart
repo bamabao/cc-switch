@@ -83,7 +83,6 @@ class AppTheme {
         surface: bgColor,
       ),
       scaffoldBackgroundColor: bgColor,
-      fontFamily: 'Roboto',
       textTheme: const TextTheme(
         displayLarge: TextStyle(fontSize: displayLarge, fontWeight: FontWeight.bold, color: textPrimary),
         displayMedium: TextStyle(fontSize: displayMedium, fontWeight: FontWeight.bold, color: textPrimary),

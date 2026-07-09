@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import '../config/api_config.dart';
 import '../models/medication.dart';
 import '../models/user.dart';
@@ -164,14 +165,40 @@ class ApiService {
     return result;
   }
 
-  /// 提交审核
-  Future<Map<String, dynamic>> submitMedication(int medicationId) async {
-    return await post(ApiConfig.medicationSubmit(medicationId));
-  }
-
   /// 删除药品
   Future<Map<String, dynamic>> deleteMedication(int medicationId) async {
     return await delete('${ApiConfig.medications}/$medicationId');
+  }
+
+  /// 获取今日打卡状态
+  Future<Map<String, dynamic>> getTodayCheckin({required int elderId}) async {
+    return await get(ApiConfig.checkinToday, queryParams: {
+      'elder_id': elderId.toString(),
+    });
+  }
+
+  /// 一键打卡服药
+  Future<Map<String, dynamic>> checkinMedication({
+    required int medicationId,
+    required int elderId,
+    int scheduleIndex = 0,
+  }) async {
+    return await post(
+      '${ApiConfig.medications}/$medicationId/checkin?elder_id=$elderId',
+      body: {'schedule_index': scheduleIndex},
+    );
+  }
+
+  /// 撤销打卡
+  Future<Map<String, dynamic>> undoCheckin({
+    required int medicationId,
+    required int elderId,
+    required int scheduleId,
+  }) async {
+    return await post(
+      '${ApiConfig.medications}/$medicationId/checkin/undo?elder_id=$elderId',
+      body: {'schedule_id': scheduleId},
+    );
   }
 
   /// 获取用药历史
@@ -187,6 +214,29 @@ class ApiService {
     if (medicationId != null) params['medication_id'] = medicationId.toString();
     if (_token != null) params['token'] = _token!;
     return await get('${ApiConfig.medications}/logs/history', queryParams: params);
+  }
+
+  // ─── OCR识别 ───
+
+  /// 上传药盒照片并识别药品信息
+  Future<Map<String, dynamic>> ocrRecognize(String imagePath) async {
+    try {
+      final uri = Uri.parse('$baseUrl${ApiConfig.ocrRecognize}');
+      final request = http.MultipartRequest('POST', uri);
+      request.files.add(await http.MultipartFile.fromPath(
+        'file',
+        imagePath,
+        contentType: MediaType('image', 'jpeg'),
+      ));
+      if (_token != null) {
+        request.headers['Authorization'] = 'Bearer $_token';
+      }
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      return _handleResponse(response);
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
   }
 
   // ─── 健康检查 ───

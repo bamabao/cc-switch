@@ -72,13 +72,6 @@ class MedicationUpdate(BaseModel):
     side_effects: Optional[str] = None
 
 
-# ========== 审核 ==========
-
-class AuditActionRequest(BaseModel):
-    action: str = Field(..., pattern="^(approve|reject)$")
-    reject_reason: Optional[str] = ""
-
-
 # ========== 响应 ==========
 
 class ScheduleResponse(BaseModel):
@@ -144,3 +137,15 @@ class MedicationConfirm(BaseModel):
     schedule_id: int
     dosage_taken: Optional[float] = None
     remark: Optional[str] = ""
+
+
+# ========== 打卡相关 ==========
+
+class CheckinRequest(BaseModel):
+    """一键打卡请求"""
+    schedule_index: Optional[int] = 0
+
+
+class CheckinUndoRequest(BaseModel):
+    """撤销打卡请求"""
+    schedule_id: int

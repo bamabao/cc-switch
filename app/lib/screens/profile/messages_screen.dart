@@ -11,7 +11,7 @@ class MessagesScreen extends StatefulWidget {
 class _MessagesScreenState extends State<MessagesScreen> {
   final List<Map<String, dynamic>> _messages = [
     {'title': '用药提醒', 'body': '该服用阿莫西林胶囊了（08:00）', 'time': '2026-07-02 08:00', 'type': 'reminder', 'read': false},
-    {'title': '审核通过', 'body': '子女已审核通过「苯磺酸氨氯地平片」', 'time': '2026-07-01 19:30', 'type': 'audit', 'read': false},
+
     {'title': '积分到账', 'body': '按时用药获得 +10 积分', 'time': '2026-07-01 08:00', 'type': 'points', 'read': true},
     {'title': '药品预警', 'body': '阿莫西林胶囊将于3天后过期', 'time': '2026-06-30 10:00', 'type': 'alert', 'read': true},
     {'title': '连续打卡', 'body': '恭喜！您已连续打卡7天，获得50积分奖励', 'time': '2026-06-28 08:05', 'type': 'points', 'read': true},
@@ -31,7 +31,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
           Color color;
           switch (msg['type'] as String) {
             case 'reminder': icon = Icons.alarm; color = AppTheme.primaryColor; break;
-            case 'audit': icon = Icons.checklist; color = AppTheme.secondaryColor; break;
+
             case 'points': icon = Icons.star; color = AppTheme.warningColor; break;
             case 'alert': icon = Icons.warning_amber; color = AppTheme.dangerColor; break;
             default: icon = Icons.notifications; color = AppTheme.textSecondary;

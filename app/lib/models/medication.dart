@@ -6,7 +6,7 @@ class Medication {
   final String? dosage;       // 剂量（如 "一粒""5ml"）
   final String? frequency;    // 频率（如 "一天两次""一日三次"）
   final String? notes;        // 备注
-  final String status;        // pending(待审核) | approved(已确认) | rejected(已驳回)
+  final String status;        // 药品状态
   final DateTime createdAt;
   final DateTime updatedAt;
 

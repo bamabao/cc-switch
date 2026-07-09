@@ -1,5 +1,5 @@
 """药品管理 API"""
-from datetime import datetime
+from datetime import date, datetime, timedelta, time as dt_time
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -9,11 +9,11 @@ from app.models.medication import (
     Medication, MedicationSchedule, MedicationLog,
     MedicationStatus, DrugCategory, OralForm, ExternalForm, InjectionForm
 )
-from app.models.audit import AuditRecord, AuditAction
 from app.models.user import User, UserRole
 from app.schemas.medication import (
     MedicationCreate, MedicationUpdate, MedicationResponse,
-    MedicationConfirm, ScheduleResponse, AuditActionRequest
+    MedicationConfirm, ScheduleResponse,
+    CheckinRequest, CheckinUndoRequest,
 )
 
 router = APIRouter(prefix="/api/v1/medications", tags=["药品管理"])
@@ -110,18 +110,7 @@ def list_medications(
     return {"items": [_to_medication_response(m) for m in q.all()]}
 
 
-@router.get("/pending")
-def list_pending_medications(
-    elder_id: int = Query(..., description="老人用户ID"),
-    db: Session = Depends(get_db),
-):
-    """获取待审核药品列表（子女端审核入口）"""
-    q = db.query(Medication).filter(
-        Medication.elder_id == elder_id,
-        Medication.status == MedicationStatus.PENDING,
-    ).order_by(Medication.created_at.asc())
-    return {"items": [_to_medication_response(m) for m in q.all()],
-            "total": q.count()}
+
 
 
 @router.get("/alerts")
@@ -187,6 +176,76 @@ def get_medication_alerts(
     return {"items": alerts, "total": len(alerts)}
 
 
+# ========== 打卡查询 ==========
+
+@router.get("/checkin/today")
+def get_today_checkin(
+    elder_id: int = Query(...),
+    db: Session = Depends(get_db),
+):
+    """查询老人今天已打卡/待打卡状态（首页刷新用）"""
+    _get_elder(db, elder_id)
+
+    # 查询老人所有 active 药品
+    meds = db.query(Medication).filter(
+        Medication.elder_id == elder_id,
+        Medication.status != MedicationStatus.DISABLED,
+    ).all()
+
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+
+    items = []
+    total_pending = 0
+
+    for med in meds:
+        schedules = med.schedules
+        if not schedules:
+            continue
+
+        # 取今天该药品的所有打卡记录
+        existing_logs = db.query(MedicationLog).filter(
+            MedicationLog.medication_id == med.id,
+            MedicationLog.elder_id == elder_id,
+            MedicationLog.scheduled_time >= today_start,
+            MedicationLog.scheduled_time < today_end,
+            MedicationLog.status == "confirmed",
+        ).all()
+        checked_schedule_ids = {log.schedule_id for log in existing_logs if log.schedule_id}
+
+        schedule_list = []
+        checked_count = 0
+        for s in schedules:
+            if not s.is_active:
+                continue
+            checked = s.id in checked_schedule_ids
+            if checked:
+                checked_count += 1
+            else:
+                total_pending += 1
+            schedule_list.append({
+                "schedule_id": s.id,
+                "time": s.time_of_day.strftime("%H:%M"),
+                "checked": checked,
+            })
+
+        total_slots = len(schedule_list)
+        if total_slots == 0:
+            continue
+
+        items.append({
+            "medication_id": med.id,
+            "name": med.name,
+            "dosage_per_take": med.dosage_per_take,
+            "unit": med.unit or "",
+            "total_slots": total_slots,
+            "checked_slots": checked_count,
+            "schedules": schedule_list,
+        })
+
+    return {"items": items, "total_pending": total_pending}
+
+
 @router.get("/{medication_id}")
 def get_medication(medication_id: int, elder_id: int = Query(...), db: Session = Depends(get_db)):
     """获取单个药品详情"""
@@ -230,10 +289,9 @@ def create_medication(
             except ValueError:
                 raise HTTPException(400, f"无效的{form_field}值: {create_data[form_field]}")
 
-    # 自审核覆盖status
-    if elder.self_audit:
-        create_data["status"] = MedicationStatus.APPROVED
-        create_data["created_by"] = "elder"
+    # 直接通过，无需审核
+    create_data["status"] = MedicationStatus.APPROVED
+    create_data["created_by"] = "elder"
 
     med = Medication(elder_id=elder_id, **create_data)
     db.add(med)
@@ -250,14 +308,6 @@ def create_medication(
         )
         db.add(schedule)
 
-    # 记录操作
-    audit = AuditRecord(
-        medication_id=med.id,
-        actor_id=elder_id,
-        action=AuditAction.CREATE,
-        detail=f"新增药品：{body.name}",
-    )
-    db.add(audit)
     db.commit()
     db.refresh(med)
 
@@ -271,24 +321,15 @@ def update_medication(
     body: MedicationUpdate = None,
     db: Session = Depends(get_db),
 ):
-    """修改药品信息（进入待审核状态）"""
+    """修改药品信息"""
     med = _get_medication(db, medication_id, elder_id)
 
     update_data = body.model_dump(exclude_none=True)
     for k, v in update_data.items():
         setattr(med, k, v)
 
-    # 修改后重置为待审核（除非是子女直接操作）
-    if med.status == MedicationStatus.APPROVED:
-        med.status = MedicationStatus.PENDING
+    # 修改后状态不变，无需重新审核
 
-    audit = AuditRecord(
-        medication_id=med.id,
-        actor_id=elder_id,
-        action=AuditAction.UPDATE,
-        detail=f"修改药品信息：{', '.join(update_data.keys())}",
-    )
-    db.add(audit)
     db.commit()
     db.refresh(med)
     return _to_medication_response(med)
@@ -296,27 +337,7 @@ def update_medication(
 
 # ========== 药品提交 & 审核 ==========
 
-@router.post("/{medication_id}/submit")
-def submit_medication(
-    medication_id: int,
-    elder_id: int = Query(...),
-    db: Session = Depends(get_db),
-):
-    """老人提交药品审核"""
-    med = _get_medication(db, medication_id, elder_id)
-    if med.status == MedicationStatus.APPROVED:
-        raise HTTPException(400, "该药品已审核通过，无需重复提交")
 
-    med.status = MedicationStatus.PENDING
-    audit = AuditRecord(
-        medication_id=med.id,
-        actor_id=elder_id,
-        action=AuditAction.SUBMIT,
-        detail="提交审核",
-    )
-    db.add(audit)
-    db.commit()
-    return {"message": "已提交审核", "status": "pending"}
 
 
 @router.delete("/{medication_id}")
@@ -324,16 +345,13 @@ def delete_medication(
     medication_id: int,
     db: Session = Depends(get_db),
 ):
-    """删除药品（仅DRAFT/PENDING状态可删）"""
+    """删除药品"""
     med = db.query(Medication).filter(Medication.id == medication_id).first()
     if not med:
         raise HTTPException(404, "药品不存在")
-    if med.status == MedicationStatus.APPROVED or med.status == MedicationStatus.DISABLED:
-        raise HTTPException(400, "已通过的药品不可删除，请先联系子女")
-    # 删除关联记录（含审计、订单、日志）
-    from app.models.audit import AuditRecord
-    from app.models.point import PointTransaction, PointOrder
-    db.query(AuditRecord).filter(AuditRecord.medication_id == medication_id).delete()
+    if med.status == MedicationStatus.DISABLED:
+        raise HTTPException(400, "已停用的药品不可删除")
+    # 删除关联记录
     db.query(MedicationLog).filter(MedicationLog.medication_id == medication_id).delete()
     db.query(MedicationSchedule).filter(MedicationSchedule.medication_id == medication_id).delete()
     db.delete(med)
@@ -341,37 +359,7 @@ def delete_medication(
     return {"message": "已删除", "id": medication_id}
 
 
-@router.post("/{medication_id}/audit")
-def audit_medication(
-    medication_id: int,
-    child_id: int = Query(...),
-    body: AuditActionRequest = None,
-    db: Session = Depends(get_db),
-):
-    """子女审核药品"""
-    med = _get_medication(db, medication_id)
 
-    if body.action == "approve":
-        med.status = MedicationStatus.APPROVED
-        audit = AuditRecord(
-            medication_id=med.id,
-            actor_id=child_id,
-            action=AuditAction.APPROVE,
-            detail="审核通过",
-        )
-    elif body.action == "reject":
-        med.status = MedicationStatus.REJECTED
-        audit = AuditRecord(
-            medication_id=med.id,
-            actor_id=child_id,
-            action=AuditAction.REJECT,
-            detail="驳回",
-            reject_reason=body.reject_reason or "",
-        )
-
-    db.add(audit)
-    db.commit()
-    return {"message": f"操作成功：{body.action}", "status": med.status.value}
 
 
 # ========== 用药确认 ==========
@@ -438,6 +426,185 @@ def confirm_medication(
 
     db.commit()
     return {"message": "用药已确认", "points_earned": 10}
+
+
+# ========== 记录查询 ==========
+
+# ========== 打卡 API ==========
+
+@router.post("/{medication_id}/checkin")
+def checkin_medication(
+    medication_id: int,
+    elder_id: int = Query(...),
+    body: CheckinRequest = None,
+    db: Session = Depends(get_db),
+):
+    """老人首页一键打卡服药"""
+    now = datetime.utcnow()
+    med = _get_medication(db, medication_id, elder_id)
+
+    schedules = db.query(MedicationSchedule).filter(
+        MedicationSchedule.medication_id == med.id,
+        MedicationSchedule.is_active == True,
+    ).order_by(MedicationSchedule.time_of_day).all()
+
+    if not schedules:
+        raise HTTPException(400, "该药品无可用定时计划")
+
+    # 确定目标 schedule
+    schedule = None
+    if body.schedule_index is not None and 0 <= body.schedule_index < len(schedules):
+        # 用索引取
+        schedule = schedules[body.schedule_index]
+    else:
+        # 查找当天未确认的时段，取第一个未打卡的
+        unchecked = []
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = today_start + timedelta(days=1)
+        existing_logs = db.query(MedicationLog).filter(
+            MedicationLog.medication_id == med.id,
+            MedicationLog.elder_id == elder_id,
+            MedicationLog.scheduled_time >= today_start,
+            MedicationLog.scheduled_time < today_end,
+            MedicationLog.status == "confirmed",
+        ).all()
+        checked_ids = {log.schedule_id for log in existing_logs if log.schedule_id}
+        for s in schedules:
+            if s.id not in checked_ids:
+                unchecked.append(s)
+        if unchecked:
+            schedule = unchecked[0]  # 取第一个未打卡的
+        else:
+            schedule = schedules[0]  # 全打过了，默认第一个
+
+    if not schedule:
+        raise HTTPException(400, "无法确定打卡时段")
+
+    # 检查当天是否已重复打卡
+    today_date = now.date()
+    existing = db.query(MedicationLog).filter(
+        MedicationLog.medication_id == med.id,
+        MedicationLog.elder_id == elder_id,
+        MedicationLog.schedule_id == schedule.id,
+        MedicationLog.scheduled_time >= datetime.combine(today_date, dt_time.min),
+        MedicationLog.scheduled_time < datetime.combine(today_date, dt_time.max),
+        MedicationLog.status == "confirmed",
+    ).first()
+    if existing:
+        raise HTTPException(400, "该时段已打卡，请勿重复打卡")
+
+    # 创建打卡记录
+    log = MedicationLog(
+        medication_id=med.id,
+        elder_id=elder_id,
+        schedule_id=schedule.id,
+        scheduled_time=datetime.combine(now.date(), schedule.time_of_day),
+        confirmed_time=now,
+        status="confirmed",
+        dosage_taken=schedule.dosage,
+        remark="",
+    )
+    db.add(log)
+
+    # 增加积分 + 更新连续打卡 streak
+    points_to_add = 10
+    user = db.query(User).filter(User.id == elder_id).first()
+    if user.total_points is None:
+        user.total_points = 0
+    user.total_points += points_to_add
+
+    from app.models.point import PointTransaction, TransactionType
+    tx = PointTransaction(
+        elder_id=elder_id,
+        type=TransactionType.REWARD_DOSE,
+        amount=points_to_add,
+        balance_after=user.total_points,
+        description=f"按时用药奖励：{med.name}",
+    )
+    db.add(tx)
+
+    yesterday = datetime(now.year, now.month, now.day)
+    if user.last_medication_date:
+        last = user.last_medication_date
+        diff = (yesterday - last).days
+        if diff == 1:
+            user.current_streak += 1
+        elif diff > 1:
+            user.current_streak = 1
+    else:
+        user.current_streak = 1
+
+    if user.current_streak > user.longest_streak:
+        user.longest_streak = user.current_streak
+    user.last_medication_date = now
+
+    db.commit()
+    return {"success": True, "points_earned": points_to_add, "streak": user.current_streak}
+
+
+@router.post("/{medication_id}/checkin/undo")
+def undo_checkin_medication(
+    medication_id: int,
+    elder_id: int = Query(...),
+    body: CheckinUndoRequest = None,
+    db: Session = Depends(get_db),
+):
+    """撤销当天的打卡（误打卡回退）"""
+    now = datetime.utcnow()
+    _get_medication(db, medication_id, elder_id)
+
+    # 找到今天的打卡记录
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+
+    log = db.query(MedicationLog).filter(
+        MedicationLog.medication_id == medication_id,
+        MedicationLog.elder_id == elder_id,
+        MedicationLog.schedule_id == body.schedule_id,
+        MedicationLog.scheduled_time >= today_start,
+        MedicationLog.scheduled_time < today_end,
+        MedicationLog.status == "confirmed",
+    ).first()
+
+    if not log:
+        raise HTTPException(404, "未找到今天的打卡记录")
+
+    # 回退积分
+    user = db.query(User).filter(User.id == elder_id).first()
+    if user.total_points is None:
+        user.total_points = 0
+    points_to_deduct = 10
+    user.total_points = max(0, user.total_points - points_to_deduct)
+
+    from app.models.point import PointTransaction, TransactionType
+    tx = PointTransaction(
+        elder_id=elder_id,
+        type=TransactionType.REWARD_DOSE,
+        amount=-points_to_deduct,
+        balance_after=user.total_points,
+        description=f"撤销打卡：{log.medication.name}",
+    )
+    db.add(tx)
+
+    # 标记为 missed 而非真删除
+    log.status = "missed"
+
+    # 检查当天是否还有其他已确认打卡，如果完全没有则回退连续打卡
+    other_confirmed = db.query(MedicationLog).filter(
+        MedicationLog.elder_id == elder_id,
+        MedicationLog.scheduled_time >= today_start,
+        MedicationLog.scheduled_time < today_end,
+        MedicationLog.status == "confirmed",
+    ).first()
+
+    if not other_confirmed:
+        # 今天没有任何确认打卡了，回退 last_medication_date
+        user.last_medication_date = now - timedelta(days=1)
+        if user.current_streak > 0:
+            user.current_streak -= 1
+
+    db.commit()
+    return {"success": True}
 
 
 # ========== 记录查询 ==========

@@ -3,10 +3,11 @@
         android:label="爸妈宝"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-        <!-- 科大讯飞语音SDK -->
+        <!-- AIKit SDK已移除，改用Android原生TTS+SpeechRecognizer -->
+        <!-- 禁用 Impeller 渲染引擎（兼容旧设备 GPU） -->
         <meta-data
-            android:name="com.iflytek.cloud.appid"
-            android:value="2d77802d" />
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

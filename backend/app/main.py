@@ -11,10 +11,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.models.base import engine, Base
 from app.api import medication as medication_api
-from app.api import audit as audit_api
 from app.api import points as points_api
 from app.api import auth as auth_api
 from app.api import emergency_contact as emergency_contact_api
+from app.api import ocr as ocr_api
 from app.services.scheduler import run_reminder_cycle, run_streak_check
 import threading
 
@@ -103,10 +103,10 @@ app.add_middleware(
 
 # 注册路由
 app.include_router(medication_api.router)
-app.include_router(audit_api.router)
 app.include_router(points_api.router)
 app.include_router(auth_api.router)
 app.include_router(emergency_contact_api.router)
+app.include_router(ocr_api.router)
 
 
 @app.get("/api/v1/health")

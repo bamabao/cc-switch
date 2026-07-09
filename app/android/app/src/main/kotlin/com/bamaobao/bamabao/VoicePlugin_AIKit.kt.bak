@@ -1,0 +1,360 @@
+package com.bamaobao.bamabao
+
+import android.content.Context
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
+import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
+import android.util.Log
+import androidx.annotation.NonNull
+import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import io.flutter.plugin.common.MethodChannel.Result
+import java.util.Locale
+import java.util.concurrent.atomic.AtomicBoolean
+
+/**
+ * 爸妈宝 — 离线语音插件桥接 (Android 原生 TTS + SpeechRecognizer)
+ *
+ * 替代 AIKit SDK（因 AIKit 在不同设备上存在 native crash 兼容性问题）
+ *
+ * TTS: android.speech.tts.TextToSpeech — 离线中文语音合成
+ * ASR: android.speech.SpeechRecognizer — 语音识别（需要 Google 服务，无 Google 服务的设备自动降级）
+ *
+ * MethodChannel: com.bamaobao/voice
+ * 接口与原有 AIKit 版本完全兼容
+ */
+class VoicePlugin : FlutterPlugin, MethodCallHandler {
+
+    companion object {
+        private const val TAG = "VoicePlugin"
+    }
+
+    private lateinit var channel: MethodChannel
+    private lateinit var appContext: Context
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    // ─── TTS ───
+    private var tts: TextToSpeech? = null
+    private var ttsInitialized = AtomicBoolean(false)
+    private var ttsSpeaking = AtomicBoolean(false)
+
+    // ─── ASR ───
+    private var recognizer: SpeechRecognizer? = null
+    private var asrAvailable = AtomicBoolean(false)
+    private var asrListening = AtomicBoolean(false)
+
+    // ═══════════════════════════════════════════════════════
+    //              Flutter Plugin 生命周期
+    // ═══════════════════════════════════════════════════════
+
+    override fun onAttachedToEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+        channel = MethodChannel(binding.binaryMessenger, "com.bamaobao/voice")
+        channel.setMethodCallHandler(this)
+        appContext = binding.applicationContext
+    }
+
+    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+        channel.setMethodCallHandler(null)
+        destroyInternal()
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //              MethodChannel 入口
+    // ═══════════════════════════════════════════════════════
+
+    override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+        try {
+            when (call.method) {
+                "init" -> handleInit(result)
+                "setParams" -> result.success(null)
+                "startListening" -> handleStartListening(result)
+                "startOfflineListening" -> handleStartListening(result)  // 与 startListening 一致
+                "speak" -> handleSpeak(call, result)
+                "stopListening" -> handleStopListening(result)
+                "stopSpeaking" -> handleStopSpeaking(result)
+                "destroy" -> {
+                    destroyInternal()
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "MethodCall 异常: ${e.message}")
+            result.success(null)  // 吞掉所有异常，防止闪退
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //              1. 初始化 TTS + 检测 ASR
+    // ═══════════════════════════════════════════════════════
+
+    private fun handleInit(result: Result) {
+        if (ttsInitialized.get()) {
+            result.success(true)
+            return
+        }
+
+        // 初始化 TTS（异步回调，init 后通过 listener 通知完成）
+        try {
+            tts?.shutdown()
+        } catch (_: Exception) {}
+
+        tts = TextToSpeech(appContext) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                val langResult = tts?.setLanguage(Locale.CHINESE) ?: TextToSpeech.LANG_NOT_SUPPORTED
+                if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    Log.w(TAG, "⚠️ 中文 TTS 不支持，尝试英语")
+                    tts?.setLanguage(Locale.ENGLISH)
+                }
+                tts?.setSpeechRate(0.9f)    // 慢速，适合老年人
+                tts?.setPitch(1.0f)
+
+                // 设置播报完成回调
+                tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                    override fun onStart(utteranceId: String?) {}
+                    override fun onDone(utteranceId: String?) {
+                        ttsSpeaking.set(false)
+                        mainHandler.post {
+                            channel.invokeMethod("onSpeakCompleted", emptyMap<String, Any>())
+                            channel.invokeMethod("onStatus", mapOf("status" to "idle"))
+                        }
+                    }
+                    override fun onError(utteranceId: String?) {
+                        ttsSpeaking.set(false)
+                        mainHandler.post {
+                            channel.invokeMethod("onSpeakCompleted", emptyMap<String, Any>())
+                            channel.invokeMethod("onStatus", mapOf("status" to "idle"))
+                        }
+                    }
+                })
+
+                ttsInitialized.set(true)
+                Log.i(TAG, "✅ TTS 初始化成功")
+
+                // 检测 SpeechRecognizer 是否可用
+                try {
+                    if (SpeechRecognizer.isRecognitionAvailable(appContext)) {
+                        asrAvailable.set(true)
+                        Log.i(TAG, "✅ ASR 可用")
+                    } else {
+                        Log.w(TAG, "⚠️ ASR 不可用（无 Google 服务），语音识别降级为空")
+                    }
+                } catch (_: Exception) {
+                    asrAvailable.set(false)
+                }
+
+                mainHandler.post { result.success(true) }
+            } else {
+                Log.e(TAG, "❌ TTS 初始化失败: status=$status")
+                ttsInitialized.set(false)
+                mainHandler.post { result.success(false) }
+            }
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //              2. TTS 语音合成
+    // ═══════════════════════════════════════════════════════
+
+    private fun handleSpeak(call: MethodCall, result: Result) {
+        if (!ttsInitialized.get()) {
+            result.success(null)
+            return
+        }
+
+        val text = call.argument<String>("text") ?: ""
+        if (text.isEmpty()) {
+            result.success(null)
+            return
+        }
+
+        try {
+            ttsSpeaking.set(true)
+            channel.invokeMethod("onStatus", mapOf("status" to "speaking"))
+
+            val speakResult = tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "utt_${System.currentTimeMillis()}")
+            if (speakResult == TextToSpeech.ERROR) {
+                ttsSpeaking.set(false)
+                channel.invokeMethod("onStatus", mapOf("status" to "idle"))
+                channel.invokeMethod("onSpeakCompleted", emptyMap<String, Any>())
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "TTS speak 异常: ${e.message}")
+            ttsSpeaking.set(false)
+            channel.invokeMethod("onStatus", mapOf("status" to "idle"))
+            channel.invokeMethod("onSpeakCompleted", emptyMap<String, Any>())
+        }
+
+        result.success(null)
+    }
+
+    private fun stopTts() {
+        try {
+            tts?.stop()
+        } catch (_: Exception) {}
+        ttsSpeaking.set(false)
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //              3. 语音识别 (SpeechRecognizer)
+    // ═══════════════════════════════════════════════════════
+
+    private fun handleStartListening(result: Result) {
+        if (asrListening.get()) {
+            result.success("already_listening")
+            return
+        }
+
+        channel.invokeMethod("onStatus", mapOf("status" to "listening"))
+
+        if (!asrAvailable.get()) {
+            // 没有 Google 服务 → 直接返回空，Flutter 侧显示文本输入框
+            Log.w(TAG, "ASR 不可用，返回空结果")
+            mainHandler.postDelayed({
+                channel.invokeMethod("onStatus", mapOf("status" to "idle"))
+                channel.invokeMethod("onResult", mapOf("text" to "", "isFinal" to true))
+                result.success("")
+            }, 300)
+            return
+        }
+
+        try {
+            // 创建 Recognizer（如果还没创建）
+            if (recognizer == null) {
+                recognizer = SpeechRecognizer.createSpeechRecognizer(appContext)
+            }
+
+            recognizer?.setRecognitionListener(object : RecognitionListener {
+                override fun onReadyForSpeech(params: Bundle?) {
+                    Log.d(TAG, "ASR 准备就绪")
+                }
+
+                override fun onBeginningOfSpeech() {
+                    Log.d(TAG, "ASR 开始说话")
+                }
+
+                override fun onRmsChanged(rmsdB: Float) {
+                    // 音量回调
+                    val vol = (rmsdB / 20.0f).coerceIn(0.0f, 1.0f)
+                    mainHandler.post {
+                        channel.invokeMethod("onVolume", mapOf("volume" to vol.toDouble()))
+                    }
+                }
+
+                override fun onBufferReceived(buffer: ByteArray?) {}
+
+                override fun onEndOfSpeech() {
+                    Log.d(TAG, "ASR 说话结束")
+                }
+
+                override fun onError(error: Int) {
+                    Log.w(TAG, "ASR 错误: $error")
+                    asrListening.set(false)
+                    mainHandler.post {
+                        channel.invokeMethod("onStatus", mapOf("status" to "idle"))
+                        channel.invokeMethod("onResult", mapOf("text" to "", "isFinal" to true))
+                        result.success("")
+                    }
+                }
+
+                override fun onResults(results: Bundle?) {
+                    val texts = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    val text = texts?.firstOrNull() ?: ""
+                    Log.i(TAG, "ASR 结果: $text")
+                    asrListening.set(false)
+                    mainHandler.post {
+                        channel.invokeMethod("onStatus", mapOf("status" to "idle"))
+                        channel.invokeMethod("onResult", mapOf("text" to text, "isFinal" to true))
+                        result.success(text)
+                    }
+                }
+
+                override fun onPartialResults(partialResults: Bundle?) {
+                    val texts = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    val text = texts?.firstOrNull() ?: ""
+                    if (text.isNotEmpty()) {
+                        mainHandler.post {
+                            channel.invokeMethod("onResult", mapOf("text" to text, "isFinal" to false))
+                        }
+                    }
+                }
+
+                override fun onEvent(eventType: Int, params: Bundle?) {}
+            })
+
+            // 启动识别
+            asrListening.set(true)
+            val intent = android.content.Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "zh-CN")
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "zh-CN")
+                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
+                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 1000L)
+                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 2000L)
+            }
+            recognizer?.startListening(intent)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "ASR 启动异常: ${e.message}")
+            asrListening.set(false)
+            channel.invokeMethod("onStatus", mapOf("status" to "idle"))
+            channel.invokeMethod("onResult", mapOf("text" to "", "isFinal" to true))
+            result.success("")
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //              4. 停止操作
+    // ═══════════════════════════════════════════════════════
+
+    private fun handleStopListening(result: Result) {
+        try {
+            recognizer?.stopListening()
+            recognizer?.cancel()
+        } catch (_: Exception) {}
+        asrListening.set(false)
+        mainHandler.post {
+            channel.invokeMethod("onStatus", mapOf("status" to "idle"))
+        }
+        result.success(null)
+    }
+
+    private fun handleStopSpeaking(result: Result) {
+        stopTts()
+        mainHandler.post {
+            channel.invokeMethod("onSpeakCompleted", emptyMap<String, Any>())
+            channel.invokeMethod("onStatus", mapOf("status" to "idle"))
+        }
+        result.success(null)
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //              5. 销毁
+    // ═══════════════════════════════════════════════════════
+
+    private fun destroyInternal() {
+        try {
+            recognizer?.stopListening()
+            recognizer?.cancel()
+            recognizer?.destroy()
+        } catch (_: Exception) {}
+        recognizer = null
+        asrListening.set(false)
+
+        stopTts()
+        try {
+            tts?.shutdown()
+        } catch (_: Exception) {}
+        tts = null
+        ttsInitialized.set(false)
+        asrAvailable.set(false)
+    }
+}

@@ -106,7 +106,7 @@ def seed():
             dietary_restrictions="忌酒",
             side_effects="偶有腹泻",
             notes="抗生素，需按疗程服用",
-            status="PENDING",
+            status="APPROVED",
             created_at=now - timedelta(hours=2),
         )
         db.add_all([med1, med2, med3])
@@ -198,10 +198,11 @@ def seed():
         db.commit()
         print("[OK] 种子数据写入成功！")
         print(f"  用户: {elder.nickname}(elder) + {child1.nickname}(child)")
-        print(f"  药品: {med1.name}, {med2.name}(已批准) + {med3.name}(待审核)")
+        print(f"  药品: {med1.name}, {med2.name}, {med3.name}(全部已批准)")
         print(f"  日志: 过去7天")
         print(f"  积分: 1280分 + {len(products)}种商品")
         print(f"  老人手机号: 13800138000 (验证码: 123456)")
+        print("  [注意] 审核流程已移除，所有药品添加直接可用")
     except Exception as e:
         db.rollback()
         print(f"[ERROR] 写入失败: {e}")

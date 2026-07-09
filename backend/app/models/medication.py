@@ -40,9 +40,9 @@ class InjectionForm(str, enum.Enum):
 
 
 class MedicationStatus(str, enum.Enum):
-    PENDING = "pending"         # 待审核
-    APPROVED = "approved"       # 已通过
-    REJECTED = "rejected"       # 已驳回
+    APPROVED = "approved"         # 已通过
+    PENDING = "pending"           # 待审核（兼容旧数据）
+    REJECTED = "rejected"         # 已拒绝（兼容旧数据）
     DISABLED = "disabled"       # 已停用
 
 
@@ -66,7 +66,7 @@ class Medication(Base):
     photo_urls = Column(JSON, default=list)  # 药盒/说明书拍照存档
 
     # 审核状态
-    status = Column(SAEnum(MedicationStatus), default=MedicationStatus.PENDING)
+    status = Column(SAEnum(MedicationStatus), default=MedicationStatus.APPROVED)
     created_by = Column(String(32), default="elder")  # elder | child
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

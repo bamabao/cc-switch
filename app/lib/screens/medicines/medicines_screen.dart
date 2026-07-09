@@ -135,7 +135,6 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
   Widget _buildMedicationCard(BuildContext context, dynamic med) {
     final name = med['name'] as String? ?? '';
     final category = med['category'] as String? ?? 'oral';
-    final status = med['status'] as String? ?? 'pending';
     final schedules = med['schedules'] as List<dynamic>? ?? [];
     final dosageDisplay = med['oral_form'] != null ? '${med['dosage_per_take']?.toString() ?? ''}片' : '';
 
@@ -149,31 +148,10 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
     final iconMap = {'oral': '💊', 'external': '🧴', 'injection': '💉', 'supplement': '🌿'};
     final emoji = iconMap[category] ?? '💊';
 
-    // 状态映射
-    String statusLabel;
-    Color statusColor;
-    switch (status) {
-      case 'approved':
-        statusLabel = '正常';
-        statusColor = AppTheme.secondaryColor;
-        break;
-      case 'pending':
-        statusLabel = '待审核';
-        statusColor = AppTheme.warningColor;
-        break;
-      case 'rejected':
-        statusLabel = '已驳回';
-        statusColor = AppTheme.dangerColor;
-        break;
-      default:
-        statusLabel = status;
-        statusColor = AppTheme.textSecondary;
-    }
-
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        onTap: () => _showMedicationDetail(context, med, emoji, times, statusLabel, statusColor),
+        onTap: () => _showMedicationDetail(context, med, emoji, times),
         child: Padding(
           padding: const EdgeInsets.all(AppTheme.spacingMd),
           child: Column(
@@ -201,21 +179,6 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                       ],
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      statusLabel,
-                      style: TextStyle(
-                        fontSize: AppTheme.bodyMedium,
-                        color: statusColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
                 ],
               ),
               if (times.isNotEmpty) ...[
@@ -238,7 +201,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
     );
   }
 
-  void _showMedicationDetail(BuildContext ctx, dynamic med, String emoji, String times, String statusLabel, Color statusColor) {
+  void _showMedicationDetail(BuildContext ctx, dynamic med, String emoji, String times) {
     showDialog(
       context: ctx,
       builder: (dialogCtx) {
@@ -267,7 +230,6 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                _detailRow('状态', statusLabel, color: statusColor),
                 if (times.isNotEmpty) _detailRow('服用时间', times),
                 if (manufacturer.isNotEmpty) _detailRow('厂家', manufacturer),
                 if (dosagePerTake != null) _detailRow('每次用量', '$dosagePerTake$unit'),
@@ -282,24 +244,14 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
             ),
           ),
           actions: [
-            if (med['status'] == 'pending' || med['status'] == 'rejected')
-              ElevatedButton.icon(
-                icon: const Icon(Icons.send),
-                label: const Text('提交审核'),
-                onPressed: () async {
-                  Navigator.pop(dialogCtx);
-                  await _submitForAudit(ctx, med['id'] as int, med['name'] as String? ?? '');
-                },
-              ),
-            if (med['status'] != 'approved')
-              TextButton.icon(
-                icon: const Icon(Icons.delete_outline, color: AppTheme.dangerColor),
-                label: const Text('删除', style: TextStyle(color: AppTheme.dangerColor)),
-                onPressed: () async {
-                  Navigator.pop(dialogCtx);
-                  await _deleteMedication(ctx, med['id'] as int, med['name'] as String? ?? '');
-                },
-              ),
+            TextButton.icon(
+              icon: const Icon(Icons.delete_outline, color: AppTheme.dangerColor),
+              label: const Text('删除', style: TextStyle(color: AppTheme.dangerColor)),
+              onPressed: () async {
+                Navigator.pop(dialogCtx);
+                await _deleteMedication(ctx, med['id'] as int, med['name'] as String? ?? '');
+              },
+            ),
             TextButton(onPressed: () => Navigator.pop(dialogCtx), child: const Text('关闭')),
           ],
         );
@@ -312,7 +264,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
       context: ctx,
       builder: (c) => AlertDialog(
         title: const Text('确认删除'),
-        content: Text('确定删除「$name」吗？\n（仅未批准的药品可删）'),
+        content: Text('确定删除「$name」吗？'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('取消')),
           ElevatedButton(
@@ -340,34 +292,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
     }
   }
 
-  Future<void> _submitForAudit(BuildContext ctx, int medicationId, String name) async {
-    final confirmed = await showDialog<bool>(
-      context: ctx,
-      builder: (c) => AlertDialog(
-        title: const Text('提交审核'),
-        content: Text('将「$name」提交给子女审核？\n提交后子女可以查看并确认药品信息。'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('取消')),
-          ElevatedButton(onPressed: () => Navigator.pop(c, true), child: const Text('提交')),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
 
-    try {
-      await _api.submitMedication(medicationId);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('✅ 「$name」已提交审核')),
-      );
-      _loadMedications();
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('提交失败: $e')),
-      );
-    }
-  }
 
   Widget _detailRow(String label, String value, {Color? color}) {
     return Padding(

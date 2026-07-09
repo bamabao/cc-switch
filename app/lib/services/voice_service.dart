@@ -91,10 +91,25 @@ class VoiceService {
   /// 返回匹配到的命令词文本。
   /// 识别过程中通过 [onResult] 回调获取中间结果，
   /// 通过 [onVolume] 获取实时音量。
+  ///
+  /// ⚠️ 超时保护：20秒后自动停止（防止Native端永不回调导致页面假死）
   Future<String> startListening() async {
+    if (!_initialized) {
+      _status = 'idle';
+      return '';
+    }
     _status = 'listening';
     try {
-      final result = await _channel.invokeMethod<String>('startListening');
+      final result = await _channel
+          .invokeMethod<String>('startListening')
+          .timeout(const Duration(seconds: 20), onTimeout: () {
+        // 超时保护：停止录音并返回空串，防止页面卡死
+        try {
+          _channel.invokeMethod('stopListening');
+        } catch (_) {}
+        _status = 'idle';
+        return '';
+      });
       _status = 'idle';
       return result ?? '';
     } catch (e) {
@@ -122,6 +137,7 @@ class VoiceService {
   /// 播报过程中通过 [onStatus] 回调通知 "speaking" 状态，
   /// 完成后通过 [onSpeakCompleted] 回调通知。
   Future<void> speak(String text) async {
+    if (!_initialized) return;
     _status = 'speaking';
     try {
       await _channel.invokeMethod('speak', {'text': text});
@@ -133,19 +149,27 @@ class VoiceService {
 
   /// 停止播报
   Future<void> stopSpeaking() async {
-    await _channel.invokeMethod('stopSpeaking');
+    try {
+      await _channel.invokeMethod('stopSpeaking');
+    } catch (_) {}
     _status = 'idle';
   }
 
   /// 停止录音/识别
   Future<void> stopListening() async {
-    await _channel.invokeMethod('stopListening');
+    try {
+      await _channel.invokeMethod('stopListening');
+    } catch (_) {}
     _status = 'idle';
   }
 
   /// 释放资源
   Future<void> destroy() async {
-    await _channel.invokeMethod('destroy');
+    try {
+      await _channel.invokeMethod('destroy');
+    } catch (_) {
+      // dispose 阶段调用，吞掉所有异常防止闪退
+    }
     _initialized = false;
     _status = 'idle';
   }
