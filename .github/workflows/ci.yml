@@ -136,8 +136,13 @@ jobs:
         run: |
           flutter build apk --debug 2>&1 | tee build_output.log; exit_code=${PIPESTATUS[0]}
           if [ $exit_code -ne 0 ]; then
-            echo "=== BUILD FAILED, LAST 100 LINES ==="
-            tail -100 build_output.log
+            {
+              echo "### ❌ Build APK FAILED"
+              echo ""
+              echo '```'
+              tail -100 build_output.log
+              echo '```'
+            } >> $GITHUB_STEP_SUMMARY
           fi
           exit $exit_code
 
