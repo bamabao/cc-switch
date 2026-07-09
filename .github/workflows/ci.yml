@@ -67,18 +67,19 @@ jobs:
           ls -la android/gradlew 2>/dev/null || echo "NO GRADLEW"
           cat android/gradle/wrapper/gradle-wrapper.properties 2>/dev/null
 
-      - name: flutter build apk --debug --stacktrace
+      - name: flutter build apk --debug --verbose
         shell: bash
         run: |
-          flutter build apk --debug --stacktrace 2>&1 | tee /tmp/build.log
+          flutter build apk --debug --verbose 2>&1 | tee /tmp/build.log
           EXIT=$?
-          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || echo "no apk output"
-          if [ $EXIT -ne 0 ]; then
-            echo '### ❌ BUILD FAILED (tail 80 lines)' >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            tail -80 /tmp/build.log >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "EXIT_CODE=$EXIT" >> $GITHUB_ENV
+          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || echo "NO_APK_OUTPUT"
+          # 不论成败，都输出最后100行到 step summary（公开可见）
+          echo '### Build result' >> $GITHUB_STEP_SUMMARY
+          echo "exit_code=$EXIT" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -100 /tmp/build.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
           exit $EXIT
 
       - name: Upload APK
