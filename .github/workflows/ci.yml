@@ -67,24 +67,28 @@ jobs:
           ls -la android/gradlew 2>/dev/null || echo "NO GRADLEW"
           cat android/gradle/wrapper/gradle-wrapper.properties 2>/dev/null
 
-      - name: flutter build apk --debug --verbose
+      - name: flutter build apk --debug
         shell: bash
         run: |
-          flutter build apk --debug --verbose 2>&1 | tee /tmp/build.log
+          flutter build apk --debug 2>&1 | tee /tmp/build.log
           EXIT=$?
           echo "EXIT_CODE=$EXIT" >> $GITHUB_ENV
           ls -la build/app/outputs/flutter-apk/ 2>/dev/null || echo "NO_APK_OUTPUT"
-          # 不论成败，都输出最后100行到 step summary（公开可见）
-          echo '### Build result' >> $GITHUB_STEP_SUMMARY
-          echo "exit_code=$EXIT" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          tail -100 /tmp/build.log >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          if [ $EXIT -ne 0 ]; then
+            tail -200 /tmp/build.log
+          fi
           exit $EXIT
 
+      - if: always()
+        name: Upload build log
+        uses: actions/upload-artifact@v4
+        with: { name: build-log, path: /tmp/build.log }
+
       - name: Upload APK
+        if: success()
         run: |
           mkdir -p build-apk
           cp build/app/outputs/flutter-apk/app-debug.apk build-apk/
       - uses: actions/upload-artifact@v4
+        if: success()
         with: { name: bamabao-apk-debug, path: app/build-apk/*.apk }
