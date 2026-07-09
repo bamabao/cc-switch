@@ -147,7 +147,14 @@ jobs:
           ls $ANDROID_HOME/ndk/ 2>/dev/null || echo "NO NDK"
 
       - name: Build APK (debug)
-        run: flutter build apk --debug 2>&1 | tee ../build_output.log
+        shell: bash
+        run: |
+          exit_code=0
+          flutter build apk --debug 2>&1 | tee ../build_output.log || exit_code=$?
+          if [ $exit_code -ne 0 ]; then
+            echo "❌ Build failed with exit code $exit_code"
+            exit $exit_code
+          fi
 
       - name: Upload build logs
         if: always()
