@@ -110,6 +110,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -120,36 +126,24 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Check AAR files & NDK
+      - name: Install Android NDK
         run: |
-          echo "=== AAR files ==="
-          ls -la android/app/libs/ 2>/dev/null || echo "NO LIBS DIR"
-          echo "=== ANDROID_HOME ==="
-          echo $ANDROID_HOME
-          ls $ANDROID_HOME/ndk/ 2>/dev/null || echo "NO NDK"
-          echo "=== Java ==="
-          java -version 2>&1
-          echo "=== Gradle wrapper ==="
-          cat android/gradle/wrapper/gradle-wrapper.properties 2>/dev/null
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973" --sdk_root=$ANDROID_HOME 2>&1 || \
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "ndk;27.0.12077973" --sdk_root=$ANDROID_SDK_ROOT 2>&1
+          echo "ANDROID_NDK=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
 
       - name: Build APK (debug)
         run: |
-          flutter build apk --debug 2>&1 | tee build_output.log
-        continue-on-error: true
-
-      - name: Upload build log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-apk-log
-          path: app/build_output.log
-
-      - name: Fail if build failed
-        run: |
-          if [ ! -f build_output.log ] || ! grep -q "BUILD SUCCESSFUL" build_output.log 2>/dev/null; then
-            echo "❌ Build failed"
-            exit 1
+          flutter build apk --debug 2>&1 | tee build_output.log; exit_code=${PIPESTATUS[0]}
+          if [ $exit_code -ne 0 ]; then
+            {
+              echo "### ❌ Build APK FAILED (tail -80)"
+              echo '```'
+              tail -80 build_output.log
+              echo '```'
+            } >> $GITHUB_STEP_SUMMARY
           fi
+          exit $exit_code
 
       - name: Rename APK with version
         run: |
