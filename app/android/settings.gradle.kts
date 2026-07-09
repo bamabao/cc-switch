@@ -1,17 +1,13 @@
 pluginManagement {
     val flutterSdkPath = run {
-        // 优先从 local.properties 读取 Flutter SDK 路径
-        val localProps = file("local.properties")
-        if (localProps.exists()) {
-            val properties = java.util.Properties()
-            localProps.inputStream().use { properties.load(it) }
-            val sdk = properties.getProperty("flutter.sdk")
-            if (sdk != null) return@run sdk
-        }
-        // CI 环境降级方案：从 FLUTTER_ROOT 环境变量读取
+        // CI: FLUTTER_ROOT env var from flutter-action; local: local.properties
         val envSdk = System.getenv("FLUTTER_ROOT")
         if (envSdk != null) return@run envSdk
-        error("flutter.sdk not found: neither local.properties nor FLUTTER_ROOT is set")
+        val properties = java.util.Properties()
+        file("local.properties").inputStream().use { properties.load(it) }
+        val sdk = properties.getProperty("flutter.sdk")
+        require(sdk != null) { "flutter.sdk not set in local.properties, and FLUTTER_ROOT env is not set" }
+        sdk
     }
 
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
