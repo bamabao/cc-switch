@@ -134,17 +134,22 @@ jobs:
 
       - name: Build APK (debug)
         run: |
-          flutter build apk --debug 2>&1 | tee build_output.log; exit_code=${PIPESTATUS[0]}
-          if [ $exit_code -ne 0 ]; then
-            {
-              echo "### ❌ Build APK FAILED"
-              echo ""
-              echo '```'
-              tail -100 build_output.log
-              echo '```'
-            } >> $GITHUB_STEP_SUMMARY
+          flutter build apk --debug 2>&1 | tee build_output.log
+        continue-on-error: true
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-apk-log
+          path: app/build_output.log
+
+      - name: Fail if build failed
+        run: |
+          if [ ! -f build_output.log ] || ! grep -q "BUILD SUCCESSFUL" build_output.log 2>/dev/null; then
+            echo "❌ Build failed"
+            exit 1
           fi
-          exit $exit_code
 
       - name: Rename APK with version
         run: |
