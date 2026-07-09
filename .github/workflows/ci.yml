@@ -149,12 +149,15 @@ jobs:
       - name: Build APK (debug)
         shell: bash
         run: |
-          exit_code=0
-          flutter build apk --debug 2>&1 | tee ../build_output.log || exit_code=$?
+          flutter build apk --debug 2>&1 | tee ../build_output.log; exit_code=${PIPESTATUS[0]}
           if [ $exit_code -ne 0 ]; then
             echo "❌ Build failed with exit code $exit_code"
+            tail -30 ../build_output.log
             exit $exit_code
           fi
+          echo "✅ APK built successfully"
+          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || ls -la build/app/outputs/ 2>/dev/null || echo "Checking alternate output paths..."
+          find build -name "*.apk" 2>/dev/null || true
 
       - name: Upload build logs
         if: always()
@@ -168,7 +171,16 @@ jobs:
         run: |
           VERSION=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}' | cut -d+ -f1)
           mkdir -p ../build/apk-artifacts
-          cp build/app/outputs/flutter-apk/app-debug.apk ../build/apk-artifacts/爸妈宝_v${VERSION}-${{ github.sha }}.apk
+          APK_PATH=$(find build -name "*.apk" -type f 2>/dev/null | head -1)
+          if [ -z "$APK_PATH" ]; then
+            echo "❌ No APK found! Listing build dir:"
+            ls -la build/ 2>/dev/null || echo "no build dir"
+            ls -la build/app/outputs/ 2>/dev/null || echo "no outputs dir"
+            exit 1
+          fi
+          echo "Found APK at: $APK_PATH"
+          cp "$APK_PATH" "../build/apk-artifacts/爸妈宝_v${VERSION}-${{ github.sha }}.apk"
+          echo "APK renamed successfully"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
