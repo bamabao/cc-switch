@@ -29,7 +29,11 @@ jobs:
       - uses: subosito/flutter-action@v2
         with: { flutter-version: "3.x", channel: "stable", cache: true }
       - run: flutter pub get
-      - run: flutter test 2>&1 || flutter test
+      - name: flutter analyze
+        continue-on-error: true
+        run: flutter analyze
+      - name: flutter test
+        run: flutter test
 
   build-apk:
     name: Build APK
@@ -52,8 +56,8 @@ jobs:
       - name: Install Android platform & NDK
         run: |
           SDKMANAGER="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
-          echo "y" | "$SDKMANAGER" "platforms;android-35" 2>&1 || true
-          echo "y" | "$SDKMANAGER" "ndk;27.0.12077973" 2>&1 || true
+          yes | "$SDKMANAGER" "platforms;android-35"
+          yes | "$SDKMANAGER" "ndk;27.0.12077973"
           echo "ANDROID_NDK=$ANDROID_HOME/ndk/27.0.12077973" >> "$GITHUB_ENV"
 
       - name: Build APK (debug) with full log
