@@ -120,8 +120,26 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Check AAR files & NDK
+        run: |
+          echo "=== AAR files ==="
+          ls -la android/app/libs/ 2>/dev/null || echo "NO LIBS DIR"
+          echo "=== ANDROID_HOME ==="
+          echo $ANDROID_HOME
+          ls $ANDROID_HOME/ndk/ 2>/dev/null || echo "NO NDK"
+          echo "=== Java ==="
+          java -version 2>&1
+          echo "=== Gradle wrapper ==="
+          cat android/gradle/wrapper/gradle-wrapper.properties 2>/dev/null
+
       - name: Build APK (debug)
-        run: flutter build apk --debug
+        run: |
+          flutter build apk --debug 2>&1 | tee build_output.log; exit_code=${PIPESTATUS[0]}
+          if [ $exit_code -ne 0 ]; then
+            echo "=== BUILD FAILED, LAST 100 LINES ==="
+            tail -100 build_output.log
+          fi
+          exit $exit_code
 
       - name: Rename APK with version
         run: |
