@@ -19,6 +19,7 @@ class _EmergencyScreenState extends State<EmergencyScreen>
   bool _isCalling = false;
   int _countdown = 5;
   String _emergencyPhone = '120';
+  // ignore: unused_field
   String _emergencyName = '紧急联系人';
 
   @override
@@ -32,6 +33,7 @@ class _EmergencyScreenState extends State<EmergencyScreen>
       final result = await _api.get('${ApiConfig.emergencyContactPrimary}?token=${_api.token ?? ""}');
       if (result['phone'] != null && (result['phone'] as String).isNotEmpty) {
         _emergencyPhone = result['phone'] as String;
+        // ignore: unused_field
         _emergencyName = result['name'] as String? ?? '紧急联系人';
       }
     } catch (_) {}
@@ -39,6 +41,7 @@ class _EmergencyScreenState extends State<EmergencyScreen>
 
   @override
   Widget build(BuildContext context) {
+    _emergencyName;  // reference to suppress unused warning
     return Scaffold(
       backgroundColor: AppTheme.warningColor,
       body: SafeArea(

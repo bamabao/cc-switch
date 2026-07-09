@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../config/theme.dart';
@@ -462,7 +461,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
 
                         // ── 原始文本填入备注 ──
                         if (rawTexts.isNotEmpty && _noteController.text.isEmpty) {
-                          _noteController.text = (rawTexts as List).join(' ');
+                          _noteController.text = rawTexts.join(' ');
                         }
 
                         if (success && name.isNotEmpty) {

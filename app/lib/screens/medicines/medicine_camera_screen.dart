@@ -1,9 +1,6 @@
 import 'dart:io';
-import 'dart:math';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:image/image.dart' as img;
 
 /// 药盒拍照专用相机页
 /// - 支持点击对焦 + 曝光补偿

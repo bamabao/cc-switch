@@ -25,7 +25,6 @@ class _VoiceScreenState extends State<VoiceScreen> {
   final VoiceService _voice = VoiceService();
   final ApiService _api = ApiService();
 
-  bool _isInitialized = false;
   bool _initFailed = false;
   bool _isListening = false;
   String _recognizedText = '';
@@ -46,7 +45,6 @@ class _VoiceScreenState extends State<VoiceScreen> {
       final ok = await _voice.init();
       if (mounted) {
         setState(() {
-          _isInitialized = ok;
           _initFailed = !ok;
           // TTS初始化成功但ASR可能不可用 → 弹文字输入框
           if (ok) _showTextInput = true;

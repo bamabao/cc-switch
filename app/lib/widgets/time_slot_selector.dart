@@ -66,12 +66,6 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
     return '$h:$m';
   }
 
-  String _labelForTime(TimeOfDay t) {
-    // 匹配快捷标签
-    return _defaultLabels[_defaultTimes.indexWhere((d) => d.hour == t.hour && d.minute == t.minute)]
-        ?? _formatTime(t);
-  }
-
   void _removeAt(int index) {
     setState(() => _items.removeAt(index));
     _notifyChanged();
