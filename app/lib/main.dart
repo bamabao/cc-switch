@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'config/theme.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/medicines/medicines_screen.dart';
@@ -24,6 +25,11 @@ class BamabaoApp extends StatelessWidget {
       title: '爸妈宝',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('zh', 'CN'), Locale('en', 'US')],
       home: const LoginScreen(),
       routes: {
         '/home': (_) => const MainScreen(),
