@@ -64,7 +64,9 @@ jobs:
         id: build
         run: |
           flutter build apk --debug 2>&1 | tee /tmp/build-out.log
-          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+          exit_code="${PIPESTATUS[0]}"
+          echo "exit_code=${exit_code}" >> $GITHUB_OUTPUT
+          exit ${exit_code}
 
       - name: Upload build log (on failure)
         if: failure()
@@ -74,10 +76,10 @@ jobs:
           path: /tmp/build-out.log
 
       - name: Upload APK
-        if: steps.build.outputs.exit_code == '0'
+        if: success()
         run: |
           mkdir -p build-apk
           cp build/app/outputs/flutter-apk/app-debug.apk build-apk/
       - uses: actions/upload-artifact@v4
-        if: steps.build.outputs.exit_code == '0'
+        if: success()
         with: { name: bamabao-apk-debug, path: app/build-apk/*.apk }
