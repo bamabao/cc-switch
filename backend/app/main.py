@@ -6,7 +6,8 @@
 """
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.models.base import engine, Base
@@ -91,6 +92,16 @@ app = FastAPI(
     version="0.2.0",
     lifespan=lifespan,
 )
+
+# 中间件：确保所有 JSON 响应带 charset=utf-8，防止 Flutter http 包默认 latin1 解码破坏中文
+@app.middleware("http")
+async def ensure_json_charset(request: Request, call_next):
+    response: Response = await call_next(request)
+    ct = response.headers.get("content-type", "")
+    if ct.startswith("application/json") and "charset" not in ct:
+        response.headers["content-type"] = "application/json; charset=utf-8"
+    return response
+
 
 # CORS
 app.add_middleware(

@@ -81,11 +81,13 @@ class ApiService {
     return headers;
   }
 
-  /// 处理响应
+  /// 处理响应（强制UTF-8解码，防止中文乱码）
   Map<String, dynamic> _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (response.body.isEmpty) return {};
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      if (response.bodyBytes.isEmpty) return {};
+      // 强制用 UTF-8 解码 body，避免 http 包在 Content-Type 无 charset 时默认 latin1 编码破坏中文
+      final body = utf8.decode(response.bodyBytes);
+      return jsonDecode(body) as Map<String, dynamic>;
     }
     throw HttpException(
       '请求失败: ${response.statusCode} ${response.body}',
