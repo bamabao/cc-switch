@@ -23,7 +23,11 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Optional
-from fastapi import APIRouter, File, UploadFile, HTTPException
+from fastapi import APIRouter, File, UploadFile, HTTPException, Query
+
+from app.models.medicine_cache import MedicineCache
+from app.models.base import SessionLocal
+from app.services.volcengine_vision import volcengine_vision_recognize
 
 logger = logging.getLogger("bamabao.ocr")
 
@@ -689,25 +693,28 @@ def _save_failed_ocr(image_data: bytes, raw_texts: list[str], engine_used: str):
 # ═══════════════════════════════════════════════════════
 
 @router.post("/recognize")
-async def recognize_medicine(file: UploadFile = File(...)):
+async def recognize_medicine(
+    file: UploadFile = File(...),
+    medicine_name: Optional[str] = Query(None, description="药品名称（有则优先查缓存）"),
+):
     """
-    上传药盒照片，返回OCR识别的药品信息（v3.2 优化版）
+    上传药盒照片，返回OCR识别的药品信息（v4.0 — 火山视觉集成版）
 
-    优化流程：
-      上传图片 → 特征缓存校验（相同图片命中直接返回）
-      → 图片缩放(长边≤1280px) → 亮度判断 → 轻度/重预处理分流
-      → Rapid+Paddle并行推理 → 加权融合 → 无结果→EasyOCR兜底
-      → 药品词库加权匹配 → 字段提取 → 缓存结果
+    流程：
+      药品名查缓存（优先） → 特征缓存校验 → OCR（Rapid+Paddle→EasyOCR兜底）
+      → 置信度判断 → 低置信度/无结果走火山视觉兜底 → 写入缓存
 
     返回字段：
       success: bool        是否提取到药品名
       name: str            药品名称
       dosage: str          剂量规格
       frequency: str       用药频率
+      category: str        药品分类（火山视觉来源有值）
       raw_texts: [str]     OCR原始文本
       engine_used: str     引擎标签
       timing_ms: int       总耗时ms
       cached: bool         是否缓存命中
+      source: str          结果来源："cache" | "local_ocr" | "volcano_vision"
     """
     timing_total = time.time()
     timing_steps = {}
@@ -720,12 +727,42 @@ async def recognize_medicine(file: UploadFile = File(...)):
     if len(content) > MAX_IMAGE_BYTES:
         raise HTTPException(400, "图片过大，请上传10MB以内的图片")
 
+    # ─── 第1关：药品名称查缓存（最优先） ───
+    if medicine_name:
+        t_cache = time.time()
+        db = SessionLocal()
+        try:
+            cached_entry = db.query(MedicineCache).filter(
+                MedicineCache.medicine_name == medicine_name
+            ).first()
+            if cached_entry:
+                cached_entry.hit_count += 1
+                db.commit()
+                logger.info(f"药品缓存命中: {medicine_name}")
+                return {
+                    "success": True,
+                    "name": cached_entry.medicine_name,
+                    "dosage": cached_entry.dosage or "",
+                    "frequency": cached_entry.frequency or "",
+                    "category": cached_entry.category or "",
+                    "raw_texts": [],
+                    "engine_used": cached_entry.source,
+                    "cached": True,
+                    "source": "cache",
+                    "timing_ms": round((time.time() - timing_total) * 1000),
+                    "timing_steps": {"cache_db": round((time.time() - t_cache) * 1000)},
+                }
+        finally:
+            db.close()
+
+    # ─── 第2关：图片特征缓存（相同图片） ───
     t0 = time.time()
     fp = _image_fingerprint(content)
     cached = _get_cached(fp)
     timing_steps["cache_check"] = round((time.time() - t0) * 1000)
     if cached is not None:
         cached["cached"] = True
+        cached["source"] = "cache"
         cached["timing_ms"] = round((time.time() - timing_total) * 1000)
         return cached
 
@@ -783,33 +820,89 @@ async def recognize_medicine(file: UploadFile = File(...)):
         medicine_info = _parse_medicine_text(texts, scores)
         timing_steps["parse"] = round((time.time() - t_parse) * 1000)
 
-        # ─── 保存失败日志 ───
-        if not texts:
-            _save_failed_ocr(content, [], engine_used)
+        # ─── 第3关：火山视觉兜底（混合策略） ───
+        ocr_name = (medicine_info.get("name") or "").strip()
+        # 估算最大置信度作为是否可信的依据
+        max_conf = max(scores) if scores else 0.0
+
+        # 用于构建最终结果
+        final_name = ocr_name
+        final_dosage = medicine_info.get("dosage") or ""
+        final_frequency = medicine_info.get("frequency") or ""
+        final_category = ""
+        final_source = "local_ocr"
+
+        if ocr_name and max_conf >= 0.6:
+            # 高置信度 → 写入缓存，直接返回
+            final_source = "local_ocr"
+            _write_to_cache(final_name, final_dosage, final_frequency, "", "ocr_manual")
+            logger.info(f"本地OCR高置信度(conf={max_conf:.3f})，写入缓存: {final_name}")
+
+        elif ocr_name and max_conf < 0.6:
+            # 有药品名但置信度低 → 走火山视觉兜底
+            logger.info(f"本地OCR置信度不足(conf={max_conf:.3f})，走火山视觉兜底")
+            t_volcano = time.time()
+            db = SessionLocal()
+            try:
+                volc_result = await volcengine_vision_recognize(content, db=db)
+                if volc_result:
+                    final_name = volc_result["name"]
+                    final_dosage = volc_result["dosage"] or final_dosage
+                    final_frequency = volc_result["frequency"] or final_frequency
+                    final_category = volc_result["category"] or ""
+                    final_source = "volcano_vision"
+                    logger.info(f"火山视觉覆盖低置信度结果: {final_name}")
+            finally:
+                db.close()
+            timing_steps["volcano_vision"] = round((time.time() - t_volcano) * 1000)
+
+        else:
+            # 没解析出药品名 → 原图走火山视觉
+            logger.info("本地OCR未识别出药品名，走火山视觉兜底")
+            t_volcano = time.time()
+            db = SessionLocal()
+            try:
+                volc_result = await volcengine_vision_recognize(content, db=db)
+                if volc_result:
+                    final_name = volc_result["name"]
+                    final_dosage = volc_result["dosage"] or ""
+                    final_frequency = volc_result["frequency"] or ""
+                    final_category = volc_result["category"] or ""
+                    final_source = "volcano_vision"
+                    logger.info(f"火山视觉识别成功: {final_name}")
+            finally:
+                db.close()
+            timing_steps["volcano_vision"] = round((time.time() - t_volcano) * 1000)
+
+        # ─── 保存失败日志（火山也失败且本地也无结果） ───
+        if not final_name:
+            _save_failed_ocr(content, texts, engine_used)
 
         result = {
-            "success": bool(medicine_info["name"]),
-            "name": medicine_info["name"],
-            "dosage": medicine_info["dosage"],
-            "frequency": medicine_info["frequency"],
+            "success": bool(final_name),
+            "name": final_name,
+            "dosage": final_dosage,
+            "frequency": final_frequency,
+            "category": final_category,
             "raw_texts": texts,
             "engine_used": engine_used,
             "preprocess": preprocess_used,
             "brightness": round(brightness, 1),
             "cached": False,
+            "source": final_source,
             "timing_ms": round((time.time() - timing_total) * 1000),
             "timing_steps": timing_steps,
         }
 
-        # ─── 缓存结果 ───
-        if texts:
+        # ─── 特征缓存（有结果就缓） ───
+        if texts or final_name:
             _set_cache(fp, result)
 
         total_ms = result["timing_ms"]
         if total_ms > TIMING_WARN_MS:
-            logger.warning(f"OCR耗时过长: {total_ms}ms steps={timing_steps}")
+            logger.warning(f"OCR完成: {total_ms}ms source={final_source} steps={timing_steps}")
         else:
-            logger.info(f"OCR完成: {total_ms}ms engine={engine_used} steps={timing_steps}")
+            logger.info(f"OCR完成: {total_ms}ms source={final_source} steps={timing_steps}")
 
         return result
 
@@ -825,3 +918,34 @@ async def recognize_medicine(file: UploadFile = File(...)):
                 os.unlink(tmp_path)
             except Exception:
                 pass
+
+
+def _write_to_cache(name: str, dosage: str, frequency: str, category: str, source: str):
+    """将本地OCR结果写入 medicine_cache 表"""
+    try:
+        db = SessionLocal()
+        entry = db.query(MedicineCache).filter(
+            MedicineCache.medicine_name == name
+        ).first()
+        if entry:
+            entry.hit_count += 1
+            if dosage:
+                entry.dosage = dosage
+            if frequency:
+                entry.frequency = frequency
+            if category:
+                entry.category = category
+        else:
+            entry = MedicineCache(
+                medicine_name=name,
+                dosage=dosage,
+                frequency=frequency,
+                category=category,
+                source=source,
+            )
+            db.add(entry)
+        db.commit()
+    except Exception as e:
+        logger.warning(f"写入药品缓存失败: {e}")
+    finally:
+        db.close()

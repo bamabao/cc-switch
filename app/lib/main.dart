@@ -30,7 +30,7 @@ class BamabaoApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
       ],
       supportedLocales: const [Locale('zh', 'CN'), Locale('en', 'US')],
-      home: const LoginScreen(),
+      home: const MainScreen(), // TEMP: show home for review
       routes: {
         '/home': (_) => const MainScreen(),
         '/record': (_) => const RecordScreen(),
@@ -73,16 +73,25 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildBottomNav() {
     return Container(
       padding: EdgeInsets.only(
-        top: 8,
-        bottom: MediaQuery.of(context).padding.bottom + 8,
+        top: 10,
+        bottom: MediaQuery.of(context).padding.bottom + 10,
       ),
       decoration: BoxDecoration(
         color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, -2),
+            blurRadius: 20,
+            offset: const Offset(0, -4),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, -1),
           ),
         ],
       ),
@@ -119,7 +128,7 @@ class _MainScreenState extends State<MainScreen> {
                 animationIntensity: isSelected
                     ? ClayAnimationIntensity.full
                     : ClayAnimationIntensity.subtle,
-                iconColorOverride: isSelected ? null : Colors.grey,
+                iconColorOverride: isSelected ? null : const Color(0xFF999999),
                 bgColorOverride:
                     isSelected ? null : const Color(0xFFF0F0F0),
               )
@@ -127,7 +136,7 @@ class _MainScreenState extends State<MainScreen> {
               Icon(
                 isSelected ? Icons.shopping_bag : Icons.shopping_bag_outlined,
                 size: 32,
-                color: isSelected ? ClayColors.orange : Colors.grey,
+                color: isSelected ? ClayColors.orange : const Color(0xFF999999),
               ),
             const SizedBox(height: 4),
             Text(
@@ -135,7 +144,7 @@ class _MainScreenState extends State<MainScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? ClayColors.iconColor(clayType) : Colors.grey,
+                color: isSelected ? AppTheme.primaryColor : const Color(0xFF999999),
               ),
             ),
           ],

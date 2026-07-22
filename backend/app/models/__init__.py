@@ -4,3 +4,4 @@ from .medication import Medication, MedicationSchedule, MedicationLog
 from .audit import AuditRecord
 from .point import PointTransaction, PointProduct, PointOrder
 from .emergency_contact import EmergencyContact
+from .medicine_cache import MedicineCache

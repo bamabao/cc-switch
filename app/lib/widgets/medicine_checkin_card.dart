@@ -1,29 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../config/theme.dart';
+import '../config/theme.dart';
 
-/// 3D 黏土风格圆形打卡按钮
-/// ─────────────────────────
-/// 未服药：低饱和珊瑚红 (0xFFF87670)，无图标
-/// 已服药：护眼薄荷绿 (0xFF59C992)，白色 Icons.check (size=36)
-/// 内建点击缩放回弹动画与震动反馈，再次点击可撤销
-class ClayCheckinButton extends StatefulWidget {
+/// 圆形状态指示器 — 设计稿立体风格
+/// 未服药：空心橙红圆环（甜甜圈）+ 立体阴影
+/// 已服药：薄荷绿实心圆 + 白色对勾 + 立体阴影
+class CheckinIndicator extends StatefulWidget {
   final bool isChecked;
   final VoidCallback? onTap;
-  final bool disabled; // 标题行按钮禁用点击
-
-  const ClayCheckinButton({
+  final double size;
+  const CheckinIndicator({
     super.key,
     required this.isChecked,
     this.onTap,
-    this.disabled = false,
+    this.size = 52,
   });
-
   @override
-  State<ClayCheckinButton> createState() => _ClayCheckinButtonState();
+  State<CheckinIndicator> createState() => _CheckinIndicatorState();
 }
 
-class _ClayCheckinButtonState extends State<ClayCheckinButton>
+class _CheckinIndicatorState extends State<CheckinIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnim;
@@ -32,140 +28,212 @@ class _ClayCheckinButtonState extends State<ClayCheckinButton>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
+      vsync: this, duration: const Duration(milliseconds: 400));
     _scaleAnim = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween(begin: 1.0, end: 0.92),
-        weight: 15,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: 0.92, end: 1.06),
-        weight: 25,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: 1.06, end: 1.0),
-        weight: 60,
-      ),
-    ]).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.88), weight: 15),
+      TweenSequenceItem(tween: Tween(begin: 0.88, end: 1.06), weight: 25),
+      TweenSequenceItem(tween: Tween(begin: 1.06, end: 1.0), weight: 60),
+    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  void dispose() { _controller.dispose(); super.dispose(); }
 
   void _handleTap() {
-    if (widget.disabled) return;
     HapticFeedback.lightImpact();
     _controller.forward(from: 0.0);
     widget.onTap?.call();
   }
 
-  Color get _bgColor =>
-      widget.isChecked ? const Color(0xFF59C992) : const Color(0xFFF87670);
-
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _handleTap,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: ScaleTransition(
-          scale: _scaleAnim,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeOut,
-            width: 72,
-            height: 72,
+    final uncheckedColor = AppTheme.checkinUnchecked;
+    final uncheckedDark = AppTheme.checkinUncheckedDark;
+    final checkedColor = AppTheme.checkinChecked;
+    final checkedDark = AppTheme.checkinCheckedDark;
+    final ringWidth = widget.size * 0.26;  // 圆环加粗
+
+    // 已打卡：渐变实心圆 + 对勾（对勾带分离立体阴影）
+    final checkedWidget = Container(
+      width: widget.size,
+      height: widget.size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          center: const Alignment(-0.45, -0.45),
+          radius: 0.95,
+          colors: [
+            checkedColor.withValues(alpha: 1.0),
+            checkedColor,
+            checkedDark,
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.55),
+          width: 3,
+        ),
+        boxShadow: _buildStrongShadows(checkedDark),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // 对勾的立体阴影层（分离感）
+          Transform.translate(
+            offset: const Offset(1.5, 2.5),
+            child: Icon(
+              Icons.check,
+              color: checkedDark.withValues(alpha: 0.45),
+              size: 32,
+              weight: 800,
+            ),
+          ),
+          // 白色对勾主体
+          const Icon(
+            Icons.check,
+            color: Colors.white,
+            size: 32,
+            weight: 800,
+          ),
+        ],
+      ),
+    );
+
+    // 未打卡：空心橙红圆环（黏土甜甜圈立体感 + 内阴影）
+    final uncheckedWidget = SizedBox(
+      width: widget.size,
+      height: widget.size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // 外层：橙色阴影（营造悬浮感）
+          Container(
+            width: widget.size,
+            height: widget.size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: _bgColor,
               gradient: RadialGradient(
-                center: const Alignment(-0.3, -0.3),
-                radius: 0.8,
+                center: const Alignment(-0.4, -0.4),
+                radius: 0.95,
                 colors: [
-                  Colors.white.withValues(alpha: 0.35),
-                  _bgColor,
-                  _bgColor.withValues(alpha: 0.82),
+                  uncheckedColor.withValues(alpha: 1.0),
+                  uncheckedColor,
+                  uncheckedDark,
                 ],
                 stops: const [0.0, 0.5, 1.0],
               ),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.3),
+                color: Colors.white.withValues(alpha: 0.5),
                 width: 2,
               ),
+              boxShadow: _buildStrongShadows(uncheckedDark),
+            ),
+          ),
+          // 内层：白色小圆（挖空形成圆环）+ 内阴影营造凹面感
+          Container(
+            width: widget.size - ringWidth * 2,
+            height: widget.size - ringWidth * 2,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.cardColor,
               boxShadow: [
+                // 内阴影（凹陷感）— 用外阴影反向模拟
                 BoxShadow(
-                  color: Colors.white.withValues(alpha: 0.25),
-                  blurRadius: 6,
-                  offset: const Offset(-2, -2),
+                  color: Colors.white.withValues(alpha: 0.8),
+                  blurRadius: 2,
+                  offset: const Offset(-1, -1),
                 ),
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 8,
-                  offset: const Offset(2, 4),
-                ),
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
+                  color: uncheckedDark.withValues(alpha: 0.15),
                   blurRadius: 4,
-                  offset: const Offset(0, 2),
-                  spreadRadius: -1,
+                  offset: const Offset(1, 2),
                 ),
               ],
             ),
+          ),
+          // 圆环顶部高光弧（立体关键）
+          Positioned(
+            top: 2,
+            child: Container(
+              width: widget.size * 0.5,
+              height: widget.size * 0.12,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return GestureDetector(
+      onTap: _handleTap,
+      behavior: HitTestBehavior.translucent,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: ScaleTransition(
+          scale: _scaleAnim,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            transitionBuilder: (child, anim) => FadeTransition(opacity: anim, child: child),
             child: widget.isChecked
-                ? const Icon(Icons.check, color: Colors.white, size: 36)
-                : null,
+                ? SizedBox(key: const ValueKey('checked'), width: widget.size, height: widget.size, child: checkedWidget)
+                : SizedBox(key: const ValueKey('unchecked'), width: widget.size, height: widget.size, child: uncheckedWidget),
           ),
         ),
       ),
     );
   }
+
+  List<BoxShadow> _buildStrongShadows(Color darkColor) {
+    return [
+      // 左上高光边（立体关键）
+      BoxShadow(
+        color: Colors.white.withValues(alpha: 0.65),
+        blurRadius: 2,
+        offset: const Offset(-1, -1),
+      ),
+      // 主下沉阴影（悬浮）— 加大更有立体感
+      BoxShadow(
+        color: darkColor.withValues(alpha: 0.45),
+        blurRadius: 14,
+        offset: const Offset(3, 7),
+      ),
+      // 底部深阴影（厚度）
+      BoxShadow(
+        color: darkColor.withValues(alpha: 0.30),
+        blurRadius: 6,
+        offset: const Offset(0, 4),
+      ),
+      // 右下重阴影（黏土挤压感）
+      BoxShadow(
+        color: darkColor.withValues(alpha: 0.18),
+        blurRadius: 3,
+        offset: const Offset(2, 3),
+      ),
+    ];
+  }
 }
 
-/// 爸妈宝首页「今日用药」多时段打卡卡片
-/// ────────────────────────────────────
-/// 一种药品一张卡片，卡片下方竖向罗列该药所有时段
-/// 每个时段配独立ClayCheckinButton，红/绿状态各自独立
-///
-/// 顶部标题行结构：
-///   [ClayCheckinButton(disabled)]  [药名 · 剂量(加粗)]  [>箭头]
-///                                  [剂量 · 首个时段(小字灰)]
-///
-/// 下方时段行结构（N行，N=该药每日服用次数）：
-///   [ClayCheckinButton(active)]  [时段时间·剂量(加粗)]
-///
-/// 标题行按钮仅作整体状态表示（全部打完→绿，否则→红），不可点击
-/// 时段行按钮每个独立可点击，打卡/撤销双向切换
+/// 爸妈宝药品卡片 — 白色悬浮卡片（设计稿标准）
+/// 内部管理自己的勾选状态，避免整体重建导致闪烁
 class MedicineCheckinCard extends StatefulWidget {
   final int medicationId;
   final String medicationName;
-  final dynamic dosagePerTake;
-  final String unit;
-  final List<dynamic> schedules; // 后端返回的 schedules 数组
-  final int checkedSlots;
-  final int totalSlots;
+  final String doseInfo;
+  final bool initialChecked;
+  final ValueChanged<bool>? onCheckinChanged;
   final VoidCallback? onDetailTap;
-  final Function(int scheduleIndex)? onCheckinTap;
 
   const MedicineCheckinCard({
     super.key,
     required this.medicationId,
     required this.medicationName,
-    this.dosagePerTake,
-    this.unit = '',
-    required this.schedules,
-    required this.checkedSlots,
-    required this.totalSlots,
+    required this.doseInfo,
+    required this.initialChecked,
+    this.onCheckinChanged,
     this.onDetailTap,
-    this.onCheckinTap,
   });
 
   @override
@@ -173,23 +241,13 @@ class MedicineCheckinCard extends StatefulWidget {
 }
 
 class _MedicineCheckinCardState extends State<MedicineCheckinCard> {
-  /// 是否全部时段已打卡
-  bool get _allChecked => widget.checkedSlots >= widget.totalSlots && widget.totalSlots > 0;
+  late bool _isChecked = widget.initialChecked;
 
-  /// 药名后的剂量+时段描述 如 "1粒 · 08:00 / 20:00"
-  String get _headerDoseInfo {
-    final sb = StringBuffer();
-    if (widget.dosagePerTake != null && widget.unit.isNotEmpty) {
-      sb.write('${widget.dosagePerTake} ${widget.unit}');
-    }
-    if (widget.schedules.isNotEmpty) {
-      final times = widget.schedules.map((s) => s['time'] as String? ?? '').where((t) => t.isNotEmpty).join(' / ');
-      if (times.isNotEmpty) {
-        if (sb.isNotEmpty) sb.write(' · ');
-        sb.write(times);
-      }
-    }
-    return sb.toString();
+  void _handleCheckinTap() {
+    setState(() {
+      _isChecked = !_isChecked;
+    });
+    widget.onCheckinChanged?.call(_isChecked);
   }
 
   @override
@@ -197,157 +255,99 @@ class _MedicineCheckinCardState extends State<MedicineCheckinCard> {
     return GestureDetector(
       onTap: widget.onDetailTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        padding: const EdgeInsets.fromLTRB(6, 6, 12, 6),
         decoration: BoxDecoration(
-          color: AppTheme.cardColor,
+          color: const Color(0xFFFFFBF2), // 淡奶白色
           borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-          boxShadow: [
-            ...AppTheme.shadowCard,
-            BoxShadow(
-              color: Colors.white.withValues(alpha: 0.5),
-              blurRadius: 4,
-              offset: const Offset(-2, -2),
+          boxShadow: _buildCardShadows(),
+        ),
+        child: Row(
+          children: [
+            // 左侧状态指示器
+            CheckinIndicator(
+              isChecked: _isChecked,
+              onTap: _handleCheckinTap,
+              size: 40,
+            ),
+            const SizedBox(width: 10),
+            // 药品文字信息
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.medicationName,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
+                    widget.doseInfo,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppTheme.textSecondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            // 右侧灰色箭头
+            Padding(
+              padding: const EdgeInsets.only(left: 4, right: 4),
+              child: Icon(
+                Icons.chevron_right,
+                size: 22,
+                color: AppTheme.textLightGray,
+              ),
             ),
           ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // ── 标题行 ──
-            _buildHeaderRow(),
-            // ── 各时段行 ──
-            if (widget.schedules.length >= 1) ...[
-              const SizedBox(height: 8),
-              _buildDivider(),
-              const SizedBox(height: 8),
-              ...widget.schedules.asMap().entries.map(
-                (entry) => Padding(
-                  padding: entry.key > 0
-                      ? const EdgeInsets.only(top: 8)
-                      : EdgeInsets.zero,
-                  child: _buildScheduleRow(entry.key),
-                ),
-              ),
-            ],
-          ],
-        ),
       ),
     );
   }
 
-  Widget _buildHeaderRow() {
-    return Row(
-      children: [
-        // ── 标题行按钮（禁用，仅状态标识） ──
-        ClayCheckinButton(
-          isChecked: _allChecked,
-          disabled: true,
-        ),
-        const SizedBox(width: 12),
-        // ── 药品信息 ──
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.medicationName,
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _headerDoseInfo,
-                style: const TextStyle(
-                  fontSize: 22,
-                  color: AppTheme.textSecondary,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-        // ── 箭头导航 ──
-        const Icon(
-          Icons.chevron_right,
-          size: 32,
-          color: AppTheme.textSecondary,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDivider() {
-    return Container(
-      margin: const EdgeInsets.only(left: 92), // 对齐按钮右侧
-      height: 1,
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: const Color(0xFFE0E0E0).withValues(alpha: 0.6),
-            width: 1,
-          ),
-        ),
+  // 卡片立体浮雕阴影
+  List<BoxShadow> _buildCardShadows() {
+    return [
+      // 顶部细高光（凸起感）
+      BoxShadow(
+        color: Colors.white.withValues(alpha: 0.9),
+        blurRadius: 1,
+        offset: const Offset(0, -1),
       ),
-    );
-  }
-
-  Widget _buildScheduleRow(int index) {
-    final schedule = widget.schedules[index];
-    final time = schedule['time'] as String? ?? '';
-    final checked = schedule['checked'] as bool? ?? false;
-    final dose = widget.dosagePerTake != null
-        ? '${widget.dosagePerTake} ${widget.unit}'
-        : '';
-
-    return Row(
-      children: [
-        // ── 独立可点击的打卡按钮 ──
-        ClayCheckinButton(
-          isChecked: checked,
-          onTap: () => widget.onCheckinTap?.call(index),
-          disabled: false,
-        ),
-        const SizedBox(width: 12),
-        // ── 时段时间 + 剂量 ──
-        Expanded(
-          child: Row(
-            children: [
-              Text(
-                time,
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              if (dose.isNotEmpty) ...[
-                const SizedBox(width: 16),
-                Text(
-                  dose,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-              ],
-              if (checked) ...[
-                const SizedBox(width: 12),
-                Icon(
-                  Icons.check_circle,
-                  size: 28,
-                  color: const Color(0xFF59C992),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
+      // 左上高光边
+      BoxShadow(
+        color: Colors.white.withValues(alpha: 0.6),
+        blurRadius: 4,
+        offset: const Offset(-1, -1),
+      ),
+      // 主下沉阴影（悬浮感）
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.18),
+        blurRadius: 20,
+        offset: const Offset(0, 8),
+      ),
+      // 底部深阴影（厚度）
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.10),
+        blurRadius: 8,
+        offset: const Offset(0, 4),
+      ),
+      // 右下重阴影（黏土挤压）
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.06),
+        blurRadius: 4,
+        offset: const Offset(2, 3),
+      ),
+    ];
   }
 }

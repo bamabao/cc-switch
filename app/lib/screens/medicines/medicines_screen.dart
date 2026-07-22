@@ -136,13 +136,14 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
     final name = med['name'] as String? ?? '';
     final category = med['category'] as String? ?? 'oral';
     final schedules = med['schedules'] as List<dynamic>? ?? [];
-    final dosageDisplay = med['oral_form'] != null ? '${med['dosage_per_take']?.toString() ?? ''}片' : '';
-
-    // 取服药时间
-    final times = schedules
-        .map((s) => s['time_of_day'] as String? ?? '')
-        .where((t) => t.isNotEmpty)
-        .join(' / ');
+    // 每时段独立剂量+时间展示
+    final timeInfos = schedules.map((s) {
+      final t = s['time_of_day'] as String? ?? '';
+      final tStr = t.length >= 5 ? t.substring(0, 5) : t;
+      final doseDisplay = s['dosage_display'] as String? ?? '';
+      if (doseDisplay.isNotEmpty) return '$tStr $doseDisplay';
+      return tStr;
+    }).where((s) => s.isNotEmpty).join('  ');
 
     // 图标表情
     final iconMap = {'oral': '💊', 'external': '🧴', 'injection': '💉', 'supplement': '🌿'};
@@ -151,7 +152,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        onTap: () => _showMedicationDetail(context, med, emoji, times),
+        onTap: () => _showMedicationDetail(context, med, emoji, timeInfos),
         child: Padding(
           padding: const EdgeInsets.all(AppTheme.spacingMd),
           child: Column(
@@ -174,16 +175,16 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(name, style: Theme.of(context).textTheme.titleLarge),
-                        if (dosageDisplay.isNotEmpty)
-                          Text(dosageDisplay, style: Theme.of(context).textTheme.bodyLarge),
+                        if (timeInfos.isNotEmpty)
+                          Text(timeInfos, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppTheme.primaryColor)),
                       ],
                     ),
                   ),
                 ],
               ),
-              if (times.isNotEmpty) ...[
+              if (timeInfos.isNotEmpty) ...[
                 const SizedBox(height: AppTheme.spacingSm),
-                Text('⏰ $times',
+                Text('⏰ $timeInfos',
                     style: Theme.of(context).textTheme.bodyLarge
                         ?.copyWith(color: AppTheme.warningColor)),
               ],
@@ -201,7 +202,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
     );
   }
 
-  void _showMedicationDetail(BuildContext ctx, dynamic med, String emoji, String times) {
+  void _showMedicationDetail(BuildContext ctx, dynamic med, String emoji, String timeInfos) {
     showDialog(
       context: ctx,
       builder: (dialogCtx) {
@@ -230,7 +231,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (times.isNotEmpty) _detailRow('服用时间', times),
+                if (timeInfos.isNotEmpty) _detailRow('服用时间', timeInfos),
                 if (manufacturer.isNotEmpty) _detailRow('厂家', manufacturer),
                 if (dosagePerTake != null) _detailRow('每次用量', '$dosagePerTake$unit'),
                 if (frequency != null) _detailRow('每日次数', '${frequency}次'),

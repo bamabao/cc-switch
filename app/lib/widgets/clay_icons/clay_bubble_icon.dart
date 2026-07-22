@@ -116,7 +116,7 @@ class ClayBubbleIcon extends StatefulWidget {
 }
 
 class _ClayBubbleIconState extends State<ClayBubbleIcon>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final ClayBubblePainter _painter;
 
   // ─── 动画控制器 ───

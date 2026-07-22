@@ -5,17 +5,29 @@ import 'package:flutter/material.dart';
 /// 原则：适老尺寸不动（字号≥32px、按钮≥80px）
 class AppTheme {
   // ─── 颜色 — 对标 Logo 色值 ───
-  static const Color primaryColor = Color(0xFFFF9F40); // 暖橙 — 主品牌色（新增/提醒/重点按钮）
+  static const Color primaryColor = Color(0xFFFF9A3C); // 暖橙 — 设计稿标准色
   static const Color primaryLight = Color(0xFFFFB866);
-  static const Color primaryDark = Color(0xFFE07A1A);
+  static const Color primaryDark = Color(0xFFE68A30);
   static const Color secondaryColor = Color(0xFF76D160); // 嫩绿 — 确认/完成/勾选
   static const Color warningColor = Color(0xFFE53935); // 红色 — 紧急/SOS
   static const Color dangerColor = warningColor; // 别名
-  static const Color bgColor = Color(0xFFE6F7DD); // 浅薄荷 — 全局页面底色
-  static const Color cardColor = Color(0xFFF2F7F0); // 浅灰白 — 卡片/弹窗底色
-  static const Color textPrimary = Color(0xFF3A4437); // 柔和深灰 — 正文
-  static const Color textSecondary = Color(0xFF616161);
+  static const Color bgColor = Color(0xFFE8F5E0); // 淡薄荷绿 — 全局页面底色
+  static const Color bgGradientTop = Color(0xFFE8F5E0); // 背景渐变顶部
+  static const Color bgGradientBottom = Color(0xFFDCEFD0); // 背景渐变底部（稍深）
+  static const Color cardColor = Color(0xFFFFFFFF); // 纯白 — 卡片/弹窗底色
+  static const Color textPrimary = Color(0xFF1A1A1A); // 纯黑 — 药品名称
+  static const Color textSecondary = Color(0xFF666666); // 中灰 — 正文
   static const Color textOnDark = Color(0xFFFFFBF5); // 柔和米白 — 按钮文字
+  static const Color textGray = Color(0xFF666666); // 规格时间中灰
+  static const Color textLightGray = Color(0xFF999999); // 副标题浅灰
+
+  // 专用色
+  static const Color recordCardBg = Color(0xFFD5EBCB); // 用药记录模块-抹茶绿（加深）
+  static const Color recordCardText = Color(0xFF4A7A42); // 用药记录模块-深绿文字
+  static const Color checkinUnchecked = Color(0xFFFF7A5C); // 打卡按钮未打卡-橙红圆环
+  static const Color checkinUncheckedDark = Color(0xFFE56048); // 打卡按钮未打卡-暗部
+  static const Color checkinChecked = Color(0xFF76D160); // 打卡按钮已打卡-嫩绿
+  static const Color checkinCheckedDark = Color(0xFF5AB048); // 打卡按钮已打卡-暗部
 
   // ─── 字号 — 正常2倍 ───
   static const double displayLarge = 48;
@@ -44,31 +56,47 @@ class AppTheme {
   // ─── 圆角 — 黏土椭圆大圆角 ───
   static const double radiusSm = 8;
   static const double radiusMd = 16;
-  static const double radiusLg = 20;
-  static const double radiusButton = 24;
-  static const double radiusCard = 20;
+  static const double radiusLg = 24;
+  static const double radiusButton = 22;
+  static const double radiusCard = 22;
 
   // ─── 阴影 — 柔和黏土悬浮阴影 ───
   static const Color shadowColor = Color(0xFF3A4437);
+  // 柔和立体阴影 — 双层阴影模拟黏土立体感
   static List<BoxShadow> shadowCard = [
     BoxShadow(
-      color: const Color(0xFF3A4437).withValues(alpha: 0.08),
-      blurRadius: 20,
-      offset: const Offset(0, 8),
+      color: const Color(0xFF000000).withValues(alpha: 0.15),
+      blurRadius: 24,
+      offset: const Offset(0, 10),
+    ),
+    BoxShadow(
+      color: const Color(0xFF000000).withValues(alpha: 0.08),
+      blurRadius: 8,
+      offset: const Offset(0, 4),
     ),
   ];
   static List<BoxShadow> shadowButton = [
     BoxShadow(
-      color: const Color(0xFF3A4437).withValues(alpha: 0.10),
-      blurRadius: 16,
-      offset: const Offset(0, 6),
+      color: const Color(0xFFFF9A3C).withValues(alpha: 0.45),
+      blurRadius: 20,
+      offset: const Offset(0, 8),
+    ),
+    BoxShadow(
+      color: Colors.black.withValues(alpha: 0.12),
+      blurRadius: 8,
+      offset: const Offset(0, 4),
     ),
   ];
   static List<BoxShadow> shadowElevated = [
     BoxShadow(
-      color: const Color(0xFF3A4437).withValues(alpha: 0.12),
+      color: const Color(0xFF000000).withValues(alpha: 0.14),
       blurRadius: 28,
       offset: const Offset(0, 12),
+    ),
+    BoxShadow(
+      color: const Color(0xFF000000).withValues(alpha: 0.06),
+      blurRadius: 6,
+      offset: const Offset(0, 4),
     ),
   ];
 
@@ -100,7 +128,7 @@ class AppTheme {
           backgroundColor: primaryColor,
           foregroundColor: textOnDark,
           elevation: 4,
-          shadowColor: const Color(0xFF3A4437).withValues(alpha: 0.15),
+          shadowColor: const Color(0xFFFF9A3C).withValues(alpha: 0.30),
           textStyle: const TextStyle(
             fontSize: titleMedium,
             fontWeight: FontWeight.w600,
