@@ -6,6 +6,7 @@ import '../auth/kid_binding_screen.dart';
 import '../profile/settings_screen.dart';
 import 'messages_screen.dart';
 import 'health_record_screen.dart';
+import 'health_metric_screen.dart';
 import 'emergency_contact_screen.dart';
 import 'about_screen.dart';
 
@@ -118,6 +119,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 icon: Icons.assignment, title: '健康档案',
                 onTap: () => Navigator.push(context,
                     MaterialPageRoute(builder: (_) => const HealthRecordScreen()))),
+            _buildMenuItem(context,
+                icon: Icons.monitor_heart, title: '血压/血糖/尿酸监测',
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const HealthMetricScreen()))),
             _buildMenuItem(context,
                 icon: Icons.settings, title: '设置',
                 onTap: () => Navigator.push(context,

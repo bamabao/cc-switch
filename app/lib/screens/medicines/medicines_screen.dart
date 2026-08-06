@@ -30,7 +30,9 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
     try {
       final user = await _api.getMe();
       if (mounted) setState(() => _elderId = user.id);
-    } catch (_) {}
+    } catch (_) {
+      _elderId = 1; // 默认老人ID
+    }
     _loadMedications();
   }
 

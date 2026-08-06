@@ -121,7 +121,7 @@ class ApiService {
 
   /// 获取当前用户信息
   Future<UserProfile> getMe() async {
-    final result = await get('${ApiConfig.authMe}?token=$_token');
+    final result = await get('${ApiConfig.authMe}');
     return UserProfile.fromJson(result);
   }
 
@@ -140,7 +140,7 @@ class ApiService {
 
   /// 获取单个药品详情
   Future<Map<String, dynamic>> getMedication(int id, {required int elderId}) async {
-    final result = await get('${ApiConfig.medications}/$id?elder_id=$elderId&token=$_token');
+    final result = await get('${ApiConfig.medications}/$id?elder_id=$elderId');
     return result;
   }
 
@@ -176,6 +176,50 @@ class ApiService {
   Future<Map<String, dynamic>> getTodayCheckin({required int elderId}) async {
     return await get(ApiConfig.checkinToday, queryParams: {
       'elder_id': elderId.toString(),
+    });
+  }
+
+  /// 搜索药品说明书
+  Future<Map<String, dynamic>> searchDrugInstruction(String name) async {
+    final encoded = Uri.encodeQueryComponent(name);
+    return await get('${ApiConfig.drugSearch}?name=$encoded');
+  }
+
+  /// AI 用药问答
+  Future<Map<String, dynamic>> askDrugQuestion(String question, {String drugName = ''}) async {
+    return await post(ApiConfig.aiAsk, body: {
+      'question': question,
+      'drug_name': drugName,
+    });
+  }
+
+  /// AI 药物相互作用检测
+  Future<Map<String, dynamic>> checkDrugInteraction(List<String> drugs) async {
+    return await post(ApiConfig.aiInteraction, body: {
+      'drugs': drugs,
+    });
+  }
+
+  /// AI 每周用药报告
+  Future<Map<String, dynamic>> getWeeklyReport(int elderId) async {
+    return await get('${ApiConfig.aiWeeklyReport}/$elderId');
+  }
+
+  /// 发送医患聊天消息
+  Future<Map<String, dynamic>> sendChatMessage({
+    required int doctorId,
+    required int patientId,
+    required String role,
+    required int senderId,
+    required String content,
+  }) async {
+    return await post(ApiConfig.chatSend, body: {
+      'doctor_id': doctorId,
+      'patient_id': patientId,
+      'sender_role': role,
+      'sender_id': senderId,
+      'content': content,
+      'msg_type': 'text',
     });
   }
 

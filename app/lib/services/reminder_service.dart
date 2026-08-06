@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import '../../config/api_config.dart';
 import '../services/api_service.dart';
 import '../services/voice_service.dart';
+import '../services/notification_service.dart';
 import '../models/medication_dose.dart';
 
 /// 爸妈宝 — 提醒调度/存储服务
-/// 封装：后端 API 存储 + 本地通知调度 + 语音播报
+/// 封装：后端 API 存储 + 本地精确闹钟通知 + 语音播报
 class ReminderService {
   final ApiService _api = ApiService();
 
@@ -32,19 +33,15 @@ class ReminderService {
   }) async {
     switch (dose.reminderType) {
       case ReminderType.systemAlarm:
-        // 系统闹铃 — 依赖 flutter_local_notifications 或原生 AlarmManager
-        // 此处 placeholder，实际由本地通知插件调度
+        // 系统闹铃 — 由 NotificationService 的精确闹钟调度
         debugPrint('[提醒] 系统闹铃 — $medicationName ${slotTime != null ? '${slotTime.hour}:${slotTime.minute}' : ''}');
         break;
 
       case ReminderType.backgroundMusic:
-        // 背景音乐 — 使用 AudioPlayer 播放音乐文件
-        // 此处 placeholder，后续集成 audio_player 播放 dose.musicPath
         debugPrint('[提醒] 背景音乐 — $medicationName path: ${dose.musicPath}');
         break;
 
       case ReminderType.voiceBroadcast:
-        // 讯飞语音播报
         await _broadcastVoice(medicationName, dose.voiceTitle);
         break;
     }
@@ -61,13 +58,33 @@ class ReminderService {
     }
   }
 
-  /// 多时段批量调度提醒
+  /// 多时段批量调度提醒（App被杀也能响铃）
   Future<void> scheduleAllSlots({
     required int medicationId,
     required String medicationName,
     required MedicationDose dose,
   }) async {
-    // 每个时段独立保存到后端
+    final notif = NotificationService.instance;
+
+    // 先取消旧提醒，防止重复
+    await notif.cancelForMedication(medicationId);
+
+    // 每个时段注册一个每日精确闹钟
+    for (var i = 0; i < dose.timeSlots.length; i++) {
+      final slot = dose.timeSlots[i];
+      final dosageText = dose.dosageAmount != null && dose.dosageUnit != null
+          ? '${dose.dosageAmount}${dose.dosageUnit}'
+          : '';
+      await notif.scheduleDailyReminder(
+        medicationId: medicationId,
+        medicationName: medicationName,
+        dosageText: dosageText,
+        time: slot,
+      );
+      debugPrint('[提醒] 调度时段$i: ${slot.hour}:${slot.minute} $medicationName');
+    }
+
+    // 同时保存到后端
     for (final slot in dose.timeSlots) {
       final slotDose = dose.copyWith(timeSlots: [slot]);
       await saveReminder(medicationId: medicationId, dose: slotDose);

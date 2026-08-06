@@ -16,6 +16,18 @@ from app.api import points as points_api
 from app.api import auth as auth_api
 from app.api import emergency_contact as emergency_contact_api
 from app.api import ocr as ocr_api
+from app.api import drug_instruction as drug_api
+from app.api import app_version as app_api
+from app.api import ai as ai_api
+from app.api import doctor as doctor_api
+from app.api import chat as chat_api
+from app.api import assistant as assistant_api
+from app.api import admin as admin_api
+from app.api import prescription as prescription_api
+from app.api import health as health_api
+from app.api import sleep as sleep_api
+from app.api import erp as erp_api
+from app.api import hospital as hospital_api
 from app.services.scheduler import run_reminder_cycle, run_streak_check
 import threading
 
@@ -103,6 +115,72 @@ async def ensure_json_charset(request: Request, call_next):
     return response
 
 
+# 安全中间件：API 速率限制（防刷接口）
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    path = request.url.path
+    # 仅对API限流，静态文件/健康检查不限制
+    if path.startswith("/api/v1/") and not path.endswith("/health"):
+        try:
+            from app.core.security import check_rate_limit
+            check_rate_limit(request)
+        except HTTPException as e:
+            return Response(content=f'{{"detail":"{e.detail}"}}', status_code=e.status_code,
+                            media_type="application/json; charset=utf-8")
+    return await call_next(request)
+
+
+# 安全中间件：Token 从 Header 读取（Authorization: Bearer <token>）
+# 防止 token 出现在 URL/日志中；同时兼容旧版 URL query 传参
+@app.middleware("http")
+async def token_from_header(request: Request, call_next):
+    path = request.url.path
+    if path.startswith("/api/v1/"):
+        auth = request.headers.get("Authorization", "")
+        if auth.startswith("Bearer "):
+            token = auth[7:].strip()
+            if token:
+                # 若 query 中无 token，则注入
+                query = request.url.query
+                if "token=" not in query:
+                    sep = "&" if query else ""
+                    query += f"{sep}token={token}"
+                    # 重写 scope 的 query_string 与 query_params
+                    from urllib.parse import parse_qsl
+                    request.scope["query_string"] = query.encode()
+                    request.scope["query_params"] = _QueryParams(query)
+    return await call_next(request)
+
+
+class _QueryParams:
+    """轻量 query params 包装（满足 FastAPI 依赖需要）"""
+    def __init__(self, query: str):
+        from urllib.parse import parse_qsl
+        self._dict = dict(parse_qsl(query, keep_blank_values=True))
+        self._list = [(k, v) for k, v in parse_qsl(query, keep_blank_values=True)]
+
+    def get(self, key, default=None):
+        return self._dict.get(key, default)
+
+    def __getitem__(self, key):
+        return self._dict[key]
+
+    def __contains__(self, key):
+        return key in self._dict
+
+    def items(self):
+        return self._dict.items()
+
+    def keys(self):
+        return self._dict.keys()
+
+    def multi_items(self):
+        return self._list
+
+    def __len__(self):
+        return len(self._dict)
+
+
 # CORS
 app.add_middleware(
     CORSMiddleware,
@@ -118,6 +196,18 @@ app.include_router(points_api.router)
 app.include_router(auth_api.router)
 app.include_router(emergency_contact_api.router)
 app.include_router(ocr_api.router)
+app.include_router(drug_api.router)
+app.include_router(app_api.router)
+app.include_router(ai_api.router)
+app.include_router(doctor_api.router)
+app.include_router(chat_api.router)
+app.include_router(assistant_api.router)
+app.include_router(admin_api.router)
+app.include_router(prescription_api.router)
+app.include_router(health_api.router)
+app.include_router(sleep_api.router)
+app.include_router(erp_api.router)
+app.include_router(hospital_api.router)
 
 
 @app.get("/api/v1/health")

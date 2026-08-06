@@ -11,6 +11,7 @@ import '../../widgets/reminder_dialog.dart';
 import '../../models/medication_dose.dart';
 import '../voice/voice_screen.dart';
 import 'medicine_camera_screen.dart';
+import 'doctor_prescription_screen.dart';
 
 /// 药品录入页 — 三通道录入 + 每时段独立服药数量
 ///
@@ -19,7 +20,8 @@ import 'medicine_camera_screen.dart';
 /// - 柔和轻拟物视觉升级（方案A）：大圆角+弱阴影+低饱和渐变+卡片悬浮
 /// - 统一圆角规范：大卡22-28px、按钮16-20px、输入框12-16px
 class AddMedicineScreen extends StatefulWidget {
-  const AddMedicineScreen({super.key});
+  final Map<String, dynamic>? editMedication;
+  const AddMedicineScreen({super.key, this.editMedication});
 
   @override
   State<AddMedicineScreen> createState() => _AddMedicineScreenState();
@@ -29,6 +31,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
   // ─── 控制器 ───
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
   final FocusNode _nameFocus = FocusNode();
 
   // ─── 服务 ───
@@ -41,6 +44,11 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
   bool _submitting = false;
   bool _ocrRunning = false;
   int _elderId = 1;
+  String _quantityUnit = '片';
+  String? _ocrIndication;
+  bool _isEditMode = false;
+  int? _editMedicationId;
+  final List<String> _unitOptions = ['粒', '片', '克 (g)', '毫升 (ml)', '瓶', '袋', '支', '丸', '毫克 (mg)', '剂'];
 
   // ─── 每时段独立剂量数据（由TimeSlotSelector回传） ───
   List<TimeSlotData> _timeSlotDataList = [];
@@ -71,6 +79,41 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
   void initState() {
     super.initState();
     _loadUserId();
+    _initEditMode();
+  }
+
+  void _initEditMode() {
+    final edit = widget.editMedication;
+    if (edit == null) return;
+    _isEditMode = true;
+    _editMedicationId = edit['id'] as int?;
+    _nameController.text = (edit['name'] as String? ?? '');
+    _noteController.text = (edit['notes'] as String? ?? '');
+    // 解析分类
+    final cat = edit['category'] as String? ?? '';
+    _selectedCategory = _categoryApiMap.keys.firstWhere(
+      (k) => _categoryApiMap[k] == cat,
+      orElse: () => '内服',
+    );
+    // 解析用量
+    final unit = edit['unit'] as String? ?? '粒';
+    _quantityUnit = _unitNormalizeMap[unit] ?? unit;
+    if (edit['total_quantity'] != null) {
+      _quantityController.text = edit['total_quantity'].toString();
+    }
+    // 解析时段
+    final schedules = edit['schedules'] as List<dynamic>? ?? [];
+    if (schedules.isNotEmpty) {
+      _timeSlotDataList = schedules.map((s) {
+        final time = s['time_of_day'] as String? ?? '08:00';
+        final parts = time.split(':');
+        return TimeSlotData(
+          time: TimeOfDay(hour: int.tryParse(parts[0]) ?? 8, minute: int.tryParse(parts[1]) ?? 0),
+          dosage: (s['dosage'] ?? 1.0).toString(),
+          unit: unit,
+        );
+      }).toList();
+    }
   }
 
   Future<void> _loadUserId() async {
@@ -84,8 +127,139 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
   void dispose() {
     _nameController.dispose();
     _noteController.dispose();
+    _quantityController.dispose();
     _nameFocus.dispose();
     super.dispose();
+  }
+
+  /// 智能解析OCR原始文本：提取总量、单位、用法，支持克/毫克自动识别
+  /// 例如 "10克" → 总量10，单位克；"0.1g" → 总量0.1，单位克
+  void _parseOcrRawTexts(List<dynamic> rawTexts, String knownName) {
+    if (rawTexts.isEmpty) return;
+    
+    final texts = rawTexts.map((e) => e.toString().trim()).where((t) => t.isNotEmpty).toList();
+    final joined = texts.join(' ').trim();
+    
+    // 0. 预处理：过滤掉有效期等时间相关文本
+    final filtered = texts.where((t) =>
+      !RegExp(r'有效期|个月|月$|年$|天$|小时|分钟|有效期\d+').hasMatch(t)
+    ).toList();
+    
+    // 1. 找总量：检测多板/多盒/多瓶模式，支持"、"和"×"两种分隔符
+    //    "12粒/板X2板/盒" → 24粒， "15粒/板、2板/盒" → 30粒
+    final boardPattern = RegExp(r'(\d+)\s*粒\s*[//／/]\s*板\s*(?:[Xx×*、,，]\s*)?(\d+)\s*板\s*[//／/]\s*盒');
+    String? quantityVal;
+    String? quantityUnit;
+    // 也匹配单个XX粒/板的情况  
+    final singleBoardPattern = RegExp(r'(\d+)\s*粒\s*[//／/]\s*板');
+    var boardMatch = boardPattern.firstMatch(joined);
+    if (boardMatch != null) {
+      final perBoard = int.tryParse(boardMatch.group(1) ?? '') ?? 0;
+      final boards = int.tryParse(boardMatch.group(2) ?? '') ?? 0;
+      if (perBoard > 0 && boards > 0) {
+        quantityVal = (perBoard * boards).toString();
+        quantityUnit = '粒';
+      }
+    } else {
+      // 单个 XX粒/板 的情况（可能另一块板的信息在别的token里）
+      var singleMatch = singleBoardPattern.firstMatch(joined);
+      if (singleMatch != null) {
+        quantityVal = singleMatch.group(1)!;
+        quantityUnit = '粒';
+      }
+    }
+    
+    // 2. 如果没匹配到多板模式，再找数字+单位（过滤时间相关）
+    if (quantityVal == null) {
+      final quantityPattern = RegExp(r'(\d+\.?\d*)\s*(克|g|毫克|mg|毫升|ml|支|瓶|袋|粒|片|丸|剂|贴|个|包)');
+      String? fallbackVal;
+      String? fallbackUnit;
+      
+      for (int i = 0; i < filtered.length; i++) {
+        final text = filtered[i];
+        final match = quantityPattern.firstMatch(text);
+        if (match != null) {
+          final val = match.group(1)!;
+          final unit = match.group(2)!;
+          final numVal = double.tryParse(val) ?? 0;
+          
+          // 检测是否在规格说明中（如 "规格：0.25g"）- 这种是每粒含量，不是总量
+          bool isSpec = false;
+          if (i > 0 && (filtered[i-1].contains('规格') || filtered[i-1].contains('含量'))) {
+            isSpec = true;
+          }
+          // 小数值的克/毫克（<1g）大多是每粒规格，不是总量
+          if ((unit == '克' || unit == 'g') && numVal < 1 && !isSpec && i > 0 && filtered.length > 1) {
+            // 检查相邻文本是否有暗示是规格
+            for (int j = 0; j < filtered.length; j++) {
+              if (filtered[j].contains('规格') || filtered[j].contains('含量') || filtered[j].contains('每粒') || filtered[j].contains('每片')) {
+                isSpec = true;
+                break;
+              }
+            }
+          }
+          
+          if (isSpec) continue; // 跳过规格说明中的含量
+          
+          // 优先取含"克"/"g"/"毫升"/"ml"的大数值（≥1），这通常是膏体/液体的总量
+          if ((unit == '克' || unit == 'g' || unit == '毫升' || unit == 'ml' || unit == '支' || unit == '瓶' || unit == '贴') && numVal >= 1) {
+            quantityVal = val;
+            quantityUnit = unit;
+            break;
+          }
+          // 粒/片/袋/丸/剂作为备选
+          if (fallbackVal == null && (unit == '粒' || unit == '片' || unit == '丸')) {
+            fallbackVal = val;
+            fallbackUnit = unit;
+          }
+        }
+        // 相邻token合并检测："6" + "片"
+        if (RegExp(r'^\d+\.?\d*$').hasMatch(text) && i + 1 < filtered.length) {
+          final next = filtered[i + 1];
+          if (RegExp(r'^(粒|片|丸|克|g|毫克|mg|支|瓶|袋|贴)$').hasMatch(next)) {
+            if (fallbackVal == null) {
+              fallbackVal = text;
+              fallbackUnit = next;
+            }
+          }
+        }
+      }
+      
+      // 备选优先于小数值的克
+      if (quantityVal == null && fallbackVal != null) {
+        quantityVal = fallbackVal;
+        quantityUnit = fallbackUnit;
+      }
+    }
+    
+    // 3. 填入总量
+    if (quantityVal != null && quantityUnit != null) {
+      setState(() {
+        _quantityController.text = quantityVal!;
+        _quantityUnit = (_unitNormalizeMap[quantityUnit] ?? quantityUnit)!;
+      });
+    }
+    
+    // 3. 设为外用（如果是乳膏/软膏类）
+    if (joined.contains('乳膏') || joined.contains('软膏') || joined.contains('外用')) {
+      setState(() => _selectedCategory = '外用');
+      // 外用药默认单位：支
+      if (quantityUnit == null) {
+        setState(() => _quantityUnit = '支');
+      }
+    }
+    
+    // 4. 提取适应症
+    String? indication;
+    for (final t in texts) {
+      if (t.contains('适应症') || t.contains('用于') || t.contains('主治')) {
+        indication = t;
+        break;
+      }
+    }
+    if (indication != null) {
+      setState(() => _ocrIndication = indication!);
+    }
   }
 
   /// 将OCR识别的剂量字符串（如 "0.5g" "2粒"）拆分为首时段用量
@@ -105,6 +279,22 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
 
   // ─── 提交：药品 + 每时段调度 + 提醒 ───
 
+  /// 清空表单，继续录入下一个药
+  void _clearForm() {
+    setState(() {
+      _nameController.clear();
+      _noteController.clear();
+      _quantityController.clear();
+      _timeSlotDataList = [];
+      _confirmedDose = null;
+      _ocrIndication = null;
+      _selectedCategory = '内服';
+      _quantityUnit = '片';
+      _ocrRunning = false;
+    });
+    _nameFocus.requestFocus();
+  }
+
   void _submit() async {
     if (_submitting || _nameController.text.trim().isEmpty) return;
 
@@ -120,10 +310,11 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
       return;
     }
 
-    // 校验：每个时段的数量不能为空
+    // 校验：每个时段的数量不能为空、必须为正数
     for (int i = 0; i < _timeSlotDataList.length; i++) {
       final d = _timeSlotDataList[i];
-      if (d.dosage.trim().isEmpty || double.tryParse(d.dosage) == null) {
+      final parsed = double.tryParse(d.dosage.trim());
+      if (d.dosage.trim().isEmpty || parsed == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('请填写第 ${i + 1} 个时段的服药数量'),
@@ -132,6 +323,40 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
           ),
         );
         return;
+      }
+      if (parsed <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('第 ${i + 1} 个时段的服药数量必须大于0'),
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+    }
+
+    // 查重：同一用户下已有同名药品则提示
+    if (!_isEditMode && _nameController.text.trim().isNotEmpty) {
+      try {
+        final existing = await _api.getMedications(elderId: _elderId);
+        final duplicate = existing.any((m) =>
+          m.name.toLowerCase().trim() == _nameController.text.trim().toLowerCase());
+        if (duplicate) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('⚠️ "${_nameController.text.trim()}" 已添加过，请勿重复添加'),
+              duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.orange.shade700,
+            ),
+          );
+          setState(() => _submitting = false);
+          return;
+        }
+      } catch (_) {
+        // 查重失败也继续提交，不阻塞
       }
     }
 
@@ -146,21 +371,30 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
         'weekday_mask': 127,
       }).toList();
 
-      final response = await _api.post(
-        '${ApiConfig.medications}?elder_id=$_elderId',
-        body: {
-          'name': _nameController.text.trim(),
-          'category': _categoryApiMap[_selectedCategory] ?? 'oral',
-          'oral_form': 'tablet',
-          // 第一时段用量作为 medication 级默认值（兼容旧字段）
-          'dosage_per_take': double.tryParse(_timeSlotDataList.first.dosage) ?? 1.0,
-          'unit': _timeSlotDataList.first.unit.replaceAll(RegExp(r'\s*\(.+\)'), ''),
-          'frequency_per_day': _timeSlotDataList.length,
-          'notes': _noteController.text.trim(),
-          'status': 'approved',
-          'schedules': schedules,
-        },
-      );
+      final httpResponse = _isEditMode
+        ? _api.put('${ApiConfig.medications}/$_editMedicationId', body: {
+            'name': _nameController.text.trim(),
+            'category': _categoryApiMap[_selectedCategory] ?? 'oral',
+            'oral_form': 'tablet',
+            'dosage_per_take': double.tryParse(_timeSlotDataList.first.dosage) ?? 1.0,
+            'unit': _timeSlotDataList.first.unit.replaceAll(RegExp(r'\\s*\\(.+\\)'), ''),
+            'frequency_per_day': _timeSlotDataList.length,
+            'notes': _noteController.text.trim(),
+            'status': 'approved',
+            'schedules': schedules,
+          })
+        : _api.post('${ApiConfig.medications}?elder_id=$_elderId', body: {
+            'name': _nameController.text.trim(),
+            'category': _categoryApiMap[_selectedCategory] ?? 'oral',
+            'oral_form': 'tablet',
+            'dosage_per_take': double.tryParse(_timeSlotDataList.first.dosage) ?? 1.0,
+            'unit': _timeSlotDataList.first.unit.replaceAll(RegExp(r'\\s*\\(.+\\)'), ''),
+            'frequency_per_day': _timeSlotDataList.length,
+            'notes': _noteController.text.trim(),
+            'status': 'approved',
+            'schedules': schedules,
+          });
+      final response = await httpResponse;
 
       if (!mounted) return;
       final medicationId = response['id'] as int? ?? 0;
@@ -192,13 +426,13 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('药品已添加，提醒已设置！'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(_isEditMode ? '药品已更新！' : '药品已添加！可继续录入下一项'),
+          duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
       );
-      Navigator.pop(context, true);
+      if (!_isEditMode) _clearForm();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -284,6 +518,8 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
             children: [
               // 三通道入口 — 悬浮卡片
               _buildInputChannels(),
+              // 专家版入口 — 医生用药方案
+              _buildExpertEntry(),
               const SizedBox(height: 20),
 
               // 分类选择
@@ -420,8 +656,16 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
           label: '语音录入',
           subtitle: '说话填写药品信息',
           color: AppTheme.secondaryColor,
-          onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const VoiceScreen()));
+          onTap: () async {
+            final result = await Navigator.push<String>(
+              context,
+              MaterialPageRoute(builder: (_) => const VoiceScreen(addMode: true)),
+            );
+            if (result != null && result.isNotEmpty) {
+              _nameController.text = result;
+              _nameFocus.requestFocus();
+              setState(() {});
+            }
           },
         )),
         const SizedBox(width: 14),
@@ -433,6 +677,65 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
           onTap: () => _nameFocus.requestFocus(),
         )),
       ],
+    );
+  }
+
+  /// 专家版入口 — 接收医生开好的用药方案
+  Widget _buildExpertEntry() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const DoctorPrescriptionScreen()),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(top: 14),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF1565C0), Color(0xFF42A5F5)],
+            begin: Alignment.centerLeft, end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: const Color(0xFF1565C0).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4)),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.medical_services, color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('专家版 · 医生用药方案',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white)),
+                  Text('医生开好药，一键接收自动设置提醒',
+                      style: TextStyle(fontSize: 12, color: Colors.white70)),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text('查看',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF1565C0))),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -551,9 +854,9 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
               if (frequency.isNotEmpty) {
                 // frequency 仅用于提示，不再设每日频次
               }
-              if (rawTexts.isNotEmpty && _noteController.text.isEmpty) {
-                _noteController.text = rawTexts.join(' ');
-              }
+              
+              // 智能解析OCR文本：提取总量、单位、用法
+              _parseOcrRawTexts(rawTexts, name);
 
               if (success && name.isNotEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -728,6 +1031,80 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
             large: true,
           ),
           const SizedBox(height: AppTheme.spacingMd),
+          // 药品总量（库存预警用）
+          Row(
+            children: [
+              SizedBox(
+                width: 180,
+                child: _buildInputField(
+                  controller: _quantityController,
+                  label: '药品总量',
+                  hint: '例如：30',
+                  icon: Icons.inventory_2_outlined,
+                  large: true,
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 8),
+              // 单位（与服用时间联动双向同步）
+              Container(
+                margin: const EdgeInsets.only(top: 32),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _unitOptions.contains(_quantityUnit) ? _quantityUnit : _unitOptions.first,
+                    icon: const Icon(Icons.arrow_drop_down, color: AppTheme.primaryColor, size: 26),
+                    style: const TextStyle(fontSize: 20, color: AppTheme.primaryColor, fontWeight: FontWeight.w600),
+                    items: _unitOptions.map((u) => DropdownMenuItem(
+                      value: u,
+                      child: Text(u, style: const TextStyle(fontSize: 18, color: AppTheme.textPrimary)),
+                    )).toList(),
+                    onChanged: (v) {
+                      if (v == null) return;
+                      setState(() {
+                        _quantityUnit = v;
+                        // 同步更新服用时间的单位
+                        _timeSlotDataList = _timeSlotDataList.map((d) =>
+                          TimeSlotData(time: d.time, dosage: d.dosage, unit: v)
+                        ).toList();
+                      });
+                    },
+                    isDense: true,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // OCR识别到的适应症（只读展示）
+          if (_ocrIndication != null) ...[
+            const SizedBox(height: AppTheme.spacingSm),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.15)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.healing, size: 18, color: AppTheme.primaryColor),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '【适应症】$_ocrIndication',
+                      style: const TextStyle(fontSize: 15, color: AppTheme.textSecondary, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: AppTheme.spacingMd),
           _buildInputField(
             controller: _noteController,
             label: '注意事项',
@@ -747,6 +1124,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
     required String hint,
     required IconData icon,
     bool large = false,
+    TextInputType? keyboardType,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -766,38 +1144,31 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
           ],
         ),
         SizedBox(height: large ? 12 : 8),
-        // 外层凹槽效果
-        Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFF5F5F0),
-            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-            boxShadow: [
-              // 内嵌凹槽效果
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 3,
-                offset: const Offset(0, 1),
-              ),
-            ],
+        // 输入框（简化结构，直接使用InputDecoration填充）
+        TextField(
+          controller: controller,
+          focusNode: focusNode,
+          keyboardType: keyboardType,
+          style: TextStyle(
+            fontSize: large ? 28 : AppTheme.titleMedium,
+            color: AppTheme.textPrimary,
           ),
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            style: TextStyle(
-              fontSize: large ? 28 : AppTheme.titleMedium,
-              color: AppTheme.textPrimary,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(
+              fontSize: large ? 24 : AppTheme.titleMedium,
+              color: AppTheme.textSecondary.withValues(alpha: 0.5),
             ),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(
-                fontSize: large ? 24 : AppTheme.titleMedium,
-                color: AppTheme.textSecondary.withValues(alpha: 0.5),
-              ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            filled: true,
+            fillColor: const Color(0xFFF5F5F0),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+              borderSide: BorderSide.none,
             ),
-            onChanged: (_) => setState(() {}),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
           ),
+          onChanged: (_) => setState(() {}),
+          textInputAction: TextInputAction.next,
         ),
       ],
     );
@@ -807,7 +1178,10 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
   Widget _buildTimeSlotSection() {
     return TimeSlotSelector(
       timeSlots: _timeSlotDataList,
-      onChanged: (dataList) => setState(() => _timeSlotDataList = dataList),
+      onChanged: (dataList) => setState(() {
+        _timeSlotDataList = dataList;
+        if (dataList.isNotEmpty) _quantityUnit = dataList.first.unit;
+      }),
     );
   }
 

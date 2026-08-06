@@ -73,9 +73,10 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
   }
 
   void _addCustomTime() async {
-    final picked = await ClayTimePicker.show(
+    // 弹窗：默认3个时段 + 自定义
+    final picked = await showDialog<TimeOfDay>(
       context: context,
-      initialTime: const TimeOfDay(hour: 8, minute: 0),
+      builder: (ctx) => _buildDefaultTimeDialog(ctx),
     );
     if (picked != null) {
       setState(() {
@@ -87,9 +88,9 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
 
   void _editTime(int index) async {
     final item = _items[index];
-    final picked = await ClayTimePicker.show(
+    final picked = await showDialog<TimeOfDay>(
       context: context,
-      initialTime: item.time,
+      builder: (ctx) => _buildDefaultTimeDialog(ctx, initial: item.time),
     );
     if (picked != null) {
       setState(() => _items[index] = item.copyWith(time: picked));
@@ -297,6 +298,173 @@ class _TimeSlotSelectorState extends State<TimeSlotSelector> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// 时间选择弹窗 — 3个默认时段 + 自定义滚动选择
+  Widget _buildDefaultTimeDialog(BuildContext ctx, {TimeOfDay? initial}) {
+    const defaults = [TimeOfDay(hour: 8, minute: 0), TimeOfDay(hour: 12, minute: 0), TimeOfDay(hour: 18, minute: 0)];
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: const Row(
+        children: [
+          Icon(Icons.access_time, color: AppTheme.primaryColor, size: 24),
+          SizedBox(width: 8),
+          Text('选择服药时间', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+        ],
+      ),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ...defaults.map((t) => _buildDefaultTimeTile(ctx, t)),
+            const SizedBox(height: 8),
+            // 自定义时间
+            GestureDetector(
+              onTap: () async {
+                final picked = await showDialog<TimeOfDay>(
+                  context: ctx,
+                  builder: (_) => _buildAddTimeDialog(ctx, '自定义时间', '确定'),
+                );
+                if (picked != null && ctx.mounted) Navigator.pop(ctx, picked);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.4), width: 1.5),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add_circle_outline, color: AppTheme.primaryColor, size: 22),
+                    SizedBox(width: 6),
+                    Text('自定义时间', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.primaryColor)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 默认时间卡片
+  Widget _buildDefaultTimeTile(BuildContext ctx, TimeOfDay t) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: GestureDetector(
+        onTap: () => Navigator.pop(ctx, t),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryColor.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.notifications_none, color: AppTheme.primaryColor, size: 24),
+              const SizedBox(width: 12),
+              Text(
+                '${t.hour.toString().padLeft(2, '0')} : ${t.minute.toString().padLeft(2, '0')}',
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+              ),
+              const Spacer(),
+              const Icon(Icons.check_circle_outline, color: AppTheme.primaryColor, size: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddTimeDialog(BuildContext ctx, String title, String confirm, {TimeOfDay? initial}) {
+    final notifier = ValueNotifier<TimeOfDay>(initial ?? const TimeOfDay(hour: 8, minute: 0));
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: Row(
+        children: [
+          const Icon(Icons.access_time, color: AppTheme.primaryColor, size: 24),
+          const SizedBox(width: 8),
+          Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+        ],
+      ),
+      content: SizedBox(
+        height: 180,
+        child: ValueListenableBuilder<TimeOfDay>(
+          valueListenable: notifier,
+          builder: (_, t, __) => Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '${t.hour.toString().padLeft(2, '0')} : ${t.minute.toString().padLeft(2, '0')}',
+                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w700, color: AppTheme.primaryColor),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _adjBtn(-1, Icons.remove, () => notifier.value = TimeOfDay(hour: (t.hour - 1 + 24) % 24, minute: t.minute)),
+                  const SizedBox(width: 12),
+                  _adjBtn(1, Icons.add, () => notifier.value = TimeOfDay(hour: (t.hour + 1) % 24, minute: t.minute)),
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text('时', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  ),
+                  _adjBtn(-5, Icons.remove, () => notifier.value = TimeOfDay(hour: t.hour, minute: (t.minute - 5 + 60) % 60)),
+                  const SizedBox(width: 12),
+                  _adjBtn(5, Icons.add, () => notifier.value = TimeOfDay(hour: t.hour, minute: (t.minute + 5) % 60)),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text('分', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(ctx, notifier.value),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.primaryColor,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+          child: Text(confirm, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        ),
+      ],
+    );
+  }
+
+  /// 小时/分调整按钮
+  Widget _adjBtn(int step, IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40, height: 40,
+        decoration: BoxDecoration(
+          color: step > 0 ? AppTheme.primaryColor : AppTheme.bgColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 4, offset: const Offset(0, 2))],
+        ),
+        child: Icon(icon, color: step > 0 ? Colors.white : AppTheme.textPrimary, size: 22),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import '../../config/api_config.dart';
 import '../../services/api_service.dart';
+import 'wearable_mall_screen.dart';
 
 /// 积分商城 — 对接后端真实商品API + 兑换流程
 class MallScreen extends StatefulWidget {
@@ -104,6 +105,46 @@ class _MallScreenState extends State<MallScreen> {
             : ListView(
                 padding: const EdgeInsets.all(AppTheme.spacingMd),
                 children: [
+                  // 智能穿戴设备入口（K1系列）
+                  GestureDetector(
+                    onTap: () => Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const WearableMallScreen())),
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [Color(0xFF0D47A1), Color(0xFF42A5F5)]),
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [BoxShadow(color: const Color(0xFF0D47A1).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(12)),
+                            child: const Icon(Icons.watch, color: Colors.white, size: 26),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('⌚ 爸妈宝穿戴设备',
+                                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Colors.white)),
+                                Text('Watch K1 手表 · Ring K1 指环 · 预售中',
+                                    style: TextStyle(fontSize: 12, color: Colors.white70)),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                            child: const Text('去看看', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF0D47A1))),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   // 积分余额卡
                   Card(
                     color: AppTheme.primaryColor,

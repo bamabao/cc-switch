@@ -5,7 +5,7 @@
 """
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from jose import jwt, JWTError
@@ -192,10 +192,17 @@ def bind_family(
 
 @router.get("/me", response_model=UserInfoResponse)
 def get_my_info(
-    token: str = Query(...),
+    request: Request,
+    token: str = Query(""),
     db: Session = Depends(get_db),
 ):
-    """获取当前用户信息"""
+    """获取当前用户信息（支持 URL query 或 Authorization: Bearer header）"""
+    if not token:
+        auth = request.headers.get("Authorization", "")
+        if auth.startswith("Bearer "):
+            token = auth[7:].strip()
+    if not token:
+        raise HTTPException(401, "未登录")
     user = get_current_user(token, db)
 
     # 获取家庭成员

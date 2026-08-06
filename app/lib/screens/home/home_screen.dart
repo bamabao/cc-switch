@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
+import '../../config/api_config.dart';
+import '../../services/api_service.dart';
+import '../../services/notification_service.dart';
+import '../../services/reminder_service.dart';
 import '../../widgets/medicine_checkin_card.dart';
+import '../hospital/hospital_center_screen.dart';
+import '../../widgets/disclaimer_banner.dart';
+import '../chat/patient_chat_screen.dart';
 import '../medicines/medicines_screen.dart';
 import '../medicines/add_medicine_screen.dart';
 import '../medicines/record_screen.dart';
@@ -16,49 +23,100 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final ApiService _api = ApiService();
   String _greeting = '早上好！';
-  final ValueNotifier<int> _medicationCountNotifier = ValueNotifier<int>(4);
+  int _missedCount = 0;
+  String? _hospitalName;
+  String? _doctorName;
+  final ValueNotifier<int> _medicationCountNotifier = ValueNotifier<int>(0);
   List<dynamic> _checkinItems = [];
+  bool _loading = false;
 
   @override
   void initState() {
     super.initState();
     _updateGreeting();
-    _checkinItems = [
-      {
-        'medication_id': 1, 'name': '阿莫西林',
-        'dosage_per_take': 1, 'unit': '粒',
-        'total_slots': 1, 'checked_slots': 0,
-        'schedules': [
-          {'schedule_id': 101, 'time': '08:00', 'checked': false, 'dosage': 1, 'dosage_display': '1粒'},
-        ],
-      },
-      {
-        'medication_id': 2, 'name': '氨氯地平',
-        'dosage_per_take': 1, 'unit': '片',
-        'total_slots': 2, 'checked_slots': 2,
-        'schedules': [
-          {'schedule_id': 102, 'time': '08:00', 'checked': true, 'dosage': 1, 'dosage_display': '1片'},
-          {'schedule_id': 103, 'time': '18:00', 'checked': true, 'dosage': 0.5, 'dosage_display': '0.5片'},
-        ],
-      },
-      {
-        'medication_id': 3, 'name': '二甲双胍',
-        'dosage_per_take': 0.5, 'unit': '片',
-        'total_slots': 1, 'checked_slots': 0,
-        'schedules': [
-          {'schedule_id': 104, 'time': '12:00', 'checked': false, 'dosage': 0.5, 'dosage_display': '0.5片'},
-        ],
-      },
-      {
-        'medication_id': 4, 'name': '阿托伐他汀',
-        'dosage_per_take': 10, 'unit': 'mg',
-        'total_slots': 1, 'checked_slots': 1,
-        'schedules': [
-          {'schedule_id': 105, 'time': '20:00', 'checked': true, 'dosage': 10, 'dosage_display': '10mg'},
-        ],
-      },
-    ];
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    if (_loading) return;
+    setState(() => _loading = true);
+    try {
+      // 医院信息（我的医院卡片）
+      _loadHospitalInfo();
+      final response = await _api.get('${ApiConfig.medications}?elder_id=1');
+      final items = response['items'] as List<dynamic>? ?? [];
+      final mapped = <Map<String, dynamic>>[];
+      for (final med in items) {
+        if (med is! Map) continue;
+        final schedules = (med['schedules'] as List<dynamic>?)
+            ?.where((s) => s is Map && s['is_active'] == true).toList() ?? [];
+        if (schedules.isEmpty) continue;
+        mapped.add({
+          'medication_id': med['id'],
+          'name': med['name'] ?? '',
+          'dosage_per_take': med['dosage_per_take'] ?? 1,
+          'unit': med['unit'] ?? '粒',
+          'total_slots': schedules.length,
+          'checked_slots': 0,
+          'schedules': schedules.map((s) => {
+            'schedule_id': s['id'],
+            'time': s['time_of_day'] ?? '08:00',
+            'checked': false,
+            'dosage': s['dosage'] ?? 1,
+            'dosage_display': s['dosage_display'] ?? '',
+          }).toList(),
+        });
+      }
+      if (mounted) setState(() {
+        _checkinItems = mapped;
+        // 统计漏服次数（时间已过且未打卡）
+        _missedCount = _calcMissedCount(mapped);
+        _medicationCountNotifier.value = mapped.where((i) {
+          final slots = i['schedules'] as List<dynamic>;
+          return slots.any((s) => s['checked'] == false);
+        }).length;
+        _loading = false;
+      });
+      // 同步本地闹钟（确保App被杀也能响铃）
+      _syncLocalAlarms(items);
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  /// 将后端所有药品的服药时间同步为本地精确闹钟
+  Future<void> _syncLocalAlarms(List<dynamic> meds) async {
+    final notif = NotificationService.instance;
+    for (final med in meds) {
+      if (med is! Map) continue;
+      final medId = med['id'] as int?;
+      final name = med['name'] as String? ?? '';
+      final unit = med['unit'] as String? ?? '粒';
+      final dosage = med['dosage_per_take'] as num? ?? 1;
+      final schedules = (med['schedules'] as List<dynamic>?)
+          ?.where((s) => s is Map && s['is_active'] == true).toList() ?? [];
+      if (medId == null || schedules.isEmpty) continue;
+
+      // 取消旧提醒
+      await notif.cancelForMedication(medId);
+
+      for (var i = 0; i < schedules.length; i++) {
+        final s = schedules[i];
+        final timeStr = (s as Map)['time_of_day'] as String? ?? '08:00';
+        final parts = timeStr.split(':');
+        if (parts.length < 2) continue;
+        final hour = int.tryParse(parts[0]) ?? 8;
+        final minute = int.tryParse(parts[1]) ?? 0;
+        await notif.scheduleDailyReminder(
+          medicationId: medId,
+          medicationName: name,
+          dosageText: '$dosage$unit',
+          time: TimeOfDay(hour: hour, minute: minute),
+        );
+      }
+    }
   }
 
   void _updateGreeting() {
@@ -78,10 +136,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Future<void> _loadData() async {
-    // Mock — UI demo mode
-  }
-
   void _handleCheckinTap(dynamic item, int scheduleIndex) {
     final schedules = item['schedules'] as List<dynamic>;
     if (scheduleIndex >= schedules.length) return;
@@ -98,6 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final slots = i['schedules'] as List<dynamic>;
       return slots.any((s) => s['checked'] == false);
     }).length;
+    if (mounted) setState(() {});
   }
 
   @override
@@ -128,6 +183,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 12),
                     _buildRecordCard(context),
                     const SizedBox(height: 12),
+                    _buildDoctorCard(context),
+                    const SizedBox(height: 12),
                     // 今日用药区域标题
                     const Padding(
                       padding: EdgeInsets.only(left: 4, bottom: 8),
@@ -154,8 +211,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     ..._buildCheckinCards(context),
-                    const SizedBox(height: 16),
-                    _buildBottomButtons(context),
+                    const SizedBox(height: 12),
+                    // 免责声明
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: const DisclaimerBanner(),
+                    ),
+                    const SizedBox(height: 12),
                     SizedBox(height: MediaQuery.of(context).padding.bottom + 50),
                   ],
                 ),
@@ -285,6 +347,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const Spacer(),
+          // 朗读今日用药
+          IconButton(
+            icon: const Icon(Icons.volume_up, size: 20, color: AppTheme.textOnDark),
+            tooltip: '朗读今日用药',
+            onPressed: _readTodayMedications,
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: IconButton(
@@ -359,9 +427,9 @@ class _HomeScreenState extends State<HomeScreen> {
             valueListenable: _medicationCountNotifier,
             builder: (context, count, child) {
               return Text(
-                count > 0
-                    ? '今天有 $count 种药需要服用'
-                    : '还没有添加药品哦',
+                _checkinItems.isEmpty
+                    ? '还没有添加药品哦'
+                    : '今天有 $count 种药需要服用',
                 style: const TextStyle(
                   fontSize: 22,
                   color: Color(0xFFE53935),
@@ -370,7 +438,148 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
+          // 漏服关怀提醒
+          if (_missedCount > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF3E0),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '⚠️ 今天有 $_missedCount 次漏服，记得补上哦！',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFFE65100),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
         ],
+      ),
+    );
+  }
+
+  /// 加载我的医院信息（卡片标题用）
+  Future<void> _loadHospitalInfo() async {
+    try {
+      final r = await _api.get('${ApiConfig.hospitalMyInfo}?elder_id=1');
+      final hospitals = (r['hospitals'] as List<dynamic>?) ?? [];
+      if (hospitals.isNotEmpty) {
+        final h = hospitals.first as Map<String, dynamic>;
+        final doctors = (h['doctors'] as List<dynamic>?) ?? [];
+        if (mounted) {
+          setState(() {
+            _hospitalName = (h['name'] as String?) ?? '测试医院';
+            if (doctors.isNotEmpty) {
+              final d = doctors.first as Map<String, dynamic>;
+              _doctorName = (d['real_name'] as String?) ?? '医生';
+            }
+          });
+        }
+      }
+    } catch (_) {
+      // 医院信息加载失败不影响主流程
+    }
+  }
+
+  /// 计算今日漏服次数（时间已过且未打卡）
+  int _calcMissedCount(List<dynamic> items) {
+    final now = DateTime.now();
+    final currentMinutes = now.hour * 60 + now.minute;
+    var missed = 0;
+    for (final item in items) {
+      final slots = (item['schedules'] as List<dynamic>? ?? []);
+      for (final s in slots) {
+        final time = (s as Map)['time'] as String? ?? '08:00';
+        final parts = time.split(':');
+        if (parts.length < 2) continue;
+        final slotMinutes = (int.tryParse(parts[0]) ?? 8) * 60 + (int.tryParse(parts[1]) ?? 0);
+        if (currentMinutes > slotMinutes + 30 && s['checked'] != true) {
+          missed++;
+        }
+      }
+    }
+    return missed;
+  }
+
+  /// 朗读今日用药清单
+  Future<void> _readTodayMedications() async {
+    if (_checkinItems.isEmpty) {
+      await ReminderService.readPageText('今天还没有需要服用的药品');
+      return;
+    }
+    final sb = StringBuffer('今天的用药提醒：');
+    for (final item in _checkinItems) {
+      final name = item['name'] as String? ?? '';
+      final dosage = item['dosage_per_take'] ?? 1;
+      final unit = item['unit'] ?? '粒';
+      final slots = (item['schedules'] as List<dynamic>? ?? []);
+      final times = slots.map((s) => (s as Map)['time'] as String? ?? '').where((t) => t.isNotEmpty).join('、');
+      sb.write('$name，每次$dosage$unit，服用时间$times。');
+    }
+    await ReminderService.readPageText(sb.toString());
+  }
+
+  /// 我的医院卡片 — 医院交流平台入口（第一期）
+  Widget _buildDoctorCard(BuildContext context) {
+    final hospitalName = _hospitalName ?? '测试医院';
+    final doctorLabel = _doctorName ?? '王医生';
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const HospitalCenterScreen(),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE8F1FA),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: AppTheme.shadowCard,
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(Icons.local_hospital_outlined, color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('我的医院',
+                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                  const SizedBox(height: 2),
+                  Text('🏥 $hospitalName · 👨‍⚕️ $doctorLabel · 在线咨询',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Text('去咨询',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -437,14 +646,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    '"查看历史用药情况"',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white.withValues(alpha: 0.85),
+                  Expanded(
+                    child: Text(
+                      '"查看历史用药情况"',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: 8),
                   Icon(
                     Icons.chevron_right,
                     size: 24,

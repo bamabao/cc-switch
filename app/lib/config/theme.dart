@@ -14,7 +14,7 @@ class AppTheme {
   static const Color bgColor = Color(0xFFE8F5E0); // 淡薄荷绿 — 全局页面底色
   static const Color bgGradientTop = Color(0xFFE8F5E0); // 背景渐变顶部
   static const Color bgGradientBottom = Color(0xFFDCEFD0); // 背景渐变底部（稍深）
-  static const Color cardColor = Color(0xFFFFFFFF); // 纯白 — 卡片/弹窗底色
+  static const Color cardColor = Color(0xFFFFFFFF); // 纯白（效果图） — 卡片/弹窗底色（黏土立体风格）
   static const Color textPrimary = Color(0xFF1A1A1A); // 纯黑 — 药品名称
   static const Color textSecondary = Color(0xFF666666); // 中灰 — 正文
   static const Color textOnDark = Color(0xFFFFFBF5); // 柔和米白 — 按钮文字
@@ -24,10 +24,12 @@ class AppTheme {
   // 专用色
   static const Color recordCardBg = Color(0xFFD5EBCB); // 用药记录模块-抹茶绿（加深）
   static const Color recordCardText = Color(0xFF4A7A42); // 用药记录模块-深绿文字
-  static const Color checkinUnchecked = Color(0xFFFF7A5C); // 打卡按钮未打卡-橙红圆环
-  static const Color checkinUncheckedDark = Color(0xFFE56048); // 打卡按钮未打卡-暗部
-  static const Color checkinChecked = Color(0xFF76D160); // 打卡按钮已打卡-嫩绿
-  static const Color checkinCheckedDark = Color(0xFF5AB048); // 打卡按钮已打卡-暗部
+  static const Color checkinUnchecked = Color(0xFFFF8A9E); // 打卡按钮未打卡-浅红（效果图匹配）
+  static const Color checkinUncheckedDark = Color(0xFFE86A7F); // 打卡按钮未打卡-暗部
+  static const Color checkinUncheckedLight = Color(0xFFFFCCD5); // 打卡按钮未打卡-高光
+  static const Color checkinChecked = Color(0xFF8CD5B6); // 打卡按钮已打卡-薄荷绿（效果图）
+  static const Color checkinCheckedDark = Color(0xFF78C0A0); // 打卡按钮已打卡-暗部
+  static const Color checkinCheckedLight = Color(0xFFA8E5CC); // 打卡按钮已打卡-高光
 
   // ─── 字号 — 正常2倍 ───
   static const double displayLarge = 48;
@@ -58,21 +60,30 @@ class AppTheme {
   static const double radiusMd = 16;
   static const double radiusLg = 24;
   static const double radiusButton = 22;
-  static const double radiusCard = 22;
+  static const double radiusCard = 18;  // 效果图圆角更小
 
   // ─── 阴影 — 柔和黏土悬浮阴影 ───
   static const Color shadowColor = Color(0xFF3A4437);
-  // 柔和立体阴影 — 双层阴影模拟黏土立体感
+  // 黏土立体阴影 — 三层阴影模拟哑光浮雕感
   static List<BoxShadow> shadowCard = [
+    // 顶部高光（凸起感）
     BoxShadow(
-      color: const Color(0xFF000000).withValues(alpha: 0.15),
-      blurRadius: 24,
-      offset: const Offset(0, 10),
+      color: Colors.white.withValues(alpha: 0.6),
+      blurRadius: 4,
+      offset: const Offset(-2, -2),
     ),
+    // 主下沉阴影
     BoxShadow(
-      color: const Color(0xFF000000).withValues(alpha: 0.08),
-      blurRadius: 8,
-      offset: const Offset(0, 4),
+      color: const Color(0xFF3A4437).withValues(alpha: 0.10),
+      blurRadius: 16,
+      offset: const Offset(0, 6),
+    ),
+    // 弥散阴影（边缘光）
+    BoxShadow(
+      color: Colors.white.withValues(alpha: 0.3),
+      blurRadius: 2,
+      offset: const Offset(0, 0),
+      spreadRadius: 1,
     ),
   ];
   static List<BoxShadow> shadowButton = [

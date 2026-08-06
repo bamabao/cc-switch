@@ -15,7 +15,8 @@ import '../profile/settings_screen.dart';
 /// 2. dispose 清理 VoiceService 回调引用，防止 setState 在已销毁的 State 上调用
 /// 3. SDK 初始化失败显示错误提示 + 重试按钮
 class VoiceScreen extends StatefulWidget {
-  const VoiceScreen({super.key});
+  final bool addMode;
+  const VoiceScreen({super.key, this.addMode = false});
 
   @override
   State<VoiceScreen> createState() => _VoiceScreenState();
@@ -213,6 +214,14 @@ class _VoiceScreenState extends State<VoiceScreen> {
       _safeSpeak('紧急求助已发送');
     } else if (text.contains('首页') || text.contains('返回')) {
       Navigator.pop(context);
+    } else if (widget.addMode && (text.contains('药') || text.contains('片') || text.contains('胶囊'))) {
+      // 添加药品模式：提取药品名并返回
+      String medName = text
+        .replaceAll(RegExp(r'(添加|录入|输入|新增|帮我|我要|吃|买|的|是)'), '')
+        .trim();
+      if (medName.isEmpty) medName = text;
+      _safeSpeak('好的，已录入$medName');
+      Navigator.pop(context, medName);
     } else {
       setState(() {
         _responseText = '抱歉，我没有听懂，请再说一遍\n您可以试试说：\n"今天要吃什么药"\n"我的积分"\n"打卡"';

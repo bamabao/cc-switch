@@ -1,1713 +1,358 @@
 INFO:     Will watch for changes in these directories: ['C:\\bamabao\\backend']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [20988] using WatchFiles
-INFO:     Started server process [30384]
+INFO:     Started reloader process [28192] using WatchFiles
+INFO:     Started server process [28132]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-[∏ÊæØ] ¿œ»À1 ¬©∑˛ | “©∆∑: ∞¢Õ–∑•À˚Õ°∏∆∆¨ | “—≥¨ ±: 34∑÷÷” | ◊”≈ÆIDs: [2]
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-[∏ÊæØ] ¿œ»À1 ¬©∑˛ | “©∆∑: ±Ωª«À·∞±¬»µÿ∆Ω∆¨ | “—≥¨ ±: 34∑÷÷” | ◊”≈ÆIDs: [2]
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1609, in _object_value_for_elem
-    return self._object_lookup[elem]
-           ~~~~~~~~~~~~~~~~~~~^^^^^^
-KeyError: 'PENDING'
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\applications.py", line 123, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 756, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 776, in app
-    await route.handle(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 297, in handle
-    await self.app(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 77, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
-    raise exc
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
-    await app(scope, receive, sender)
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\routing.py", line 72, in app
-    response = await func(request)
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 278, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\bamabao\backend\app\api\medication.py", line 109, in list_medications
-    return {"items": [_to_medication_response(m) for m in q.all()]}
-                                                          ^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2673, in all
-    return self._iter().all()  # type: ignore
-           ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1769, in all
-    return self._allrows()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 548, in _allrows
-    rows = self._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 1676, in _fetchall_impl
-    return self._real_result._fetchall_impl()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 2270, in _fetchall_impl
-    return list(self.iterator)
-           ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\orm\loading.py", line 219, in chunks
-    fetch = cursor._raw_all_rows()
-            ^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in _raw_all_rows
-    return [make_row(row) for row in rows]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\engine\result.py", line 541, in <listcomp>
-    return [make_row(row) for row in rows]
-            ^^^^^^^^^^^^^
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 22, in sqlalchemy.cyextension.resultproxy.BaseRow.__init__
-  File "lib\\sqlalchemy\\cyextension\\resultproxy.pyx", line 79, in sqlalchemy.cyextension.resultproxy._apply_processors
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1729, in process
-    value = self._object_value_for_elem(value)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\74897\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\sqlalchemy\sql\sqltypes.py", line 1611, in _object_value_for_elem
-    raise LookupError(
-LookupError: 'PENDING' is not among the defined enum values. Enum name: medicationstatus. Possible values: APPROVED, DISABLED
-WARNING:  WatchFiles detected changes in 'app\models\medication.py'. Reloading...
+–≈œ¢: ”√Ã·π©µƒƒ£ ΩŒﬁ∑®’“µΩŒƒº˛°£
+C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\paddle\utils\cpp_extension\extension_utils.py:712: UserWarning: No ccache found. Please be aware that recompiling all source files may be required. You can download and install ccache from: https://github.com/ccache/ccache/blob/master/doc/INSTALL.md
+  warnings.warn(warning_message)
+[32mCreating model: ('PP-LCNet_x1_0_doc_ori', None, None)[0m
+[32mModel files already exist. Using cached files. To redownload, please delete the directory manually: `C:\Users\74897\.paddlex\official_models\PP-LCNet_x1_0_doc_ori`.[0m
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+I0726 18:24:25.742785 26548 onednn_context.cc:81] oneDNN v3.6.2
+[32mCreating model: ('UVDoc', None, None)[0m
+[32mModel files already exist. Using cached files. To redownload, please delete the directory manually: `C:\Users\74897\.paddlex\official_models\UVDoc`.[0m
+[32mCreating model: ('PP-LCNet_x1_0_textline_ori', None, None)[0m
+[32mModel files already exist. Using cached files. To redownload, please delete the directory manually: `C:\Users\74897\.paddlex\official_models\PP-LCNet_x1_0_textline_ori`.[0m
+[32mCreating model: ('PP-OCRv6_medium_det', None, None)[0m
+[32mModel files already exist. Using cached files. To redownload, please delete the directory manually: `C:\Users\74897\.paddlex\official_models\PP-OCRv6_medium_det`.[0m
+[32mCreating model: ('PP-OCRv6_medium_rec', None, None)[0m
+[32mModel files already exist. Using cached files. To redownload, please delete the directory manually: `C:\Users\74897\.paddlex\official_models\PP-OCRv6_medium_rec`.[0m
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+OCRÕÍ≥…: 1956ms source=local_ocr steps={'cache_check': 0, 'preprocess': 255, 'ocr': 1668, 'parse': 10}
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+WARNING:  WatchFiles detected changes in 'app\models\drug_instruction.py'. Reloading...
 INFO:     Shutting down
 INFO:     Waiting for application shutdown.
 INFO:     Application shutdown complete.
-INFO:     Finished server process [30384]
+INFO:     Finished server process [28132]
+WARNING:  WatchFiles detected changes in 'scripts\crawl4ai_drugs.py'. Reloading...
+INFO:     Started server process [30840]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    Traceback (most recent call last):
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 123, in run
+    raise KeyboardInterrupt()
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\routing.py", line 741, in lifespan
+    await receive()
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\uvicorn\lifespan\on.py", line 137, in receive
+    return await self.receive_queue.get()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\asyncio\queues.py", line 158, in get
+    await getter
+asyncio.exceptions.CancelledError
+
+INFO:     Started server process [13788]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+–≈œ¢: ”√Ã·π©µƒƒ£ ΩŒﬁ∑®’“µΩŒƒº˛°£
+C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\paddle\utils\cpp_extension\extension_utils.py:712: UserWarning: No ccache found. Please be aware that recompiling all source files may be required. You can download and install ccache from: https://github.com/ccache/ccache/blob/master/doc/INSTALL.md
+  warnings.warn(warning_message)
+[32mCreating model: ('PP-LCNet_x1_0_doc_ori', None, None)[0m
+[32mModel files already exist. Using cached files. To redownload, please delete the directory manually: `C:\Users\74897\.paddlex\official_models\PP-LCNet_x1_0_doc_ori`.[0m
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+I0726 23:01:59.779821 28352 onednn_context.cc:81] oneDNN v3.6.2
+[32mCreating model: ('UVDoc', None, None)[0m
+[32mModel files already exist. Using cached files. To redownload, please delete the directory manually: `C:\Users\74897\.paddlex\official_models\UVDoc`.[0m
+[32mCreating model: ('PP-LCNet_x1_0_textline_ori', None, None)[0m
+[32mModel files already exist. Using cached files. To redownload, please delete the directory manually: `C:\Users\74897\.paddlex\official_models\PP-LCNet_x1_0_textline_ori`.[0m
+[32mCreating model: ('PP-OCRv6_medium_det', None, None)[0m
+[32mModel files already exist. Using cached files. To redownload, please delete the directory manually: `C:\Users\74897\.paddlex\official_models\PP-OCRv6_medium_det`.[0m
+[32mCreating model: ('PP-OCRv6_medium_rec', None, None)[0m
+[32mModel files already exist. Using cached files. To redownload, please delete the directory manually: `C:\Users\74897\.paddlex\official_models\PP-OCRv6_medium_rec`.[0m
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+OCRÕÍ≥…: 1403ms source=local_ocr steps={'cache_check': 0, 'preprocess': 112, 'ocr': 1273, 'parse': 6}
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+OCRÕÍ≥…: 1381ms source=local_ocr steps={'cache_check': 1, 'preprocess': 21, 'ocr': 1344, 'parse': 1}
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py", line 924, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.OperationalError: no such column: drug_instructions.precautions
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\base.py", line 189, in __call__
+    with collapse_excgroups():
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\_utils.py", line 93, in collapse_excgroups
+    raise exc
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\bamabao\backend\app\main.py", line 100, in ensure_json_charset
+    response: Response = await call_next(request)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\base.py", line 165, in call_next
+    raise app_exc
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\routing.py", line 72, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\fastapi\routing.py", line 278, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\anyio\_backends\_asyncio.py", line 2596, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\anyio\_backends\_asyncio.py", line 1029, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\bamabao\backend\app\api\drug_instruction.py", line 22, in search_drug
+    ).first()
+      ^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\query.py", line 2728, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\query.py", line 2827, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py", line 2236, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\context.py", line 293, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\sql\elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 2353, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py", line 924, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: drug_instructions.precautions
+[SQL: SELECT drug_instructions.id AS drug_instructions_id, drug_instructions.medicine_name AS drug_instructions_medicine_name, drug_instructions.category AS drug_instructions_category, drug_instructions.standard_dosage AS drug_instructions_standard_dosage, drug_instructions.adult_dosage AS drug_instructions_adult_dosage, drug_instructions.child_dosage AS drug_instructions_child_dosage, drug_instructions.elderly_dosage AS drug_instructions_elderly_dosage, drug_instructions.male_dosage AS drug_instructions_male_dosage, drug_instructions.female_dosage AS drug_instructions_female_dosage, drug_instructions.frequency AS drug_instructions_frequency, drug_instructions.meal_relation AS drug_instructions_meal_relation, drug_instructions.max_daily AS drug_instructions_max_daily, drug_instructions.contraindications AS drug_instructions_contraindications, drug_instructions.side_effects AS drug_instructions_side_effects, drug_instructions.dietary_restrictions AS drug_instructions_dietary_restrictions, drug_instructions.allergy_warning AS drug_instructions_allergy_warning, drug_instructions.full_instruction AS drug_instructions_full_instruction, drug_instructions.precautions AS drug_instructions_precautions, drug_instructions.indications AS drug_instructions_indications, drug_instructions.source AS drug_instructions_source, drug_instructions.hit_count AS drug_instructions_hit_count, drug_instructions.created_at AS drug_instructions_created_at, drug_instructions.updated_at AS drug_instructions_updated_at 
+FROM drug_instructions 
+WHERE drug_instructions.medicine_name = ?
+ LIMIT ? OFFSET ?]
+[parameters: ('∂˛º◊À´Î“', 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py", line 924, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.OperationalError: no such column: drug_instructions.precautions
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 399, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\applications.py", line 123, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\cors.py", line 85, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\base.py", line 189, in __call__
+    with collapse_excgroups():
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\_utils.py", line 93, in collapse_excgroups
+    raise exc
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\bamabao\backend\app\main.py", line 100, in ensure_json_charset
+    response: Response = await call_next(request)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\base.py", line 165, in call_next
+    raise app_exc
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\middleware\exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\routing.py", line 72, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\fastapi\routing.py", line 278, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\fastapi\routing.py", line 193, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\concurrency.py", line 42, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\anyio\to_thread.py", line 63, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\anyio\_backends\_asyncio.py", line 2596, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\anyio\_backends\_asyncio.py", line 1029, in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\bamabao\backend\app\api\drug_instruction.py", line 22, in search_drug
+    ).first()
+      ^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\query.py", line 2728, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\query.py", line 2827, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py", line 2236, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\context.py", line 293, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\sql\elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 2353, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "C:\Users\74897\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py", line 924, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: drug_instructions.precautions
+[SQL: SELECT drug_instructions.id AS drug_instructions_id, drug_instructions.medicine_name AS drug_instructions_medicine_name, drug_instructions.category AS drug_instructions_category, drug_instructions.standard_dosage AS drug_instructions_standard_dosage, drug_instructions.adult_dosage AS drug_instructions_adult_dosage, drug_instructions.child_dosage AS drug_instructions_child_dosage, drug_instructions.elderly_dosage AS drug_instructions_elderly_dosage, drug_instructions.male_dosage AS drug_instructions_male_dosage, drug_instructions.female_dosage AS drug_instructions_female_dosage, drug_instructions.frequency AS drug_instructions_frequency, drug_instructions.meal_relation AS drug_instructions_meal_relation, drug_instructions.max_daily AS drug_instructions_max_daily, drug_instructions.contraindications AS drug_instructions_contraindications, drug_instructions.side_effects AS drug_instructions_side_effects, drug_instructions.dietary_restrictions AS drug_instructions_dietary_restrictions, drug_instructions.allergy_warning AS drug_instructions_allergy_warning, drug_instructions.full_instruction AS drug_instructions_full_instruction, drug_instructions.precautions AS drug_instructions_precautions, drug_instructions.indications AS drug_instructions_indications, drug_instructions.source AS drug_instructions_source, drug_instructions.hit_count AS drug_instructions_hit_count, drug_instructions.created_at AS drug_instructions_created_at, drug_instructions.updated_at AS drug_instructions_updated_at 
+FROM drug_instructions 
+WHERE drug_instructions.medicine_name = ?
+ LIMIT ? OFFSET ?]
+[parameters: ('∞¢Õ–∑•À˚Õ°', 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+OCRÕÍ≥…: 1838ms source=local_ocr steps={'cache_check': 0, 'preprocess': 24, 'ocr': 1794, 'parse': 1}
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+OCRÕÍ≥…: 1004ms source=local_ocr steps={'cache_check': 0, 'preprocess': 15, 'ocr': 975, 'parse': 1}
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'
+paddleocr Õ∆¿Ì“Ï≥£: PaddleOCR.predict() got an unexpected keyword argument 'cls'

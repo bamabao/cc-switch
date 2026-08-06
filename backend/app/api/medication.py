@@ -97,9 +97,20 @@ def list_medications(
     elder_id: int = Query(..., description="老人用户ID"),
     category: Optional[str] = Query(None, description="药品分类筛选"),
     status: Optional[str] = Query(None, description="审核状态"),
+    token: str = Query("", description="登录token（防越权）"),
     db: Session = Depends(get_db),
 ):
-    """获取老人的药品列表"""
+    """获取老人的药品列表
+    安全：token存在则强制匹配elder_id，无token仅允许demo用户1
+    """
+    if token:
+        from app.core.security import require_elder_id
+        auth_elder = require_elder_id(token)
+        if auth_elder != elder_id:
+            raise HTTPException(403, "无权访问其他用户数据")
+    elif elder_id != 1:
+        raise HTTPException(403, "请先登录")
+
     _get_elder(db, elder_id)
     q = db.query(Medication).filter(Medication.elder_id == elder_id)
     if category:
@@ -260,6 +271,16 @@ def create_medication(
 ):
     """老人/子女新增药品"""
     _get_elder(db, elder_id)
+
+    # 剂量校验：必须为正数（防负剂量/零剂量非法数据）
+    if body.dosage_per_take is not None and body.dosage_per_take <= 0:
+        raise HTTPException(400, "单次剂量必须大于0")
+    if body.frequency_per_day is not None and body.frequency_per_day <= 0:
+        raise HTTPException(400, "每日频次必须大于0")
+    if body.schedules:
+        for s in body.schedules:
+            if s.dosage is not None and s.dosage <= 0:
+                raise HTTPException(400, f"时段剂量必须大于0（{s.time_of_day}）")
 
     # 检查是否同名药品已存在
     existing = db.query(Medication).filter(

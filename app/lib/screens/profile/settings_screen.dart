@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import '../../config/api_config.dart';
 import '../../services/api_service.dart';
+import '../../services/font_scale_controller.dart';
 import '../medicines/medicines_screen.dart';
 import 'emergency_contact_screen.dart';
 
@@ -99,6 +100,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           : ListView(
               padding: const EdgeInsets.all(AppTheme.spacingMd),
               children: [
+                _buildSection('显示设置', [
+                  _buildSwitchTile('长辈模式（超大字体）', FontScaleController.instance.isElderly, (v) {
+                    FontScaleController.instance.setElderly(v);
+                    setState(() {});
+                  }),
+                ]),
+                const SizedBox(height: AppTheme.spacingMd),
                 _buildSection('语音设置', [
                   _buildSliderTile('语音播报音量', _volume, (v) {
                     setState(() => _volume = v);
