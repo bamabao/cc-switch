@@ -6,12 +6,22 @@
   "skipClaudeOnboarding": false,
   "launchOnStartup": false,
   "silentStartup": false,
-  "enableLocalProxy": false,
+  "enableLocalProxy": true,
+  "streamCheckConfirmed": true,
   "enableFailoverToggle": false,
   "preserveCodexOfficialAuthOnSwitch": false,
   "firstRunNoticeConfirmed": true,
   "commonConfigConfirmed": true,
   "language": "zh",
+  "visibleApps": {
+    "claude": true,
+    "claude-desktop": true,
+    "codex": true,
+    "gemini": true,
+    "opencode": true,
+    "openclaw": true,
+    "hermes": true
+  },
   "skillSyncMethod": "auto",
   "skillStorageLocation": "cc_switch",
   "localMigrations": {
